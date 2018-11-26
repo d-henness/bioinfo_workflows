@@ -115,7 +115,7 @@ rule BaseRecalibrator:
     a1000G_index = config["a1000G_index"],
     known_indels_index = config["known_indels_index"],
     interval = config["exom_padded"],
-    java_opts = config["BaseRecalibrator.java_opt"]
+    java_opts = config["BaseRecalibrator.java_opt"],
     exclude_list = ''
   resources:
     mem_mb = int(config["BaseRecalibrator.java_opt"].strip("-Xmx")) + 1000
