@@ -2,7 +2,10 @@ import os
 import sys
 
 def main():
-    dir_string = sys.argv[1]
+    try:
+        dir_string = sys.argv[1]
+    except:
+        sys.exit("No dir string given")
     if dir_string == '':
         sys.exit("No dir string given")
     reads_list = []
