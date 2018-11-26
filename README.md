@@ -5,6 +5,7 @@ currenty supported workflows:
 * ichorCNA
 * TitanCNA
 * Strelka
+
 Note that only MuTect2 calculations can currently be run in a simple way. 
 
 ## Example command to run MuTect2 calculations
