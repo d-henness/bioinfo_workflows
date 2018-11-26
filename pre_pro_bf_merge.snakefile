@@ -38,7 +38,7 @@ rule SamToFastqAndBwaMem:
     sam = "runs/{library}/SamToFastqAndBwaMem/sam.log",
   params:
     ref_fasta = config["ref_fasta"],
-    java_opts = config["SamToFastqAndBwaMem.java_opt"]
+    java_opts = config["SamToFastqAndBwaMem.java_opt"],
     exclude_list = ''
   threads: 16
   resources:
@@ -63,7 +63,7 @@ rule MergeBamAlignment:
     "runs/{library}/MergeBamAlignment/merge.log"
   params:
     ref_fasta = config["ref_fasta"],
-    java_opts = config["MergeBamAlignment.java_opt"]
+    java_opts = config["MergeBamAlignment.java_opt"],
     exclude_list = ''
   resources:
     mem_mb = int(config["MergeBamAlignment.java_opt"].strip("-Xmx")) + 1000

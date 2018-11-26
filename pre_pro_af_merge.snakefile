@@ -34,7 +34,7 @@ rule MarkDuplicates:
   params:
     ref_fasta = config["ref_fasta"],
     java_opts = config["MarkDuplicates.java_opt"],
-    libs_string = MarkDuplicates_input_string
+    libs_string = MarkDuplicates_input_string,
     exclude_list = ''
   resources:
     mem_mb = int(config["MarkDuplicates.java_opt"].strip("-Xmx")) + 1000
@@ -155,7 +155,7 @@ rule ApplyBQSR:
     known_indels = config["known_indels"],
     a1000G_index = config["a1000G_index"],
     known_indels_index = config["known_indels_index"],
-    java_opts = config["ApplyBQSR.java_opt"]
+    java_opts = config["ApplyBQSR.java_opt"],
     exclude_list = ''
   resources:
     mem_mb = int(config["ApplyBQSR.java_opt"].strip("-Xmx")) + 1000
