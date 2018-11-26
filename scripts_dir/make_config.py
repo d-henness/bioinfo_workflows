@@ -3,7 +3,8 @@ import sys
 
 def main():
     dir_string = sys.argv[1]
-    print(dir_string)
+    if dir_string == '':
+        sys.exit("No dir string given")
     reads_list = []
     dir_list = []
     for i in sorted(os.listdir('.')):
@@ -12,7 +13,6 @@ def main():
             for seq in sorted(os.listdir(i)):
                 if (('.fastq' in seq) or ('.gz' in seq)) and ('cut_u' not in seq):
                     reads_list.append(os.getcwd() + '/' + i + '/' + seq)
-                    print(seq)
 
     file_pairs = []
     for i in range(0, len(reads_list), 2):
