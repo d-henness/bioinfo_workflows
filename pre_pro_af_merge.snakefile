@@ -35,6 +35,7 @@ rule MarkDuplicates:
     ref_fasta = config["ref_fasta"],
     java_opts = config["MarkDuplicates.java_opt"],
     libs_string = MarkDuplicates_input_string
+    exclude_list = ''
   resources:
     mem_mb = int(config["MarkDuplicates.java_opt"].strip("-Xmx")) + 1000
   benchmark:
@@ -68,6 +69,7 @@ rule SortAndFixTags:
     ref_fasta = config["ref_fasta"],
     java_opts_sort = config["SortAndFixTags.java_opt_sort"],
     java_opts_fix = config["SortAndFixTags.java_opt_fix"],
+    exclude_list = ''
   resources:
     mem_mb = int(config["SortAndFixTags.java_opt_sort"].strip("-Xmx")) + int(config["SortAndFixTags.java_opt_fix"].strip("-Xmx")) + 1000
   benchmark:
@@ -114,6 +116,7 @@ rule BaseRecalibrator:
     known_indels_index = config["known_indels_index"],
     interval = config["exom_padded"],
     java_opts = config["BaseRecalibrator.java_opt"]
+    exclude_list = ''
   resources:
     mem_mb = int(config["BaseRecalibrator.java_opt"].strip("-Xmx")) + 1000
   benchmark:
@@ -153,6 +156,7 @@ rule ApplyBQSR:
     a1000G_index = config["a1000G_index"],
     known_indels_index = config["known_indels_index"],
     java_opts = config["ApplyBQSR.java_opt"]
+    exclude_list = ''
   resources:
     mem_mb = int(config["ApplyBQSR.java_opt"].strip("-Xmx")) + 1000
   benchmark:

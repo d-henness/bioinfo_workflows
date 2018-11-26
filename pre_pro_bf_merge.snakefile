@@ -16,6 +16,8 @@ rule ubam:
     "envs_dir/pre_proc.yaml"
   resources:
     mem_mb = 5000
+  params:
+    exclude_list = ''
   benchmark:
     "benchmarks/{library}.ubam.benchmark.txt"
   shell:
@@ -37,6 +39,7 @@ rule SamToFastqAndBwaMem:
   params:
     ref_fasta = config["ref_fasta"],
     java_opts = config["SamToFastqAndBwaMem.java_opt"]
+    exclude_list = ''
   threads: 16
   resources:
     mem_mb = int(config["SamToFastqAndBwaMem.java_opt"].strip("-Xmx")) + 1000
@@ -61,6 +64,7 @@ rule MergeBamAlignment:
   params:
     ref_fasta = config["ref_fasta"],
     java_opts = config["MergeBamAlignment.java_opt"]
+    exclude_list = ''
   resources:
     mem_mb = int(config["MergeBamAlignment.java_opt"].strip("-Xmx")) + 1000
   benchmark:
