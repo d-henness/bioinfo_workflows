@@ -5,7 +5,7 @@ include: "pre_pro_af_merge.snakefile"
 tumors = config["pairs"]
 normals = [config["pairs"][tumor] for tumor in tumors]
 
-rule all:
+rule mutect_all:
   input:
 #   expand("runs/{tumor}/M2_{normal}/out.vcf", zip, tumor = tumors, normal = normals)
 #   expand("runs/{tumor}/CollectSequencingArtifactMetrics/gatk.pre_adapter_detail_metrics", tumor = tumors)

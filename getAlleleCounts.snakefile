@@ -9,12 +9,13 @@ CHRS = ['chr1','chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10','
 
 rule tumCounts:
   input: 
-    expand("results/titan/tumCounts/{tumor}/{tumor}.tumCounts.chr{chr}.txt", tumor=config["pairings"], chr=CHRS),		
-    expand("results/titan/tumCounts/{tumor}.tumCounts.txt", tumor=config["pairings"])
+    expand("results/titan/tumCounts/{tumor}/{tumor}.tumCounts.chr{chr}.txt", tumor=config["pairs"], chr=CHRS),		
+    expand("results/titan/tumCounts/{tumor}.tumCounts.txt", tumor=config["pairs"])
 	
 rule getHETsites:
   input:
-    lambda wildcards: config["samples"][config["pairings"][wildcards.tumor]]
+    lambda wildcards: "runs/" + config["pairs"][wildcards.tumor] + "/ApplyBQSR/recal.bam"
+#   lambda wildcards: config["samples"][config["pairings"][wildcards.tumor]]
   output:
     "results/titan/hetPosns/{tumor}/{tumor}.chr{chr}.vcf"
   params:
@@ -37,7 +38,8 @@ rule getHETsites:
 rule getAlleleCountsByChr:
   input:
     hetSites="results/titan/hetPosns/{tumor}/{tumor}.chr{chr}.vcf",
-    tumBam=lambda wildcards: config["samples"][wildcards.tumor]
+    tumBam = "runs/{tumor}/ApplyBQSR/recal.bam"
+#    tumBam=lambda wildcards: config["samples"][wildcards.tumor]
   output:
     "results/titan/tumCounts/{tumor}/{tumor}.tumCounts.chr{chr}.txt"
   params:

@@ -142,7 +142,7 @@ rule ApplyBQSR:
     recal = rules.BaseRecalibrator.output.recal
   output:
     bam_out = "runs/{merge}/ApplyBQSR/recal.bam",
-    bai_out = "runs/{merge}/ApplyBQSR/recal.bai",
+    bai_out = "runs/{merge}/ApplyBQSR/recal.bam.bai",
   conda:
     "envs_dir/pre_proc.yaml"
   log:
@@ -173,4 +173,7 @@ rule ApplyBQSR:
         --create-output-bam-md5 \
         --use-original-qualities \
         &> {log}
+      if [[ -e runs/{wildcards.merge}/ApplyBQSR/recal.bai ]]; then
+        mv runs/{wildcards.merge}/ApplyBQSR/recal.bai runs/{wildcards.merge}/ApplyBQSR/recal.bam.bai
+      fi
     """

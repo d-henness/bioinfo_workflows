@@ -19,3 +19,5 @@ dependencies:
  - pyyaml=3.12
  - bcftools=1.4.1
  - hmmcopy=0.1.1
+ - r-plyr=1.8.4
+ - bioconductor-genomeinfodb=1.16.0

@@ -31,7 +31,7 @@ rule SamToFastqAndBwaMem:
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
-    mem_mb = 5000
+    mem_mb = 10000
   log:
     bwa = "runs/{library}/SamToFastqAndBwaMem/bwa.log",
     picard = "runs/{library}/SamToFastqAndBwaMem/picard.log",

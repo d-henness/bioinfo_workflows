@@ -1,14 +1,16 @@
 configfile: "{}/ichorCNA/config_hg38.yaml".format(workflow.basedir)
 
-rule all:
+include: "pre_pro_af_merge.snakefile"
+
+rule ichor_all:
   input: 
-    expand("results/ichorCNA/{tumor}/{tumor}.cna.seg", tumor=config["pairings"]),
+    expand("results/ichorCNA/{tumor}/{tumor}.cna.seg", tumor=config["pairs"]),
 #   expand("results/ichorCNA/{tumor}/{tumor}.cna.seg", tumor=config["samples"]),
-    expand("results/readDepth/{samples}.bin{binSize}.wig", samples=config["samples"], binSize=str(config["binSize"]))
+    expand("results/readDepth/{samples}.bin{binSize}.wig", samples=config["merge_libs"], binSize=str(config["binSize"]))
 
 rule read_counter:
   input:
-    lambda wildcards: config["samples"][wildcards.samples]
+    "runs/{samples}/ApplyBQSR/recal.bam"
   output:
     "results/readDepth/{samples}.bin{binSize}.wig"		
   conda:    
@@ -28,7 +30,7 @@ rule read_counter:
 rule ichorCNA:
   input:
     tum="results/readDepth/{tumor}.bin" + str(config["binSize"]) + ".wig",
-    norm=lambda wildcards: "results/readDepth/" + config["pairings"][wildcards.tumor] + ".bin" + str(config["binSize"]) + ".wig"
+    norm=lambda wildcards: "results/readDepth/" + config["pairs"][wildcards.tumor] + ".bin" + str(config["binSize"]) + ".wig"
   output:
     corrDepth="results/ichorCNA/{tumor}/{tumor}.correctedDepth.txt",
     #param="results/ichorCNA/{tumor}/{tumor}.params.txt",

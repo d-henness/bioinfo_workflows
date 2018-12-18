@@ -2,12 +2,12 @@ configfile: "{}/ref.yaml".format(workflow.basedir)
 
 rule run_Strelka:
   input:
-    expand("Strelka_runs/{tumor}/ex.log", tumor = config["pairings"])
+    expand("Strelka_runs/{tumor}/results/variants/somatic.snvs.vcf.gz", tumor = config["pairs"])
 
 rule Strelka_config:
   input:
     tumor_bam = "runs/{tumor}/ApplyBQSR/recal.bam",
-    normal_bam = lambda wildcards: "runs/" + config["pairings"][wildcards.tumor] + "/ApplyBQSR/recal.bam"
+    normal_bam = lambda wildcards: "runs/" + config["pairs"][wildcards.tumor] + "/ApplyBQSR/recal.bam"
   output:
     out_run = "Strelka_runs/{tumor}/runWorkflow.py"
   conda:
@@ -36,7 +36,8 @@ rule Strelka_execute:
   input:
     rules.Strelka_config.output.out_run
   output:
-    "Strelka_runs/{tumor}/ex.log"
+    vcfs_snvs = "Strelka_runs/{tumor}/results/variants/somatic.snvs.vcf.gz",
+    vcfs_indels = "Strelka_runs/{tumor}/results/variants/somatic.indels.vcf.gz",
   conda:
     "envs_dir/Strelka_env.yaml"
   threads: 16
@@ -47,5 +48,5 @@ rule Strelka_execute:
     "benchmarks/Strelka_execute.{tumor}.txt"
   shell:
     """
-      {input} --mode local --jobs {threads} --memGb {resources.mem_gb} > {output}
+      {input} --mode local --jobs {threads} --memGb {resources.mem_gb}
     """
