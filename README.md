@@ -5,8 +5,9 @@ currenty supported workflows:
 * ichorCNA
 * TitanCNA
 * Strelka
+* PhyloWGS
 
-Note that only MuTect2 calculations can currently be run in a simple way. 
+Note that only MuTect2 calculations can currently be run in a simple way. Many workflows will need to be manually editted inorder to work on a different machine/user. This will be addressed in the future.
 
 ## Example command to run MuTect2 calculations
 ```
