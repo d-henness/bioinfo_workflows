@@ -11,7 +11,7 @@ rule ubam:
   input:
     ubam_input
   output:
-    "runs/{library}/ubam/unprocessed.bam"
+    temp("runs/{library}/ubam/unprocessed.bam")
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
@@ -27,7 +27,7 @@ rule SamToFastqAndBwaMem:
   input:
     rules.ubam.output
   output:
-    "runs/{library}/SamToFastqAndBwaMem/bwa.bam"
+    temp("runs/{library}/SamToFastqAndBwaMem/bwa.bam")
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
@@ -54,7 +54,7 @@ rule MergeBamAlignment:
     ubam = rules.ubam.output,
     bwa_bam = rules.SamToFastqAndBwaMem.output,
   output:
-    "runs/{library}/MergeBamAlignment/merge.bam"
+    temp("runs/{library}/MergeBamAlignment/merge.bam")
   conda:
     "envs_dir/pre_proc.yaml"
   resources:

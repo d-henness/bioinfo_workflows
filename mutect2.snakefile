@@ -13,7 +13,7 @@ rule mutect_all:
 #   expand("runs/{tumor}/MergeVCFs_{normal}/out.vcf", tumor = tumors, normal = normals)
 #   expand("runs/{tumor}/Filter_{normal}/out.vcf", tumor = tumors, normal = normals)
     expand("runs/{tumor}/FilterByOrientationBias_{normal}/out.vcf", zip, tumor = tumors, normal = normals)
-#   expand("runs/{tumor}/FuncotateMaf_{normal}/out.vcf.maf.annotated", zip, tumor = tumors, normal = normals)
+#   expand("runs/{tumor}/FuncotateMaf_{normal}/out.vcf.maf.annotated", zip, tumor = tumors, normal = normals) There is an issue with funcotator, uncomment this if a fix is found
 
 
 rule CollectF1R2Counts:
@@ -308,7 +308,6 @@ rule FuncotateMaf:
     "runs/{tumor}/FuncotateMaf_{normal}/out.log",
   conda:
     "envs_dir/pre_proc.yaml"
-    
   params:
     ref_fasta = config["ref_fasta"],
     ref_fai = config["ref_fasta_index"],

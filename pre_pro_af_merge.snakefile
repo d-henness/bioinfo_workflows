@@ -24,8 +24,8 @@ rule MarkDuplicates:
   input:
     MarkDuplicates_input
   output:
-    bam = "runs/{merge}/MarkDuplicates/dup.bam",
-    metrics = "runs/{merge}/MarkDuplicates/metrics.duplicate_metrics",
+    bam = temp("runs/{merge}/MarkDuplicates/dup.bam"),
+    metrics = temp("runs/{merge}/MarkDuplicates/metrics.duplicate_metrics"),
     temp_dir = temp(directory("runs/{merge}/MarkDuplicates/tmp/"))
   conda:
     "envs_dir/pre_proc.yaml"
@@ -57,9 +57,9 @@ rule SortAndFixTags:
   input:
     rules.MarkDuplicates.output.bam,
   output:
-    out_bam = "runs/{merge}/SortAndFixTags/sorted.bam",
-    out_bai = "runs/{merge}/SortAndFixTags/sorted.bai",
-    temp_dir = temp (directory("runs/{merge}/SortAndFixTags/tmp/"))
+    out_bam = temp("runs/{merge}/SortAndFixTags/sorted.bam"),
+    out_bai = temp("runs/{merge}/SortAndFixTags/sorted.bai"),
+    temp_dir = temp(directory("runs/{merge}/SortAndFixTags/tmp/"))
   conda:
     "envs_dir/pre_proc.yaml"
   log:
@@ -100,7 +100,7 @@ rule BaseRecalibrator:
     bam = rules.SortAndFixTags.output.out_bam,
     index = rules.SortAndFixTags.output.out_bai,
   output:
-    recal = "runs/{merge}/BaseRecalibrator/recal.csv",
+    recal = temp("runs/{merge}/BaseRecalibrator/recal.csv"),
 #   temp_dir = temp (directory("runs/{merge}/BaseRecalibrator/tmp/")),
   conda:
     "envs_dir/pre_proc.yaml"
