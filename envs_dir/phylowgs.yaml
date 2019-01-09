@@ -1,0 +1,8 @@
+channels:
+ - conda-forge
+ - bioconda
+ - defaults
+dependencies:
+ - bcftools=1.9
+ - pbgzip=2016.08.04
+ - phylowgs=20180317
