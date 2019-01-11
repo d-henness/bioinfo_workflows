@@ -24,6 +24,7 @@ rule CollectF1R2Counts:
     alt_table = "runs/{tumor}/CollectF1R2Counts/alt_tab.tsv",
     ref_hist = "runs/{tumor}/CollectF1R2Counts/alt_tab.metrics",
     ref_hists = "runs/{tumor}/CollectF1R2Counts/alt-depth1.metrics",
+    tumor_name = "runs/{tumor}/CollectF1R2Counts/tumor_name.txt",
   params:
     ref_fasta = config["ref_fasta"],
     ref_fai = config["ref_fasta_index"],
@@ -41,8 +42,8 @@ rule CollectF1R2Counts:
     "benchmarks/{tumor}.CollectF1R2Counts.benchmark.txt"
   shell:
     """
-      gatk --java-options -Xmx4000m GetSampleName -R {params.ref_fasta} -I {input.tumor_bam} -O tumor_name.txt -encode
-      tumor_name=$(head -n 1 tumor_name.txt)
+      gatk --java-options -Xmx4000m GetSampleName -R {params.ref_fasta} -I {input.tumor_bam} -O {output.tumor_name} -encode
+      tumor_name=$(head -n 1 {output.tumor_name})
 
 			gatk --java-options -Xmx4000m CollectF1R2Counts \
       -I {input.tumor_bam} -R {params.ref_fasta} \
@@ -95,6 +96,8 @@ rule M2:
     vcf = "runs/{tumor}/M2_{normal}/out.vcf",
     vcf_index = "runs/{tumor}/M2_{normal}/out.vcf.idx",
     bam_out = "runs/{tumor}/M2_{normal}/out.bam",
+    tumor_name = "runs/{tumor}/M2_{normal}/tumor_name.txt",
+    normal_name = "runs/{tumor}/M2_{normal}/normal_name.txt",
   params:
     ref_fasta = config["ref_fasta"],
     ref_fai = config["ref_fasta_index"],
@@ -111,11 +114,11 @@ rule M2:
     "benchmarks/{tumor}_{normal}.M2.benchmark.txt"
   shell:
     """
-      gatk --java-options -Xmx4000m GetSampleName -R {params.ref_fasta} -I {input.tumor_bam} -O tumor_name.txt -encode
-      tumor_command_line="-I {input.tumor_bam} -tumor `cat tumor_name.txt`"
+      gatk --java-options -Xmx4000m GetSampleName -R {params.ref_fasta} -I {input.tumor_bam} -O {output.tumor_name} -encode
+      tumor_command_line="-I {input.tumor_bam} -tumor `cat {output.tumor_name}`"
 
-      gatk --java-options -Xmx4000m GetSampleName -R {params.ref_fasta} -I {input.normal_bam} -O normal_name.txt -encode 
-      normal_command_line="-I {input.normal_bam} -normal `cat normal_name.txt`"
+      gatk --java-options -Xmx4000m GetSampleName -R {params.ref_fasta} -I {input.normal_bam} -O {output.normal_name} -encode 
+      normal_command_line="-I {input.normal_bam} -normal `cat {output.normal_name}`"
 
       gatk --java-options -Xmx4000m Mutect2 \
       -R {params.ref_fasta} \
