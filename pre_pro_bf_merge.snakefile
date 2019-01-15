@@ -40,7 +40,7 @@ rule SamToFastqAndBwaMem:
     ref_fasta = config["ref_fasta"],
     java_opts = config["SamToFastqAndBwaMem.java_opt"],
     exclude_list = ''
-  threads: 16
+  threads: 8
   resources:
     mem_mb = int(config["SamToFastqAndBwaMem.java_opt"].strip("-Xmx")) + 1000
   benchmark:
