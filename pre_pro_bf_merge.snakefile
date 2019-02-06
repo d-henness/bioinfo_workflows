@@ -2,7 +2,14 @@ configfile: "{}/ref.yaml".format(workflow.basedir)
 
 rule make_alig:
   input:
-    expand("runs/{library}/MergeBamAlignment/merge.bam", library = config["libraries"])
+#    expand("runs/{library}/MergeBamAlignment/merge.bam", library = config["libraries"])
+    expand("runs/{library}/ubam/unprocessed.bam", library = config["libraries"])
+
+def get_sample_name(wildcards):
+  for sample_name in config["merge_libs"]:
+    for lib in config["merge_libs"][sample_name]:
+      if lib == config["libraries"][wildcards.library]:
+        print(sample_name)
 
 def ubam_input(wildcards):
   return config["libraries"][wildcards.library]
@@ -17,11 +24,14 @@ rule ubam:
   resources:
     mem_mb = 5000
   params:
-    exclude_list = ''
+    exclude_list = '',
+    sample_name = get_sample_name
+  log:
+    ubam = "runs/{library}/ubam/ubam.log"
   benchmark:
     "benchmarks/{library}.ubam.benchmark.txt"
   shell:
-    "python3 {workflow.basedir}/scripts_dir/ubam.py {input} {wildcards.library} {output}"
+    "python3 {workflow.basedir}/scripts_dir/ubam.py {input} {wildcards.library} {output} 2> {log.ubam} {params.sample_name}"
 
 rule SamToFastqAndBwaMem:
   input:
