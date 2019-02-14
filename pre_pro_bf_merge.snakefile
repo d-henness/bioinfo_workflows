@@ -77,7 +77,7 @@ rule MergeBamAlignment:
     java_opts = config["MergeBamAlignment.java_opt"],
     exclude_list = ''
   resources:
-    mem_mb = int(config["MergeBamAlignment.java_opt"].strip("-Xmx")) + 1000,
+    mem_mb = lambda wildcards, attempt: attempt * (int(config["MergeBamAlignment.java_opt"].strip("-Xmx")) + 1000),
     time_hr = lambda wildcards, attempt: str(attempt * 24) + ':00:00'
   benchmark:
     "benchmarks/{library}.MergeBamAlignment.benchmark.txt"
