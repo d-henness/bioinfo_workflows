@@ -38,7 +38,7 @@ rule MarkDuplicates:
     exclude_list = ''
   resources:
     mem_mb = lambda wildcards, attempt: attempt * (int(config["MarkDuplicates.java_opt"].strip("-Xmx")) + 1000),
-    time_hr = lambda wildcards, attempt: str(attempt * 24) + ':00:00'
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   benchmark:
     "benchmarks/{merge}.MarkDuplicates.benchmark.txt"
   shell:
@@ -73,7 +73,7 @@ rule SortAndFixTags:
     exclude_list = ''
   resources:
     mem_mb = lambda wildcards, attempt: attempt * (int(config["SortAndFixTags.java_opt_sort"].strip("-Xmx")) + int(config["SortAndFixTags.java_opt_fix"].strip("-Xmx")) + 1000),
-    time_hr = lambda wildcards, attempt: str(attempt * 24) + ':00:00'
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   benchmark:
     "benchmarks/{merge}.SortAndFixTags.benchmark.txt"
   shell:
@@ -121,7 +121,7 @@ rule BaseRecalibrator:
     exclude_list = ''
   resources:
     mem_mb = lambda wildcards, attempt: attempt * (int(config["BaseRecalibrator.java_opt"].strip("-Xmx")) + 1000),
-    time_hr = lambda wildcards, attempt: str(attempt * 24) + ':00:00'
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   benchmark:
     "benchmarks/{merge}.BaseRecalibrator.benchmark.txt"
   shell:
@@ -162,7 +162,7 @@ rule ApplyBQSR:
     exclude_list = ''
   resources:
     mem_mb = lambda wildcards, attempt: attempt * (int(config["ApplyBQSR.java_opt"].strip("-Xmx")) + 1000),
-    time_hr = lambda wildcards, attempt: str(attempt * 24) + ':00:00'
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   benchmark:
     "benchmarks/{merge}.ApplyBQSR.benchmark.txt"
   shell:

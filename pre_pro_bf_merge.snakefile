@@ -23,7 +23,7 @@ rule ubam:
     "envs_dir/pre_proc.yaml"
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
-    time_hr = lambda wildcards, attempt: str(attempt * 24) + ':00:00'
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   params:
     exclude_list = '',
     sample_name = get_sample_name
@@ -78,7 +78,7 @@ rule MergeBamAlignment:
     exclude_list = ''
   resources:
     mem_mb = lambda wildcards, attempt: attempt * (int(config["MergeBamAlignment.java_opt"].strip("-Xmx")) + 1000),
-    time_hr = lambda wildcards, attempt: str(attempt * 24) + ':00:00'
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   benchmark:
     "benchmarks/{library}.MergeBamAlignment.benchmark.txt"
   shell:

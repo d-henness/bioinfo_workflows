@@ -34,7 +34,7 @@ rule CollectF1R2Counts:
     exclude_list = ''
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
-    time_hr = lambda wildcards, attempt: str(attempt * 24) + ':00:00'
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
     "runs/{tumor}/CollectF1R2Counts/out.log",
   conda:
@@ -71,7 +71,7 @@ rule LearnReadOrientationModel:
     exclude_list = ''
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
-    time_hr = lambda wildcards, attempt: str(attempt * 24) + ':00:00'
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
     "runs/{tumor}/LearnReadOrientationModel/log.log",
   benchmark:
@@ -109,7 +109,7 @@ rule M2:
     exclude_list = 'neuron,biolx95'
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
-    time_hr = lambda wildcards, attempt: str(attempt * 72) + ':00:00'
+    time_min = lambda wildcards, attempt: attempt * 24 * 60 * 30,	# time in minutes
   threads: 4 # default for mutect asks for 4 threads
   log:
     "runs/{tumor}/M2_{normal}/out.log"
@@ -146,7 +146,7 @@ rule CollectSequencingArtifactMetrics:
     ada_sum_met = "runs/{tumor}/CollectSequencingArtifactMetrics/gatk.pre_adapter_summary_metrics",
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
-    time_hr = lambda wildcards, attempt: str(attempt * 24) + ':00:00'
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
     "runs/{tumor}/CollectSequencingArtifactMetrics/gatk.log"
   conda:
@@ -179,7 +179,7 @@ rule CalculateContamination:
     seg_tab = "runs/{tumor}/CalculateContamination_{normal}/seg_tab.table",
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
-    time_hr = lambda wildcards, attempt: str(attempt * 24) + ':00:00'
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
     "runs/{tumor}/CalculateContamination_{normal}/out.log"
   conda:
@@ -217,7 +217,7 @@ rule MergeVCFs:
     "envs_dir/pre_proc.yaml"
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
-    time_hr = lambda wildcards, attempt: str(attempt * 24) + ':00:00'
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
     "runs/{tumor}/MergeVCFs_{normal}/out.log",
   params:
@@ -250,7 +250,7 @@ rule Filter:
     "envs_dir/pre_proc.yaml"
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
-    time_hr = lambda wildcards, attempt: str(attempt * 24) + ':00:00'
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
     "runs/{tumor}/Filter_{normal}/out.log"
   params:
@@ -284,7 +284,7 @@ rule FilterByOrientationBias:
     "envs_dir/pre_proc.yaml"
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
-    time_hr = lambda wildcards, attempt: str(attempt * 24) + ':00:00'
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
     "runs/{tumor}/FilterByOrientationBias_{normal}/out.log"
   params:
@@ -315,7 +315,7 @@ rule FuncotateMaf:
     final_out_name = "runs/{tumor}/FuncotateMaf_{normal}/out.vcf.maf.annotated",
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
-    time_hr = lambda wildcards, attempt: str(attempt * 24) + ':00:00'
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
     "runs/{tumor}/FuncotateMaf_{normal}/out.log",
   conda:
