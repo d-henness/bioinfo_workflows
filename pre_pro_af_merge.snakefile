@@ -37,7 +37,7 @@ rule MarkDuplicates:
     libs_string = MarkDuplicates_input_string,
     exclude_list = ''
   resources:
-    mem_mb = int(config["MarkDuplicates.java_opt"].strip("-Xmx")) + 1000
+    mem_mb = lambda wildcards, attempt: attempt * (int(config["MarkDuplicates.java_opt"].strip("-Xmx")) + 1000)
   benchmark:
     "benchmarks/{merge}.MarkDuplicates.benchmark.txt"
   shell:
@@ -71,7 +71,7 @@ rule SortAndFixTags:
     java_opts_fix = config["SortAndFixTags.java_opt_fix"],
     exclude_list = ''
   resources:
-    mem_mb = int(config["SortAndFixTags.java_opt_sort"].strip("-Xmx")) + int(config["SortAndFixTags.java_opt_fix"].strip("-Xmx")) + 1000
+    mem_mb = lambda wildcards, attempt: attempt * (int(config["SortAndFixTags.java_opt_sort"].strip("-Xmx")) + int(config["SortAndFixTags.java_opt_fix"].strip("-Xmx")) + 1000)
   benchmark:
     "benchmarks/{merge}.SortAndFixTags.benchmark.txt"
   shell:
@@ -118,7 +118,7 @@ rule BaseRecalibrator:
     java_opts = config["BaseRecalibrator.java_opt"],
     exclude_list = ''
   resources:
-    mem_mb = int(config["BaseRecalibrator.java_opt"].strip("-Xmx")) + 1000
+    mem_mb = lambda wildcards, attempt: attempt * (int(config["BaseRecalibrator.java_opt"].strip("-Xmx")) + 1000)
   benchmark:
     "benchmarks/{merge}.BaseRecalibrator.benchmark.txt"
   shell:
@@ -158,7 +158,7 @@ rule ApplyBQSR:
     java_opts = config["ApplyBQSR.java_opt"],
     exclude_list = ''
   resources:
-    mem_mb = int(config["ApplyBQSR.java_opt"].strip("-Xmx")) + 1000
+    mem_mb = lambda wildcards, attempt: attempt * (int(config["ApplyBQSR.java_opt"].strip("-Xmx")) + 1000)
   benchmark:
     "benchmarks/{merge}.ApplyBQSR.benchmark.txt"
   shell:
