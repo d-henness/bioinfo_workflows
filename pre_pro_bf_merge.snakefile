@@ -41,8 +41,6 @@ rule SamToFastqAndBwaMem:
     temp("runs/{library}/SamToFastqAndBwaMem/bwa.bam")
   conda:
     "envs_dir/pre_proc.yaml"
-  resources:
-    mem_mb = lambda wildcards, attempt: attempt * 10000
   log:
     bwa = "runs/{library}/SamToFastqAndBwaMem/bwa.log",
     picard = "runs/{library}/SamToFastqAndBwaMem/picard.log",
@@ -53,7 +51,8 @@ rule SamToFastqAndBwaMem:
     exclude_list = ''
   threads: 8
   resources:
-    mem_mb = int(config["SamToFastqAndBwaMem.java_opt"].strip("-Xmx")) + 1000
+    mem_mb = lambda wildcards, attempt: attempt * int(config["SamToFastqAndBwaMem.java_opt"].strip("-Xmx")) + 1000,
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   benchmark:
     "benchmarks/{library}.SamToFastqAndBwaMem.benchmark.txt"
   shell:
@@ -68,8 +67,6 @@ rule MergeBamAlignment:
     temp("runs/{library}/MergeBamAlignment/merge.bam")
   conda:
     "envs_dir/pre_proc.yaml"
-  resources:
-    mem_mb = lambda wildcards, attempt: attempt * 5000
   log:
     "runs/{library}/MergeBamAlignment/merge.log"
   params:
