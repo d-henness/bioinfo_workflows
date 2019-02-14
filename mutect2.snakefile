@@ -33,7 +33,7 @@ rule CollectF1R2Counts:
     interval = config["exom_padded_primary"],
     exclude_list = ''
   resources:
-    mem_mb = 5000
+    mem_mb = lambda wildcards, attempt: attempt * 5000
   log:
     "runs/{tumor}/CollectF1R2Counts/out.log",
   conda:
@@ -69,7 +69,7 @@ rule LearnReadOrientationModel:
     gnomad = config["gnomad"],
     exclude_list = ''
   resources:
-    mem_mb = 5000
+    mem_mb = lambda wildcards, attempt: attempt * 5000
   log:
     "runs/{tumor}/LearnReadOrientationModel/log.log",
   benchmark:
@@ -106,7 +106,7 @@ rule M2:
     interval = config["exom_padded_primary"],
     exclude_list = 'neuron,biolx95'
   resources:
-    mem_mb = 5000,
+    mem_mb = lambda wildcards, attempt: attempt * 5000,
   threads: 4 # default for mutect asks for 4 threads
   log:
     "runs/{tumor}/M2_{normal}/out.log"
@@ -142,7 +142,7 @@ rule CollectSequencingArtifactMetrics:
     ada_det_met = "runs/{tumor}/CollectSequencingArtifactMetrics/gatk.pre_adapter_detail_metrics",
     ada_sum_met = "runs/{tumor}/CollectSequencingArtifactMetrics/gatk.pre_adapter_summary_metrics",
   resources:
-    mem_mb = 5000
+    mem_mb = lambda wildcards, attempt: attempt * 5000
   log:
     "runs/{tumor}/CollectSequencingArtifactMetrics/gatk.log"
   conda:
@@ -174,7 +174,7 @@ rule CalculateContamination:
     con_tab = "runs/{tumor}/CalculateContamination_{normal}/con_tab.table",
     seg_tab = "runs/{tumor}/CalculateContamination_{normal}/seg_tab.table",
   resources:
-    mem_mb = 5000
+    mem_mb = lambda wildcards, attempt: attempt * 5000
   log:
     "runs/{tumor}/CalculateContamination_{normal}/out.log"
   conda:
@@ -211,7 +211,7 @@ rule MergeVCFs:
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
-    mem_mb = 5000
+    mem_mb = lambda wildcards, attempt: attempt * 5000
   log:
     "runs/{tumor}/MergeVCFs_{normal}/out.log",
   params:
@@ -243,7 +243,7 @@ rule Filter:
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
-    mem_mb = 5000
+    mem_mb = lambda wildcards, attempt: attempt * 5000
   log:
     "runs/{tumor}/Filter_{normal}/out.log"
   params:
@@ -276,7 +276,7 @@ rule FilterByOrientationBias:
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
-    mem_mb = 5000
+    mem_mb = lambda wildcards, attempt: attempt * 5000
   log:
     "runs/{tumor}/FilterByOrientationBias_{normal}/out.log"
   params:
@@ -306,7 +306,7 @@ rule FuncotateMaf:
   output:
     final_out_name = "runs/{tumor}/FuncotateMaf_{normal}/out.vcf.maf.annotated",
   resources:
-    mem_mb = 5000
+    mem_mb = lambda wildcards, attempt: attempt * 5000
   log:
     "runs/{tumor}/FuncotateMaf_{normal}/out.log",
   conda:
