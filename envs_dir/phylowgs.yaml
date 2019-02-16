@@ -4,5 +4,7 @@ channels:
  - defaults
 dependencies:
  - bcftools=1.9
+ - samtools
+ - htslib
  - pbgzip=2016.08.04
  - phylowgs=20180317

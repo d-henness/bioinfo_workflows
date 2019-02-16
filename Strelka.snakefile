@@ -14,7 +14,7 @@ rule Strelka_config:
     "envs_dir/Strelka_env.yaml"
   params:
     ref_fasta = config["ref_fasta"],
-    bed_file = "/data/synapse1/shared/gatk4/gatk_data/hg38/remapped_S07604624_Padded_primaryOnly.bed.gz"
+    bed_file = "/data/shared/hg38/remapped_S07604624_Padded_primaryOnly.bed.gz"
   threads: 1
   resources:
     mem_mb = 1000
@@ -40,7 +40,7 @@ rule Strelka_execute:
     vcfs_indels = "Strelka_runs/{tumor}/results/variants/somatic.indels.vcf.gz",
   conda:
     "envs_dir/Strelka_env.yaml"
-  threads: 16
+  threads: 4
   resources:
     mem_mb = 4000,
     mem_gb = 4
