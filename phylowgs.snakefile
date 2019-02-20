@@ -76,10 +76,12 @@ rule parse_cnvs:
     post_filter = "pre_pro_cnv/{tumor}/cnvs_filter.txt"
   conda:
     "envs_dir/phylowgs.yaml"
+  resources:
+    mem_mb = 4000
   shell:
     '''
-      PURITY=$(cat {input.cnv} | sed 's/\,[^\t]*//' | grep {wildcards.tumor} | awk '{{print $6}}')
-      TITANFILE1=$(grep {wildcards.tumor} {input.cnv} | sed 's/.*results\//results\//; s/$/\.segs.txt/')
+      PURITY=$(cat {input.cnv} | sed 's/\,[^\t]*//' | grep '{wildcards.tumor}_cluster' | awk '{{print $6}}')
+      TITANFILE1=$(grep '{wildcards.tumor}_cluster' {input.cnv} | sed 's/.*results\//results\//; s/$/\.segs.txt/')
       TITANFILE2=$(echo $TITANFILE1 | sed 's/.*\///; s/^/pre_pro_cnv\/{wildcards.tumor}\//')
       if [[ !(-d pre_pro_cnv/{wildcards.tumor}) ]]; then
         mkdir -p pre_pro_cnv/{wildcards.tumor}
@@ -101,6 +103,8 @@ rule parse_cnv_and_vcf:
     out_param = "parse_cnv_and_vcf/{tumor}/params.json"
   conda:
     "envs_dir/phylowgs.yaml"
+  resources:
+    mem_mb = 4000
   shell:
     """
       $CONDA_PREFIX/share/phylowgs/parser/create_phylowgs_inputs.py \
@@ -123,6 +127,8 @@ rule run_phylo:
   conda:
     "envs_dir/phylowgs.yaml"
   threads: 4
+  resources:
+    mem_mb = 4000
   benchmark:
     "benchmarks/{tumor}.run_phylo.benchmark.txt"
   shell:
