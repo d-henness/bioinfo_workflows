@@ -1,10 +1,10 @@
 # TODO
 * add in the time resources for all workflows
-* stich up workflows so only the final step needs to be executed
-* add a setup script so that paths do not need to be manually editted
+* stitch up workflows so only the final step needs to be executed
+* add a setup script so that paths do not need to be manually edited
 
 # Bioinformatics workflows
-currenty supported workflows:
+currently supported workflows:
 * GATK preprocessing
 * MuTect2
 * ichorCNA
@@ -14,7 +14,7 @@ currenty supported workflows:
 * VarScan
 * MuPeXI (kind of)
 
-Note that only MuTect2 calculations can currently be run in a simple way. Many workflows will need to be manually editted inorder to work on a different machine/user. This will be addressed in the future.
+Note that only MuTect2 calculations can currently be run in a simple way. Many workflows will need to be manually edited in order to work on a different machine/user. This will be addressed in the future.
 
 ## Example command to run MuTect2 calculations
 ```
@@ -29,10 +29,10 @@ snakemake -s path/to/mutect2.snakefile  \
 * -s: gives the snakefile for the pipeline we want
 * --configfile: the path to the job specific yaml config file, see below for an example and formatting
 * --jobs: the maximum number of jobs that snakemake will try to run at once. Check to see if you have any limits
-* --use-conda: allows snakemake to use conda enviroments to install the needed programs
+* --use-conda: allows snakemake to use conda environments to install the needed programs
 * --cluster: needed for running the calculations on a cluster, here I am assuming that the cluster is using the slurm scheduler
 * (optional) --restart-times: the number of times snakemake will try to restart a job that failed. Each restart increases the memory and time requested
-* (optional) -p: print the shell command that runs a particular job, this is useful for debugging but is not actully needed
+* (optional) -p: print the shell command that runs a particular job, this is useful for debugging but is not actually needed
 * (optional) -n: print out all steps that will be run but won't actually run them, this is useful to make sure that the jobs to be run match what you expect
 
 ## Example configfile.yaml file
@@ -56,10 +56,10 @@ pairs:
   tumor_1:  normal_0
 ```
 
-The libraries and merge_libs sections can be genreated automatically using the make_config.py script (in scripts_dir).
+The libraries and merge_libs sections can be generated automatically using the make_config.py script (in scripts_dir).
 It takes one argument which is a string that matches something that all libraries we want to work on contain.
 For instance we want to do runs on the fq.gz files in the directories called RG4-2, RG4-3, RG4_PBMC, RG5-1, RG5-2, and RG5_PBMC.
-We would run the following command in a directory that contains all of these other diredctories:
+We would run the following command in a directory that contains all of these other directories:
 
 ```
 python3 /path/to/bioinfo_workflows/scripts_dir/make_config_2.py RG > config.yaml
