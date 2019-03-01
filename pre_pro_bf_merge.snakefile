@@ -22,7 +22,8 @@ rule ubam:
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
-    mem_mb = 5000
+    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   params:
     exclude_list = '',
     sample_name = get_sample_name
@@ -40,8 +41,6 @@ rule SamToFastqAndBwaMem:
     temp("runs/{library}/SamToFastqAndBwaMem/bwa.bam")
   conda:
     "envs_dir/pre_proc.yaml"
-  resources:
-    mem_mb = 10000
   log:
     bwa = "runs/{library}/SamToFastqAndBwaMem/bwa.log",
     picard = "runs/{library}/SamToFastqAndBwaMem/picard.log",
@@ -52,7 +51,8 @@ rule SamToFastqAndBwaMem:
     exclude_list = ''
   threads: 8
   resources:
-    mem_mb = int(config["SamToFastqAndBwaMem.java_opt"].strip("-Xmx")) + 1000
+    mem_mb = lambda wildcards, attempt: attempt * int(config["SamToFastqAndBwaMem.java_opt"].strip("-Xmx")) + 1000,
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   benchmark:
     "benchmarks/{library}.SamToFastqAndBwaMem.benchmark.txt"
   shell:
@@ -67,8 +67,6 @@ rule MergeBamAlignment:
     temp("runs/{library}/MergeBamAlignment/merge.bam")
   conda:
     "envs_dir/pre_proc.yaml"
-  resources:
-    mem_mb = 5000
   log:
     "runs/{library}/MergeBamAlignment/merge.log"
   params:
@@ -76,7 +74,8 @@ rule MergeBamAlignment:
     java_opts = config["MergeBamAlignment.java_opt"],
     exclude_list = ''
   resources:
-    mem_mb = int(config["MergeBamAlignment.java_opt"].strip("-Xmx")) + 1000
+    mem_mb = lambda wildcards, attempt: attempt * (int(config["MergeBamAlignment.java_opt"].strip("-Xmx")) + 1000),
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   benchmark:
     "benchmarks/{library}.MergeBamAlignment.benchmark.txt"
   shell:
