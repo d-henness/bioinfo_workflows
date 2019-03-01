@@ -1,3 +1,8 @@
+# TODO
+* add in the time resources for all workflows
+* stich up workflows so only the final step needs to be exicuted
+* add a setup script so that paths do not need to be manually editted
+
 # Bioinformatics workflows
 currenty supported workflows:
 * GATK preprocessing
@@ -6,6 +11,8 @@ currenty supported workflows:
 * TitanCNA
 * Strelka
 * PhyloWGS
+* VarScan
+* MuPeXI (kind of)
 
 Note that only MuTect2 calculations can currently be run in a simple way. Many workflows will need to be manually editted inorder to work on a different machine/user. This will be addressed in the future.
 
