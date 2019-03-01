@@ -1,6 +1,6 @@
 # TODO
 * add in the time resources for all workflows
-* stich up workflows so only the final step needs to be exicuted
+* stich up workflows so only the final step needs to be executed
 * add a setup script so that paths do not need to be manually editted
 
 # Bioinformatics workflows
