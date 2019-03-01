@@ -13,16 +13,18 @@ Note that only MuTect2 calculations can currently be run in a simple way. Many w
 ```
 snakemake -s path/to/mutect2.snakefile  \
           --configfile path/to/configfile.yaml  \
-          --cores 16  \
+          --jobs 1000  \
           --use-conda \
-          --cluster 'sbatch --cpus-per-task={threads} --mem-per-cpu={resources.mem_mb} --exclude={params.exclude_list}' \
+          --cluster 'sbatch --cpus-per-task={threads} --mem={resources.mem_mb} --time={resources.time_min}' \
+          --restart-times 3 \
           -p
 ```
 * -s: gives the snakefile for the pipeline we want
 * --configfile: the path to the job specific yaml config file, see below for an example and formatting
-* --cores: gives the maximum number of cores that any particular job can use, 16 is currently the max that any job uses so just set this to 16
+* --jobs: the maximum number of jobs that snakemake will try to run at once. Check to see if you have any limits
 * --use-conda: allows snakemake to use conda enviroments to install the needed programs
 * --cluster: needed for running the calculations on a cluster, here I am assuming that the cluster is using the slurm scheduler
+* (optional) --restart-times: the number of times snakemake will try to restart a job that failed. Each restart increases the memory and time requested
 * (optional) -p: print the shell command that runs a particular job, this is useful for debugging but is not actully needed
 * (optional) -n: print out all steps that will be run but won't actually run them, this is useful to make sure that the jobs to be run match what you expect
 
@@ -53,7 +55,7 @@ For instance we want to do runs on the fq.gz files in the directories called RG4
 We would run the following command in a directory that contains all of these other diredctories:
 
 ```
-python3 /path/to/bioinfo_workflows/scripts_dir/make_config.py RG > config.yaml
+python3 /path/to/bioinfo_workflows/scripts_dir/make_config_2.py RG > config.yaml
 ```
 
 This creates a file called config.yaml which would contain something like the following.
