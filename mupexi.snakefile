@@ -20,6 +20,7 @@ rule mupexi:
     mupexi_path = "/usr/local/bioinfo_workflows/MuPeXI/MuPeXI.py",
     mupexi_config = "/usr/local/bioinfo_workflows/MuPeXI/config.ini",
     out_dir = "mupexi_runs/{tumor}",
+  threads: 1
   resources:
     mem_mb = 4000,
   shell:
