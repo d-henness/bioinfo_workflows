@@ -90,7 +90,7 @@ rule parse_cnvs:
       sed -i 's/\.bp\./\(bp\)/g' $TITANFILE2
       sed -i 's/Clonal_Cluster/Clonal_Frequency/' $TITANFILE2
       python2 $CONDA_PREFIX/share/phylowgs/parser/parse_cnvs.py -f titan --cnv-output {output.pre_filter} -c $PURITY $TITANFILE2
-      python3 /usr/local/bioinfo_workflows/scripts_dir/filter_cnvs.py {output.pre_filter} {output.post_filter}
+      python3 {workflow.basedir}/scripts_dir/filter_cnvs.py {output.pre_filter} {output.post_filter}
     '''
 
 rule parse_cnv_and_vcf:
@@ -133,5 +133,5 @@ rule run_phylo:
     "benchmarks/{tumor}.run_phylo.benchmark.txt"
   shell:
     """
-      python2 /usr/local/bioinfo_workflows/phylowgs/multievolve.py --num-chains 4 --ssms {input.var} --cnvs {input.cnv} -O {output.out_dir}
+      python2 {workflow.basedir}/phylowgs/multievolve.py --num-chains 4 --ssms {input.var} --cnvs {input.cnv} -O {output.out_dir}
     """

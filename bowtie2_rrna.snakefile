@@ -30,7 +30,7 @@ rule fastp_paired:
     fq2_out = "bowtie2_rrna/{rna_lib}/fastp/{rna_lib}_2.fq.gz",
     signal = "bowtie2_rrna/{rna_lib}/fastp/{rna_lib}_signal.txt",
   conda:
-    "/usr/local/bioinfo_workflows/envs_dir/bowtie2.yaml"
+    "envs_dir/bowtie2.yaml"
   resources:
     mem_mb = 4000
   threads: 1
@@ -51,7 +51,7 @@ rule fastp_unpaired:
     fq1_out = "bowtie2_rrna/{rna_lib}/fastp/{rna_lib}_1.fq.gz",
     signal = "bowtie2_rrna/{rna_lib}/fastp/{rna_lib}_signal.txt",
   conda:
-    "/usr/local/bioinfo_workflows/envs_dir/bowtie2.yaml"
+    "envs_dir/bowtie2.yaml"
   resources:
     mem_mb = 4000
   threads: 1
@@ -71,7 +71,7 @@ rule bowtie2:
   output:
     sam_file = "bowtie2_rrna/{rna_lib}/{rna_lib}.sam"
   conda:
-    "/usr/local/bioinfo_workflows/envs_dir/bowtie2.yaml"
+    "envs_dir/bowtie2.yaml"
   params:
     regions = config["bowtie2_rrna"],
     input_cmd = bowtie2_input
