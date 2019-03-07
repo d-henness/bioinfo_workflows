@@ -14,7 +14,7 @@ rule Strelka_config:
     "envs_dir/Strelka_env.yaml"
   params:
     ref_fasta = config["ref_fasta"],
-    bed_file = "/data/shared/hg38/remapped_S07604624_Padded_primaryOnly.bed.gz"
+    bed_file = "{config['data_path']}/remapped_S07604624_Padded_primaryOnly.bed.gz"
   threads: 1
   resources:
     mem_mb = 1000

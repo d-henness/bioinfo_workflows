@@ -1,3 +1,7 @@
+# path to reference directory
+"data_path": "/data/shared/hg38"
+
+# change these as needed
 "ref_dict": "/data/shared/hg38/Homo_sapiens_assembly38.dict"
 "ref_fasta": "/data/shared/hg38/Homo_sapiens_assembly38.fasta"
 "ref_fasta_index": "/data/shared/hg38/Homo_sapiens_assembly38.fasta.fai"
