@@ -17,8 +17,8 @@ rule mupexi:
     mupexi_log = "mupexi_runs/log/{tumor}.log",
   benchmark: "mupexi_runs/benchmark/{tumor}_mupexi.benchmark"
   params:
-    mupexi_path = "/usr/local/bioinfo_workflows/MuPeXI/MuPeXI.py",
-    mupexi_config = "/usr/local/bioinfo_workflows/MuPeXI/config.ini",
+    mupexi_path = "{workflow.basedir}/MuPeXI/MuPeXI.py",
+    mupexi_config = "{workflow.basedir}/MuPeXI/config.ini",
     out_dir = "mupexi_runs/{tumor}",
   threads: 1
   resources:

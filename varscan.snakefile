@@ -4,7 +4,6 @@ rule run_varscan:
   input:
     expand("varscan_runs/{tumor}/varscan/{tumor}_snp.vcf", zip, sample = config["merge_libs"], tumor = config["pairs"])
 
-
 rule make_pileup:
   input:
     bam_in = "runs/{sample}/ApplyBQSR/recal.bam",
@@ -38,7 +37,7 @@ rule varscan:
   log:
     "varscan_runs/log/{tumor}_varscan.log",
   benchmark:
-    "varscan_runs/benchmark/{tumor}_varscan.log",
+    "varscan_runs/benchmark/{tumor}_varscan.benchmark",
   threads: 1
   resources:
     mem_mb = 4000,
@@ -47,6 +46,7 @@ rule varscan:
       varscan somatic \
         {input.normal} \
         {input.tumor} \
+        --output-vcf 1 \
         --output-snp {output.snp} \
         --output-indel {output.indel} 2> {log}
     """
