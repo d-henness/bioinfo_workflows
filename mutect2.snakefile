@@ -21,10 +21,10 @@ rule CollectF1R2Counts:
     tumor_bam = "runs/{tumor}/ApplyBQSR/recal.bam",
     tumor_bai = "runs/{tumor}/ApplyBQSR/recal.bam.bai",
   output:
-    alt_table = "runs/{tumor}/CollectF1R2Counts/alt_tab.tsv",
-    ref_hist = "runs/{tumor}/CollectF1R2Counts/alt_tab.metrics",
-    ref_hists = "runs/{tumor}/CollectF1R2Counts/alt-depth1.metrics",
-    tumor_name = "runs/{tumor}/CollectF1R2Counts/tumor_name.txt",
+    alt_table = temp("runs/{tumor}/CollectF1R2Counts/alt_tab.tsv"),
+    ref_hist = temp("runs/{tumor}/CollectF1R2Counts/alt_tab.metrics"),
+    ref_hists = temp("runs/{tumor}/CollectF1R2Counts/alt-depth1.metrics"),
+    tumor_name = temp("runs/{tumor}/CollectF1R2Counts/tumor_name.txt"),
   params:
     ref_fasta = config["ref_fasta"],
     ref_fai = config["ref_fasta_index"],
@@ -62,7 +62,7 @@ rule LearnReadOrientationModel:
     ref_hist = rules.CollectF1R2Counts.output.ref_hist,
     ref_hists = rules.CollectF1R2Counts.output.ref_hists,
   output:
-    "runs/{tumor}/LearnReadOrientationModel/art_tab.tsv",
+    temp("runs/{tumor}/LearnReadOrientationModel/art_tab.tsv"),
   params:
     ref_fasta = config["ref_fasta"],
     ref_fai = config["ref_fasta_index"],
@@ -95,11 +95,11 @@ rule M2:
     tumor_bai = "runs/{tumor}/ApplyBQSR/recal.bam.bai",
     art_tab = rules.LearnReadOrientationModel.output
   output:
-    vcf = "runs/{tumor}/M2_{normal}/out.vcf",
-    vcf_index = "runs/{tumor}/M2_{normal}/out.vcf.idx",
-    bam_out = "runs/{tumor}/M2_{normal}/out.bam",
-    tumor_name = "runs/{tumor}/M2_{normal}/tumor_name.txt",
-    normal_name = "runs/{tumor}/M2_{normal}/normal_name.txt",
+    vcf = temp("runs/{tumor}/M2_{normal}/out.vcf"),
+    vcf_index = temp("runs/{tumor}/M2_{normal}/out.vcf.idx"),
+    bam_out = temp("runs/{tumor}/M2_{normal}/out.bam"),
+    tumor_name = temp("runs/{tumor}/M2_{normal}/tumor_name.txt"),
+    normal_name = temp("runs/{tumor}/M2_{normal}/normal_name.txt"),
   params:
     ref_fasta = config["ref_fasta"],
     ref_fai = config["ref_fasta_index"],
@@ -139,11 +139,11 @@ rule CollectSequencingArtifactMetrics:
     tumor_bam = "runs/{tumor}/ApplyBQSR/recal.bam",
     tumor_bai = "runs/{tumor}/ApplyBQSR/recal.bam.bai",
   output:
-    bait_det_met = "runs/{tumor}/CollectSequencingArtifactMetrics/gatk.bait_bias_detail_metrics",
-    bait_sum_met = "runs/{tumor}/CollectSequencingArtifactMetrics/gatk.bait_bias_summary_metrics",
-    err_sum_met = "runs/{tumor}/CollectSequencingArtifactMetrics/gatk.error_summary_metrics",
-    ada_det_met = "runs/{tumor}/CollectSequencingArtifactMetrics/gatk.pre_adapter_detail_metrics",
-    ada_sum_met = "runs/{tumor}/CollectSequencingArtifactMetrics/gatk.pre_adapter_summary_metrics",
+    bait_det_met = temp("runs/{tumor}/CollectSequencingArtifactMetrics/gatk.bait_bias_detail_metrics"),
+    bait_sum_met = temp("runs/{tumor}/CollectSequencingArtifactMetrics/gatk.bait_bias_summary_metrics"),
+    err_sum_met = temp("runs/{tumor}/CollectSequencingArtifactMetrics/gatk.error_summary_metrics"),
+    ada_det_met = temp("runs/{tumor}/CollectSequencingArtifactMetrics/gatk.pre_adapter_detail_metrics"),
+    ada_sum_met = temp("runs/{tumor}/CollectSequencingArtifactMetrics/gatk.pre_adapter_summary_metrics"),
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
@@ -173,10 +173,10 @@ rule CalculateContamination:
     normal_bam = "runs/{normal}/ApplyBQSR/recal.bam",
     normal_bia = "runs/{normal}/ApplyBQSR/recal.bam.bai",
   output:
-    normal_pil_tab = "runs/{tumor}/CalculateContamination_{normal}/normal_pileups.table",
-    pil_tab = "runs/{tumor}/CalculateContamination_{normal}/pileups.table",
-    con_tab = "runs/{tumor}/CalculateContamination_{normal}/con_tab.table",
-    seg_tab = "runs/{tumor}/CalculateContamination_{normal}/seg_tab.table",
+    normal_pil_tab = temp("runs/{tumor}/CalculateContamination_{normal}/normal_pileups.table"),
+    pil_tab = temp("runs/{tumor}/CalculateContamination_{normal}/pileups.table"),
+    con_tab = temp("runs/{tumor}/CalculateContamination_{normal}/con_tab.table"),
+    seg_tab = temp("runs/{tumor}/CalculateContamination_{normal}/seg_tab.table"),
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
@@ -211,8 +211,8 @@ rule MergeVCFs:
     vcfs = rules.M2.output.vcf,
     vcf_index = rules.M2.output.vcf_index,
   output:
-    merged_vcf = "runs/{tumor}/MergeVCFs_{normal}/out.vcf",
-    merged_vcf_index = "runs/{tumor}/MergeVCFs_{normal}/out.vcf.idx",
+    merged_vcf = temp("runs/{tumor}/MergeVCFs_{normal}/out.vcf"),
+    merged_vcf_index = temp("runs/{tumor}/MergeVCFs_{normal}/out.vcf.idx"),
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
@@ -244,8 +244,8 @@ rule Filter:
     con_tab = rules.CalculateContamination.output.con_tab,
     maf_seg = rules.CalculateContamination.output.seg_tab,
   output:
-    filt_vcf = "runs/{tumor}/Filter_{normal}/out.vcf",
-    filt_vcf_index = "runs/{tumor}/Filter_{normal}/out.vcf.idx",
+    filt_vcf = temp("runs/{tumor}/Filter_{normal}/out.vcf"),
+    filt_vcf_index = temp("runs/{tumor}/Filter_{normal}/out.vcf.idx"),
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
