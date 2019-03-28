@@ -6,31 +6,31 @@ merged = config["merge_libs"]
 
 rule pre_proc:
   input:
-    expand("runs/{merge}/ApplyBQSR/recal.bam", merge = merged)
+    expand("GATK_runs/{merge}/ApplyBQSR/recal.bam", merge = merged)
 
 def MarkDuplicates_input(wildcards):
   bam_files = []
   for library in config["merge_libs"][wildcards.merge]:
-    bam_files.append(f"runs/{library}/MergeBamAlignment/merge.bam")
+    bam_files.append(f"GATK_runs/{library}/MergeBamAlignment/merge.bam")
   return bam_files
 
 def MarkDuplicates_input_string(wildcards):
   bam_files = []
   for library in config["merge_libs"][wildcards.merge]:
-    bam_files.append(f"--INPUT runs/{library}/MergeBamAlignment/merge.bam")
+    bam_files.append(f"--INPUT GATK_runs/{library}/MergeBamAlignment/merge.bam")
   return ' '.join(bam_files)
 
 rule MarkDuplicates:
   input:
     MarkDuplicates_input
   output:
-    bam = temp("runs/{merge}/MarkDuplicates/dup.bam"),
-    metrics = temp("runs/{merge}/MarkDuplicates/metrics.duplicate_metrics"),
-    temp_dir = temp(directory("runs/{merge}/MarkDuplicates/tmp/"))
+    bam = temp("GATK_runs/{merge}/MarkDuplicates/dup.bam"),
+    metrics = temp("GATK_runs/{merge}/MarkDuplicates/metrics.duplicate_metrics"),
+    temp_dir = temp(directory("GATK_runs/{merge}/MarkDuplicates/tmp/"))
   conda:
     "envs_dir/pre_proc.yaml"
   log:
-    "runs/{merge}/MarkDuplicates/dup.log"
+    "GATK_runs/{merge}/MarkDuplicates/dup.log"
   params:
     ref_fasta = config["ref_fasta"],
     java_opts = config["MarkDuplicates.java_opt"],
@@ -58,14 +58,14 @@ rule SortAndFixTags:
   input:
     rules.MarkDuplicates.output.bam,
   output:
-    out_bam = temp("runs/{merge}/SortAndFixTags/sorted.bam"),
-    out_bai = temp("runs/{merge}/SortAndFixTags/sorted.bai"),
-    temp_dir = temp(directory("runs/{merge}/SortAndFixTags/tmp/"))
+    out_bam = temp("GATK_runs/{merge}/SortAndFixTags/sorted.bam"),
+    out_bai = temp("GATK_runs/{merge}/SortAndFixTags/sorted.bai"),
+    temp_dir = temp(directory("GATK_runs/{merge}/SortAndFixTags/tmp/"))
   conda:
     "envs_dir/pre_proc.yaml"
   log:
-    log1 = "runs/{merge}/SortAndFixTags/sorted_sam.log",
-    log2 = "runs/{merge}/SortAndFixTags/sorted_tags.log",
+    log1 = "GATK_runs/{merge}/SortAndFixTags/sorted_sam.log",
+    log2 = "GATK_runs/{merge}/SortAndFixTags/sorted_tags.log",
   params:
     ref_fasta = config["ref_fasta"],
     java_opts_sort = config["SortAndFixTags.java_opt_sort"],
@@ -102,12 +102,12 @@ rule BaseRecalibrator:
     bam = rules.SortAndFixTags.output.out_bam,
     index = rules.SortAndFixTags.output.out_bai,
   output:
-    recal = temp("runs/{merge}/BaseRecalibrator/recal.csv"),
-#   temp_dir = temp (directory("runs/{merge}/BaseRecalibrator/tmp/")),
+    recal = temp("GATK_runs/{merge}/BaseRecalibrator/recal.csv"),
+#   temp_dir = temp (directory("GATK_runs/{merge}/BaseRecalibrator/tmp/")),
   conda:
     "envs_dir/pre_proc.yaml"
   log:
-    "runs/{merge}/BaseRecalibrator/recal.log",
+    "GATK_runs/{merge}/BaseRecalibrator/recal.log",
   params:
     dbSNP_vcf = config["dbSNP_vcf"],
     dbSNP_vcf_index = config["dbSNP_vcf_index"],
@@ -144,12 +144,12 @@ rule ApplyBQSR:
     bam_index = rules.SortAndFixTags.output.out_bai,
     recal = rules.BaseRecalibrator.output.recal
   output:
-    bam_out = "runs/{merge}/ApplyBQSR/recal.bam",
-    bai_out = "runs/{merge}/ApplyBQSR/recal.bam.bai",
+    bam_out = "GATK_runs/{merge}/ApplyBQSR/recal.bam",
+    bai_out = "GATK_runs/{merge}/ApplyBQSR/recal.bam.bai",
   conda:
     "envs_dir/pre_proc.yaml"
   log:
-    "runs/{merge}/ApplyBQSR/recal.log",
+    "GATK_runs/{merge}/ApplyBQSR/recal.log",
   params:
     dbSNP_vcf = config["dbSNP_vcf"],
     dbSNP_vcf_index = config["dbSNP_vcf_index"],
@@ -177,7 +177,7 @@ rule ApplyBQSR:
         --create-output-bam-md5 \
         --use-original-qualities \
         &> {log}
-      if [[ -e runs/{wildcards.merge}/ApplyBQSR/recal.bai ]]; then
-        mv runs/{wildcards.merge}/ApplyBQSR/recal.bai runs/{wildcards.merge}/ApplyBQSR/recal.bam.bai
+      if [[ -e GATK_runs/{wildcards.merge}/ApplyBQSR/recal.bai ]]; then
+        mv GATK_runs/{wildcards.merge}/ApplyBQSR/recal.bai GATK_runs/{wildcards.merge}/ApplyBQSR/recal.bam.bai
       fi
     """

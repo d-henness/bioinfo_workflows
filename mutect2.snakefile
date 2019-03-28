@@ -7,24 +7,24 @@ normals = [config["pairs"][tumor] for tumor in tumors]
 
 rule mutect_all:
   input:
-#   expand("runs/{tumor}/M2_{normal}/out.vcf", zip, tumor = tumors, normal = normals)
-#   expand("runs/{tumor}/CollectSequencingArtifactMetrics/gatk.pre_adapter_detail_metrics", tumor = tumors)
-#   expand("runs/{tumor}/CalculateContamination_{normal}/seg_tab.table", tumor = tumors, normal = normals)
-#   expand("runs/{tumor}/MergeVCFs_{normal}/out.vcf", tumor = tumors, normal = normals)
-#   expand("runs/{tumor}/Filter_{normal}/out.vcf", tumor = tumors, normal = normals)
-    expand("runs/{tumor}/FilterByOrientationBias_{normal}/out.vcf", zip, tumor = tumors, normal = normals)
-#   expand("runs/{tumor}/FuncotateMaf_{normal}/out.vcf.maf.annotated", zip, tumor = tumors, normal = normals) There is an issue with funcotator, uncomment this if a fix is found
+#   expand("GATK_runs/{tumor}/M2_{normal}/out.vcf", zip, tumor = tumors, normal = normals)
+#   expand("GATK_runs/{tumor}/CollectSequencingArtifactMetrics/gatk.pre_adapter_detail_metrics", tumor = tumors)
+#   expand("GATK_runs/{tumor}/CalculateContamination_{normal}/seg_tab.table", tumor = tumors, normal = normals)
+#   expand("GATK_runs/{tumor}/MergeVCFs_{normal}/out.vcf", tumor = tumors, normal = normals)
+#   expand("GATK_runs/{tumor}/Filter_{normal}/out.vcf", tumor = tumors, normal = normals)
+    expand("GATK_runs/{tumor}/FilterByOrientationBias_{normal}/out.vcf", zip, tumor = tumors, normal = normals)
+#   expand("GATK_runs/{tumor}/FuncotateMaf_{normal}/out.vcf.maf.annotated", zip, tumor = tumors, normal = normals) There is an issue with funcotator, uncomment this if a fix is found
 
 
 rule CollectF1R2Counts:
   input:
-    tumor_bam = "runs/{tumor}/ApplyBQSR/recal.bam",
-    tumor_bai = "runs/{tumor}/ApplyBQSR/recal.bam.bai",
+    tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/recal.bam",
+    tumor_bai = "GATK_runs/{tumor}/ApplyBQSR/recal.bam.bai",
   output:
-    alt_table = temp("runs/{tumor}/CollectF1R2Counts/alt_tab.tsv"),
-    ref_hist = temp("runs/{tumor}/CollectF1R2Counts/alt_tab.metrics"),
-    ref_hists = temp("runs/{tumor}/CollectF1R2Counts/alt-depth1.metrics"),
-    tumor_name = temp("runs/{tumor}/CollectF1R2Counts/tumor_name.txt"),
+    alt_table = temp("GATK_runs/{tumor}/CollectF1R2Counts/alt_tab.tsv"),
+    ref_hist = temp("GATK_runs/{tumor}/CollectF1R2Counts/alt_tab.metrics"),
+    ref_hists = temp("GATK_runs/{tumor}/CollectF1R2Counts/alt-depth1.metrics"),
+    tumor_name = temp("GATK_runs/{tumor}/CollectF1R2Counts/tumor_name.txt"),
   params:
     ref_fasta = config["ref_fasta"],
     ref_fai = config["ref_fasta_index"],
@@ -36,7 +36,7 @@ rule CollectF1R2Counts:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
-    "runs/{tumor}/CollectF1R2Counts/out.log",
+    "GATK_runs/{tumor}/CollectF1R2Counts/out.log",
   conda:
     "envs_dir/pre_proc.yaml"
   benchmark:
@@ -51,7 +51,7 @@ rule CollectF1R2Counts:
       -L {params.interval} \
       -alt-table "{output.alt_table}" \
       -ref-hist "{output.ref_hist}" \
-			-alt-hist "{output.ref_hists}"
+			-alt-hist "{output.ref_hists}" &> {log}
     """
 
 rule LearnReadOrientationModel:
@@ -62,7 +62,7 @@ rule LearnReadOrientationModel:
     ref_hist = rules.CollectF1R2Counts.output.ref_hist,
     ref_hists = rules.CollectF1R2Counts.output.ref_hists,
   output:
-    temp("runs/{tumor}/LearnReadOrientationModel/art_tab.tsv"),
+    temp("GATK_runs/{tumor}/LearnReadOrientationModel/art_tab.tsv"),
   params:
     ref_fasta = config["ref_fasta"],
     ref_fai = config["ref_fasta_index"],
@@ -73,7 +73,7 @@ rule LearnReadOrientationModel:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
-    "runs/{tumor}/LearnReadOrientationModel/log.log",
+    "GATK_runs/{tumor}/LearnReadOrientationModel/log.log",
   benchmark:
     "benchmarks/{tumor}.LearnReadOrientationModel.benchmark.txt"
   shell:
@@ -82,24 +82,24 @@ rule LearnReadOrientationModel:
 			-alt-table {input.alt_table} \
 			-ref-hist {input.ref_hist} \
 			-alt-hist {input.ref_hists} \
-			-O "{output}"
+			-O "{output}" &> {log}
     """
 
 rule M2:
   conda:
     "envs_dir/pre_proc.yaml"
   input:
-    normal_bam = "runs/{normal}/ApplyBQSR/recal.bam",
-    normal_bia = "runs/{normal}/ApplyBQSR/recal.bam.bai",
-    tumor_bam = "runs/{tumor}/ApplyBQSR/recal.bam",
-    tumor_bai = "runs/{tumor}/ApplyBQSR/recal.bam.bai",
+    normal_bam = "GATK_runs/{normal}/ApplyBQSR/recal.bam",
+    normal_bia = "GATK_runs/{normal}/ApplyBQSR/recal.bam.bai",
+    tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/recal.bam",
+    tumor_bai = "GATK_runs/{tumor}/ApplyBQSR/recal.bam.bai",
     art_tab = rules.LearnReadOrientationModel.output
   output:
-    vcf = temp("runs/{tumor}/M2_{normal}/out.vcf"),
-    vcf_index = temp("runs/{tumor}/M2_{normal}/out.vcf.idx"),
-    bam_out = temp("runs/{tumor}/M2_{normal}/out.bam"),
-    tumor_name = temp("runs/{tumor}/M2_{normal}/tumor_name.txt"),
-    normal_name = temp("runs/{tumor}/M2_{normal}/normal_name.txt"),
+    vcf = temp("GATK_runs/{tumor}/M2_{normal}/out.vcf"),
+    vcf_index = temp("GATK_runs/{tumor}/M2_{normal}/out.vcf.idx"),
+    bam_out = temp("GATK_runs/{tumor}/M2_{normal}/out.bam"),
+    tumor_name = temp("GATK_runs/{tumor}/M2_{normal}/tumor_name.txt"),
+    normal_name = temp("GATK_runs/{tumor}/M2_{normal}/normal_name.txt"),
   params:
     ref_fasta = config["ref_fasta"],
     ref_fai = config["ref_fasta_index"],
@@ -112,7 +112,7 @@ rule M2:
     time_min = lambda wildcards, attempt: attempt * 24 * 60 * 30,	# time in minutes
   threads: 4 # default for mutect asks for 4 threads
   log:
-    "runs/{tumor}/M2_{normal}/out.log"
+    "GATK_runs/{tumor}/M2_{normal}/out.log"
   benchmark:
     "benchmarks/{tumor}_{normal}.M2.benchmark.txt"
   shell:
@@ -131,24 +131,24 @@ rule M2:
       -L {params.interval} \
       -O "{output.vcf}" \
       --bam-output {output.bam_out} \
-      --orientation-bias-artifact-priors {input.art_tab}  \
+      --orientation-bias-artifact-priors {input.art_tab} &> {log}
     """
 
 rule CollectSequencingArtifactMetrics:
   input:
-    tumor_bam = "runs/{tumor}/ApplyBQSR/recal.bam",
-    tumor_bai = "runs/{tumor}/ApplyBQSR/recal.bam.bai",
+    tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/recal.bam",
+    tumor_bai = "GATK_runs/{tumor}/ApplyBQSR/recal.bam.bai",
   output:
-    bait_det_met = temp("runs/{tumor}/CollectSequencingArtifactMetrics/gatk.bait_bias_detail_metrics"),
-    bait_sum_met = temp("runs/{tumor}/CollectSequencingArtifactMetrics/gatk.bait_bias_summary_metrics"),
-    err_sum_met = temp("runs/{tumor}/CollectSequencingArtifactMetrics/gatk.error_summary_metrics"),
-    ada_det_met = temp("runs/{tumor}/CollectSequencingArtifactMetrics/gatk.pre_adapter_detail_metrics"),
-    ada_sum_met = temp("runs/{tumor}/CollectSequencingArtifactMetrics/gatk.pre_adapter_summary_metrics"),
+    bait_det_met = temp("GATK_runs/{tumor}/CollectSequencingArtifactMetrics/gatk.bait_bias_detail_metrics"),
+    bait_sum_met = temp("GATK_runs/{tumor}/CollectSequencingArtifactMetrics/gatk.bait_bias_summary_metrics"),
+    err_sum_met = temp("GATK_runs/{tumor}/CollectSequencingArtifactMetrics/gatk.error_summary_metrics"),
+    ada_det_met = temp("GATK_runs/{tumor}/CollectSequencingArtifactMetrics/gatk.pre_adapter_detail_metrics"),
+    ada_sum_met = temp("GATK_runs/{tumor}/CollectSequencingArtifactMetrics/gatk.pre_adapter_summary_metrics"),
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
-    "runs/{tumor}/CollectSequencingArtifactMetrics/gatk.log"
+    "GATK_runs/{tumor}/CollectSequencingArtifactMetrics/gatk.log"
   conda:
     "envs_dir/pre_proc.yaml"
   params:
@@ -163,25 +163,25 @@ rule CollectSequencingArtifactMetrics:
   shell:
       """
         gatk --java-options -Xmx4000m CollectSequencingArtifactMetrics \
-        -I {input.tumor_bam} -O runs/{wildcards.tumor}/CollectSequencingArtifactMetrics/gatk -R {params.ref_fasta} -VALIDATION_STRINGENCY LENIENT 
+        -I {input.tumor_bam} -O GATK_runs/{wildcards.tumor}/CollectSequencingArtifactMetrics/gatk -R {params.ref_fasta} -VALIDATION_STRINGENCY LENIENT &> {log}
       """
 
 rule CalculateContamination:
   input:
-    tumor_bam = "runs/{tumor}/ApplyBQSR/recal.bam",
-    tumor_bai = "runs/{tumor}/ApplyBQSR/recal.bam.bai",
-    normal_bam = "runs/{normal}/ApplyBQSR/recal.bam",
-    normal_bia = "runs/{normal}/ApplyBQSR/recal.bam.bai",
+    tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/recal.bam",
+    tumor_bai = "GATK_runs/{tumor}/ApplyBQSR/recal.bam.bai",
+    normal_bam = "GATK_runs/{normal}/ApplyBQSR/recal.bam",
+    normal_bia = "GATK_runs/{normal}/ApplyBQSR/recal.bam.bai",
   output:
-    normal_pil_tab = temp("runs/{tumor}/CalculateContamination_{normal}/normal_pileups.table"),
-    pil_tab = temp("runs/{tumor}/CalculateContamination_{normal}/pileups.table"),
-    con_tab = temp("runs/{tumor}/CalculateContamination_{normal}/con_tab.table"),
-    seg_tab = temp("runs/{tumor}/CalculateContamination_{normal}/seg_tab.table"),
+    normal_pil_tab = temp("GATK_runs/{tumor}/CalculateContamination_{normal}/normal_pileups.table"),
+    pil_tab = temp("GATK_runs/{tumor}/CalculateContamination_{normal}/pileups.table"),
+    con_tab = temp("GATK_runs/{tumor}/CalculateContamination_{normal}/con_tab.table"),
+    seg_tab = temp("GATK_runs/{tumor}/CalculateContamination_{normal}/seg_tab.table"),
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
-    "runs/{tumor}/CalculateContamination_{normal}/out.log"
+    "GATK_runs/{tumor}/CalculateContamination_{normal}/out.log"
   conda:
     "envs_dir/pre_proc.yaml"
   params:
@@ -198,12 +198,12 @@ rule CalculateContamination:
   shell:
     """
       gatk --java-options -Xmx4000m GetPileupSummaries -I {input.normal_bam} --interval-set-rule INTERSECTION -L {params.interval} \
-        -V {params.variants_con} -L {params.variants_con} -O {output.normal_pil_tab}
+        -V {params.variants_con} -L {params.variants_con} -O {output.normal_pil_tab} &> {log}
       NORMAL_CMD="-matched {output.normal_pil_tab}"
 
       gatk --java-options -Xmx4000m GetPileupSummaries -R {params.ref_fasta} -I {input.tumor_bam} --interval-set-rule INTERSECTION -L {params.interval} \
-        -V {params.variants_con} -L {params.variants_con} -O {output.pil_tab}
-      gatk CalculateContamination -I {output.pil_tab} -O {output.con_tab} --tumor-segmentation {output.seg_tab} ${{NORMAL_CMD}}
+        -V {params.variants_con} -L {params.variants_con} -O {output.pil_tab} &>> {log}
+      gatk CalculateContamination -I {output.pil_tab} -O {output.con_tab} --tumor-segmentation {output.seg_tab} ${{NORMAL_CMD}} &>> {log}
     """
 
 rule MergeVCFs:
@@ -211,15 +211,15 @@ rule MergeVCFs:
     vcfs = rules.M2.output.vcf,
     vcf_index = rules.M2.output.vcf_index,
   output:
-    merged_vcf = temp("runs/{tumor}/MergeVCFs_{normal}/out.vcf"),
-    merged_vcf_index = temp("runs/{tumor}/MergeVCFs_{normal}/out.vcf.idx"),
+    merged_vcf = temp("GATK_runs/{tumor}/MergeVCFs_{normal}/out.vcf"),
+    merged_vcf_index = temp("GATK_runs/{tumor}/MergeVCFs_{normal}/out.vcf.idx"),
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
-    "runs/{tumor}/MergeVCFs_{normal}/out.log",
+    "GATK_runs/{tumor}/MergeVCFs_{normal}/out.log",
   params:
     ref_fasta = config["ref_fasta"],
     ref_fai = config["ref_fasta_index"],
@@ -233,9 +233,8 @@ rule MergeVCFs:
     "benchmarks/{tumor}_{normal}.MergeVCFs.benchmark.txt"
   shell:
     """
-      gatk --java-options -Xmx4000m MergeVcfs -I {input.vcfs} -O {output.merged_vcf}
+      gatk --java-options -Xmx4000m MergeVcfs -I {input.vcfs} -O {output.merged_vcf} &> {log}
     """
-    
 
 rule Filter:
   input:
@@ -244,15 +243,15 @@ rule Filter:
     con_tab = rules.CalculateContamination.output.con_tab,
     maf_seg = rules.CalculateContamination.output.seg_tab,
   output:
-    filt_vcf = temp("runs/{tumor}/Filter_{normal}/out.vcf"),
-    filt_vcf_index = temp("runs/{tumor}/Filter_{normal}/out.vcf.idx"),
+    filt_vcf = temp("GATK_runs/{tumor}/Filter_{normal}/out.vcf"),
+    filt_vcf_index = temp("GATK_runs/{tumor}/Filter_{normal}/out.vcf.idx"),
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
-    "runs/{tumor}/Filter_{normal}/out.log"
+    "GATK_runs/{tumor}/Filter_{normal}/out.log"
   params:
     ref_fasta = config["ref_fasta"],
     ref_fai = config["ref_fasta_index"],
@@ -269,7 +268,7 @@ rule Filter:
       gatk --java-options -Xmx4000m FilterMutectCalls -V {input.vcf} \
         -O {output.filt_vcf} \
       	--contamination-table {input.con_tab} \
-      	--tumor-segmentation {input.maf_seg} \
+      	--tumor-segmentation {input.maf_seg} &> {log} \
     """
 
 rule FilterByOrientationBias:
@@ -278,15 +277,15 @@ rule FilterByOrientationBias:
     vcf_index = rules.Filter.output.filt_vcf_index,
     ada_det_met = rules.CollectSequencingArtifactMetrics.output.ada_det_met
   output:
-    vcf = "runs/{tumor}/FilterByOrientationBias_{normal}/out.vcf",
-    vcf_index = "runs/{tumor}/FilterByOrientationBias_{normal}/out.vcf.idx",
+    vcf = "GATK_runs/{tumor}/FilterByOrientationBias_{normal}/{tumor}.vcf",
+    vcf_index = "GATK_runs/{tumor}/FilterByOrientationBias_{normal}/{tumor}.vcf.idx",
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
-    "runs/{tumor}/FilterByOrientationBias_{normal}/out.log"
+    "GATK_runs/{tumor}/FilterByOrientationBias_{normal}/out.log"
   params:
     ref_fasta = config["ref_fasta"],
     ref_fai = config["ref_fasta_index"],
@@ -303,7 +302,7 @@ rule FilterByOrientationBias:
       gatk --java-options -Xmx4000m FilterByOrientationBias \
         -V {input.vcf} \
         -P {input.ada_det_met} \
-        -O {output.vcf}
+        -O {output.vcf} &> {log}
     """
 # removed final_artifact_modes
 
@@ -312,12 +311,12 @@ rule FuncotateMaf:
     vcf = rules.FilterByOrientationBias.output.vcf,
     vcf_index = rules.FilterByOrientationBias.output.vcf_index,
   output:
-    final_out_name = "runs/{tumor}/FuncotateMaf_{normal}/out.vcf.maf.annotated",
+    final_out_name = "GATK_runs/{tumor}/FuncotateMaf_{normal}/out.vcf.maf.annotated",
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
-    "runs/{tumor}/FuncotateMaf_{normal}/out.log",
+    "GATK_runs/{tumor}/FuncotateMaf_{normal}/out.log",
   conda:
     "envs_dir/pre_proc.yaml"
   params:

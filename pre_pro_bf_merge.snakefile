@@ -2,8 +2,8 @@ configfile: "{}/ref.yaml".format(workflow.basedir)
 
 rule make_alig:
   input:
-#    expand("runs/{library}/MergeBamAlignment/merge.bam", library = config["libraries"])
-    expand("runs/{library}/ubam/unprocessed.bam", library = config["libraries"])
+#    expand("GATK_runs/{library}/MergeBamAlignment/merge.bam", library = config["libraries"])
+    expand("GATK_runs/{library}/ubam/unprocessed.bam", library = config["libraries"])
 
 def get_sample_name(wildcards):
   for sample_name in config["merge_libs"]:
@@ -18,7 +18,7 @@ rule ubam:
   input:
     ubam_input
   output:
-    temp("runs/{library}/ubam/unprocessed.bam")
+    temp("GATK_runs/{library}/ubam/unprocessed.bam")
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
@@ -28,7 +28,7 @@ rule ubam:
     exclude_list = '',
     sample_name = get_sample_name
   log:
-    ubam = "runs/{library}/ubam/ubam.log"
+    ubam = "GATK_runs/{library}/ubam/ubam.log"
   benchmark:
     "benchmarks/{library}.ubam.benchmark.txt"
   shell:
@@ -38,13 +38,13 @@ rule SamToFastqAndBwaMem:
   input:
     rules.ubam.output
   output:
-    temp("runs/{library}/SamToFastqAndBwaMem/bwa.bam")
+    temp("GATK_runs/{library}/SamToFastqAndBwaMem/bwa.bam")
   conda:
     "envs_dir/pre_proc.yaml"
   log:
-    bwa = "runs/{library}/SamToFastqAndBwaMem/bwa.log",
-    picard = "runs/{library}/SamToFastqAndBwaMem/picard.log",
-    sam = "runs/{library}/SamToFastqAndBwaMem/sam.log",
+    bwa = "GATK_runs/{library}/SamToFastqAndBwaMem/bwa.log",
+    picard = "GATK_runs/{library}/SamToFastqAndBwaMem/picard.log",
+    sam = "GATK_runs/{library}/SamToFastqAndBwaMem/sam.log",
   params:
     ref_fasta = config["ref_fasta"],
     java_opts = config["SamToFastqAndBwaMem.java_opt"],
@@ -64,11 +64,11 @@ rule MergeBamAlignment:
     ubam = rules.ubam.output,
     bwa_bam = rules.SamToFastqAndBwaMem.output,
   output:
-    temp("runs/{library}/MergeBamAlignment/merge.bam")
+    temp("GATK_runs/{library}/MergeBamAlignment/merge.bam")
   conda:
     "envs_dir/pre_proc.yaml"
   log:
-    "runs/{library}/MergeBamAlignment/merge.log"
+    "GATK_runs/{library}/MergeBamAlignment/merge.log"
   params:
     ref_fasta = config["ref_fasta"],
     java_opts = config["MergeBamAlignment.java_opt"],
