@@ -8,3 +8,4 @@ dependencies:
  - htslib
  - pbgzip=2016.08.04
  - phylowgs=20180317
+ - ensembl-vep=95.2

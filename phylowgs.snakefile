@@ -8,9 +8,30 @@ rule phylowgs_all:
   input:
 #    expand("prepro_vfcs/{tumor}/pre_pro_mutect/mutect.split.filter.vcf.gz", tumor = config["pairs"]),
 #    expand("prepro_vfcs/{tumor}/pre_pro_strelka/strelka.split.filter.vcf.gz", tumor = config["pairs"]),
-#    expand("prepro_vfcs/{tumor}/overlap/0002.vcf", tumor = config["pairs"])
-    expand("run_phylo/{tumor}", tumor = config["pairs"])
-    
+#    expand("prepro_vfcs/{tumor}/overlap_mut_and_strel/0003.vcf", tumor = config["pairs"]),
+#   expand("prepro_vfcs/{tumor}/overlap_mut_and_var/0003.vcf", tumor = config["pairs"]),
+#   expand("prepro_vfcs/{tumor}/overlap_strel_and_var/0003.vcf", tumor = config["pairs"]),
+#    expand("run_phylo/{tumor}", tumor = config["pairs"])
+    expand("prepro_vfcs/{tumor}/VEP/{tumor}_VEP.vcf", tumor = config["pairs"]),
+
+rule pre_pro_varscan:
+  input:
+    vcf = lambda wildcards : "varscan_runs/" + wildcards.tumor + "/varscan/" + wildcards.tumor + "_snp.vcf",
+  output:
+    split_filter_vfc_zip = "prepro_vfcs/{tumor}/pre_pro_varscan/varscan.split.filter.vcf.gz",
+    split_filter_vfc = temp("prepro_vfcs/{tumor}/pre_pro_varscan/out.split.filter.vcf"),
+  params:
+    ref_fasta = config["ref_fasta"],
+  conda:
+    "envs_dir/phylowgs.yaml"
+  resources:
+    mem_mb = 4000
+  shell:
+    """
+      bcftools filter -i "TYPE='snp' && FILTER='PASS'" {input.vcf} -o {output.split_filter_vfc}
+      bgzip -c {output.split_filter_vfc} > {output.split_filter_vfc_zip}
+      bcftools index -f {output.split_filter_vfc_zip}
+    """
     
 rule pre_pro_mutect:
   input:
@@ -50,16 +71,16 @@ rule pre_pro_strelka:
       bcftools index -f {output.split_filter_vfc_zip}
     """
 
-rule make_overlap:
+rule make_overlap_mut_and_strel:
   input:
     rules.pre_pro_mutect.output.split_filter_vfc_zip,
-    rules.pre_pro_strelka.output.split_filter_vfc_zip
+    rules.pre_pro_strelka.output.split_filter_vfc_zip,
   output:
-    overlap_vcf = "prepro_vfcs/{tumor}/overlap/0003.vcf"
+    overlap_vcf = "prepro_vfcs/{tumor}/overlap_mut_and_strel/0003.vcf"
   conda:
     "envs_dir/phylowgs.yaml"
   params:
-    out_dir = "prepro_vfcs/{tumor}/overlap"
+    out_dir = "prepro_vfcs/{tumor}/overlap_mut_and_strel"
   resources:
     mem_mb = 4000
   shell:
@@ -67,71 +88,142 @@ rule make_overlap:
       bcftools isec -p {params.out_dir} {input}
     """
 
-rule parse_cnvs:
-  input:
-    vcf = rules.make_overlap.output.overlap_vcf,
-    cnv = "results/titan/hmm/optimalClusterSolution.txt"
-  output:
-    pre_filter = "pre_pro_cnv/{tumor}/cnvs.txt",
-    post_filter = "pre_pro_cnv/{tumor}/cnvs_filter.txt"
-  conda:
-    "envs_dir/phylowgs.yaml"
-  resources:
-    mem_mb = 4000
-  shell:
-    '''
-      PURITY=$(cat {input.cnv} | sed 's/\,[^\t]*//' | grep '{wildcards.tumor}_cluster' | awk '{{print $6}}')
-      TITANFILE1=$(grep '{wildcards.tumor}_cluster' {input.cnv} | sed 's/.*results\//results\//; s/$/\.segs.txt/')
-      TITANFILE2=$(echo $TITANFILE1 | sed 's/.*\///; s/^/pre_pro_cnv\/{wildcards.tumor}\//')
-      if [[ !(-d pre_pro_cnv/{wildcards.tumor}) ]]; then
-        mkdir -p pre_pro_cnv/{wildcards.tumor}
-      fi
-      cp $TITANFILE1 pre_pro_cnv/{wildcards.tumor}
-      sed -i 's/\.bp\./\(bp\)/g' $TITANFILE2
-      sed -i 's/Clonal_Cluster/Clonal_Frequency/' $TITANFILE2
-      python2 $CONDA_PREFIX/share/phylowgs/parser/parse_cnvs.py -f titan --cnv-output {output.pre_filter} -c $PURITY $TITANFILE2
-      python3 {workflow.basedir}/scripts_dir/filter_cnvs.py {output.pre_filter} {output.post_filter}
-    '''
+#rule make_overlap_mut_and_var:
+#  input:
+#    rules.pre_pro_mutect.output.split_filter_vfc_zip,
+#    rules.pre_pro_varscan.output.split_filter_vfc_zip
+#  output:
+#    overlap_vcf = "prepro_vfcs/{tumor}/overlap_mut_and_var/0003.vcf"
+#  conda:
+#    "envs_dir/phylowgs.yaml"
+#  params:
+#    out_dir = "prepro_vfcs/{tumor}/overlap_mut_and_var"
+#  resources:
+#    mem_mb = 4000
+#  shell:
+#    """
+#      bcftools isec -p {params.out_dir} {input}
+#    """
+#
+#rule make_overlap_strel_and_var:
+#  input:
+#    rules.pre_pro_strelka.output.split_filter_vfc_zip,
+#    rules.pre_pro_varscan.output.split_filter_vfc_zip
+#  output:
+#    overlap_vcf = "prepro_vfcs/{tumor}/overlap_strel_and_var/0003.vcf"
+#  conda:
+#    "envs_dir/phylowgs.yaml"
+#  params:
+#    out_dir = "prepro_vfcs/{tumor}/overlap_strel_and_var"
+#  resources:
+#    mem_mb = 4000
+#  shell:
+#    """
+#      bcftools isec -p {params.out_dir} {input}
+#    """
+#
 
-rule parse_cnv_and_vcf:
+rule VEP:
   input:
-    cnv = rules.parse_cnvs.output.post_filter,
-    vcf = rules.make_overlap.output.overlap_vcf
+    vcf_in = rules.make_overlap_mut_and_strel.output.overlap_vcf,
   output:
-    out_cnv = "parse_cnv_and_vcf/{tumor}/cnv_data.txt",
-    out_var = "parse_cnv_and_vcf/{tumor}/ssm_data.txt",
-    out_param = "parse_cnv_and_vcf/{tumor}/params.json"
-  conda:
-    "envs_dir/phylowgs.yaml"
+    vcf_out = "prepro_vfcs/{tumor}/VEP/{tumor}_VEP.vcf",
+    summary = "prepro_vfcs/{tumor}/VEP/{tumor}_VEP.vcf_summary.html"
+  conda: "envs_dir/phylowgs.yaml"
+  log: "phylowgs/log/{tumor}_VEP.log"
+  benchmark: "phylowgs/benchmark/{tumor}_VEP.benchmark"
+  params:
+    ref_fasta = config["ref_fasta"],
+    vep_cache = config["vep_cache"],
+#    vep_plugins = config["vep_plug_dir"],
+  threads: 1
   resources:
     mem_mb = 4000
   shell:
     """
-      $CONDA_PREFIX/share/phylowgs/parser/create_phylowgs_inputs.py \
-        -s 5000 \
-        --output-cnvs {output.out_cnv}  \
-        --output-variants {output.out_var}  \
-        --output-params {output.out_param}  \
-        --cnvs sample1={input.cnv}  \
-        --vcf-type sample1=strelka  \
-        sample1={input.vcf}
+      vep \
+        --input_file {input.vcf_in} \
+        --output_file {output.vcf_out} \
+        --format vcf \
+        --vcf \
+        --symbol \
+        --terms SO \
+        --tsl \
+        --hgvs \
+        --hgvsg \
+        --fasta {params.ref_fasta} \
+        --offline --cache --dir_cache {params.vep_cache} \
+        --plugin Downstream \
+        --pick \
+        --sift b \
+        --polyphen b \
+        --transcript_version &> {log}
     """
-
-rule run_phylo:
-  input:
-    cnv = rules.parse_cnv_and_vcf.output.out_cnv,
-    var = rules.parse_cnv_and_vcf.output.out_var,
-    param = rules.parse_cnv_and_vcf.output.out_param,
-  output:
-    out_dir = directory("run_phylo/{tumor}")
-  conda:
-    "envs_dir/phylowgs.yaml"
-  threads: 4
-  resources:
-    mem_mb = 4000
-  benchmark:
-    "benchmarks/{tumor}.run_phylo.benchmark.txt"
-  shell:
-    """
-      python2 {workflow.basedir}/phylowgs/multievolve.py --num-chains 4 --ssms {input.var} --cnvs {input.cnv} -O {output.out_dir}
-    """
+#rule parse_cnvs:
+#  input:
+#    vcf = rules.make_overlap.output.overlap_vcf,
+#    cnv = "results/titan/hmm/optimalClusterSolution.txt"
+#  output:
+#    pre_filter = "pre_pro_cnv/{tumor}/cnvs.txt",
+#    post_filter = "pre_pro_cnv/{tumor}/cnvs_filter.txt"
+#  conda:
+#    "envs_dir/phylowgs.yaml"
+#  resources:
+#    mem_mb = 4000
+#  shell:
+#    '''
+#      PURITY=$(cat {input.cnv} | sed 's/\,[^\t]*//' | grep '{wildcards.tumor}_cluster' | awk '{{print $6}}')
+#      TITANFILE1=$(grep '{wildcards.tumor}_cluster' {input.cnv} | sed 's/.*results\//results\//; s/$/\.segs.txt/')
+#      TITANFILE2=$(echo $TITANFILE1 | sed 's/.*\///; s/^/pre_pro_cnv\/{wildcards.tumor}\//')
+#      if [[ !(-d pre_pro_cnv/{wildcards.tumor}) ]]; then
+#        mkdir -p pre_pro_cnv/{wildcards.tumor}
+#      fi
+#      cp $TITANFILE1 pre_pro_cnv/{wildcards.tumor}
+#      sed -i 's/\.bp\./\(bp\)/g' $TITANFILE2
+#      sed -i 's/Clonal_Cluster/Clonal_Frequency/' $TITANFILE2
+#      python2 $CONDA_PREFIX/share/phylowgs/parser/parse_cnvs.py -f titan --cnv-output {output.pre_filter} -c $PURITY $TITANFILE2
+#      python3 {workflow.basedir}/scripts_dir/filter_cnvs.py {output.pre_filter} {output.post_filter}
+#    '''
+#
+#rule parse_cnv_and_vcf:
+#  input:
+#    cnv = rules.parse_cnvs.output.post_filter,
+#    vcf = rules.make_overlap.output.overlap_vcf
+#  output:
+#    out_cnv = "parse_cnv_and_vcf/{tumor}/cnv_data.txt",
+#    out_var = "parse_cnv_and_vcf/{tumor}/ssm_data.txt",
+#    out_param = "parse_cnv_and_vcf/{tumor}/params.json"
+#  conda:
+#    "envs_dir/phylowgs.yaml"
+#  resources:
+#    mem_mb = 4000
+#  shell:
+#    """
+#      $CONDA_PREFIX/share/phylowgs/parser/create_phylowgs_inputs.py \
+#        -s 5000 \
+#        --output-cnvs {output.out_cnv}  \
+#        --output-variants {output.out_var}  \
+#        --output-params {output.out_param}  \
+#        --cnvs sample1={input.cnv}  \
+#        --vcf-type sample1=strelka  \
+#        sample1={input.vcf}
+#    """
+#
+#rule run_phylo:
+#  input:
+#    cnv = rules.parse_cnv_and_vcf.output.out_cnv,
+#    var = rules.parse_cnv_and_vcf.output.out_var,
+#    param = rules.parse_cnv_and_vcf.output.out_param,
+#  output:
+#    out_dir = directory("run_phylo/{tumor}")
+#  conda:
+#    "envs_dir/phylowgs.yaml"
+#  threads: 4
+#  resources:
+#    mem_mb = 4000
+#  benchmark:
+#    "benchmarks/{tumor}.run_phylo.benchmark.txt"
+#  shell:
+#    """
+#      python2 {workflow.basedir}/phylowgs/multievolve.py --num-chains 4 --ssms {input.var} --cnvs {input.cnv} -O {output.out_dir}
+#    """
