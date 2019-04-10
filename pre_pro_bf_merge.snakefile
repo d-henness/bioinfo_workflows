@@ -49,7 +49,7 @@ rule SamToFastqAndBwaMem:
     ref_fasta = config["ref_fasta"],
     java_opts = config["SamToFastqAndBwaMem.java_opt"],
     exclude_list = ''
-  threads: 8
+  threads: 4
   resources:
     mem_mb = lambda wildcards, attempt: attempt * int(config["SamToFastqAndBwaMem.java_opt"].strip("-Xmx")) + 1000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes

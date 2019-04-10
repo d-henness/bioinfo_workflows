@@ -12,14 +12,14 @@ rule mutect_all:
 #   expand("GATK_runs/{tumor}/CalculateContamination_{normal}/seg_tab.table", tumor = tumors, normal = normals)
 #   expand("GATK_runs/{tumor}/MergeVCFs_{normal}/out.vcf", tumor = tumors, normal = normals)
 #   expand("GATK_runs/{tumor}/Filter_{normal}/out.vcf", tumor = tumors, normal = normals)
-    expand("GATK_runs/{tumor}/FilterByOrientationBias_{normal}/out.vcf", zip, tumor = tumors, normal = normals)
+    expand("GATK_runs/{tumor}/FilterByOrientationBias_{normal}/{tumor}.vcf", zip, tumor = tumors, normal = normals)
 #   expand("GATK_runs/{tumor}/FuncotateMaf_{normal}/out.vcf.maf.annotated", zip, tumor = tumors, normal = normals) There is an issue with funcotator, uncomment this if a fix is found
 
 
 rule CollectF1R2Counts:
   input:
-    tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/recal.bam",
-    tumor_bai = "GATK_runs/{tumor}/ApplyBQSR/recal.bam.bai",
+    tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam",
+    tumor_bai = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam.bai",
   output:
     alt_table = temp("GATK_runs/{tumor}/CollectF1R2Counts/alt_tab.tsv"),
     ref_hist = temp("GATK_runs/{tumor}/CollectF1R2Counts/alt_tab.metrics"),
@@ -89,10 +89,10 @@ rule M2:
   conda:
     "envs_dir/pre_proc.yaml"
   input:
-    normal_bam = "GATK_runs/{normal}/ApplyBQSR/recal.bam",
-    normal_bia = "GATK_runs/{normal}/ApplyBQSR/recal.bam.bai",
-    tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/recal.bam",
-    tumor_bai = "GATK_runs/{tumor}/ApplyBQSR/recal.bam.bai",
+    normal_bam = "GATK_runs/{normal}/ApplyBQSR/{normal}_recal.bam",
+    normal_bia = "GATK_runs/{normal}/ApplyBQSR/{normal}_recal.bam.bai",
+    tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam",
+    tumor_bai = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam.bai",
     art_tab = rules.LearnReadOrientationModel.output
   output:
     vcf = temp("GATK_runs/{tumor}/M2_{normal}/out.vcf"),
@@ -136,8 +136,8 @@ rule M2:
 
 rule CollectSequencingArtifactMetrics:
   input:
-    tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/recal.bam",
-    tumor_bai = "GATK_runs/{tumor}/ApplyBQSR/recal.bam.bai",
+    tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam",
+    tumor_bai = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam.bai",
   output:
     bait_det_met = temp("GATK_runs/{tumor}/CollectSequencingArtifactMetrics/gatk.bait_bias_detail_metrics"),
     bait_sum_met = temp("GATK_runs/{tumor}/CollectSequencingArtifactMetrics/gatk.bait_bias_summary_metrics"),
@@ -168,10 +168,10 @@ rule CollectSequencingArtifactMetrics:
 
 rule CalculateContamination:
   input:
-    tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/recal.bam",
-    tumor_bai = "GATK_runs/{tumor}/ApplyBQSR/recal.bam.bai",
-    normal_bam = "GATK_runs/{normal}/ApplyBQSR/recal.bam",
-    normal_bia = "GATK_runs/{normal}/ApplyBQSR/recal.bam.bai",
+    tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam",
+    tumor_bai = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam.bai",
+    normal_bam = "GATK_runs/{normal}/ApplyBQSR/{normal}_recal.bam",
+    normal_bia = "GATK_runs/{normal}/ApplyBQSR/{normal}_recal.bam.bai",
   output:
     normal_pil_tab = temp("GATK_runs/{tumor}/CalculateContamination_{normal}/normal_pileups.table"),
     pil_tab = temp("GATK_runs/{tumor}/CalculateContamination_{normal}/pileups.table"),

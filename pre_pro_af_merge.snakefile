@@ -6,7 +6,7 @@ merged = config["merge_libs"]
 
 rule pre_proc:
   input:
-    expand("GATK_runs/{merge}/ApplyBQSR/recal.bam", merge = merged)
+    expand("GATK_runs/{merge}/ApplyBQSR/{merge}_recal.bam", merge = merged)
 
 def MarkDuplicates_input(wildcards):
   bam_files = []
@@ -144,8 +144,9 @@ rule ApplyBQSR:
     bam_index = rules.SortAndFixTags.output.out_bai,
     recal = rules.BaseRecalibrator.output.recal
   output:
-    bam_out = "GATK_runs/{merge}/ApplyBQSR/recal.bam",
-    bai_out = "GATK_runs/{merge}/ApplyBQSR/recal.bam.bai",
+    bam_out = "GATK_runs/{merge}/ApplyBQSR/{merge}_recal.bam",
+    bai_out = "GATK_runs/{merge}/ApplyBQSR/{merge}_recal.bam.bai",
+    stats = "GATK_runs/{merge}/ApplyBQSR/{merge}_recal.stats",
   conda:
     "envs_dir/pre_proc.yaml"
   log:
@@ -177,7 +178,8 @@ rule ApplyBQSR:
         --create-output-bam-md5 \
         --use-original-qualities \
         &> {log}
-      if [[ -e GATK_runs/{wildcards.merge}/ApplyBQSR/recal.bai ]]; then
-        mv GATK_runs/{wildcards.merge}/ApplyBQSR/recal.bai GATK_runs/{wildcards.merge}/ApplyBQSR/recal.bam.bai
+      if [[ -e GATK_runs/{wildcards.merge}/ApplyBQSR/{wildcards.merge}_recal.bai ]]; then
+        mv GATK_runs/{wildcards.merge}/ApplyBQSR/{wildcards.merge}_recal.bai GATK_runs/{wildcards.merge}/ApplyBQSR/{wildcards.merge}_recal.bam.bai
       fi
+      samtools stats {output.bam_out} > {output.stats}
     """

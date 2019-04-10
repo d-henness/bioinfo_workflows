@@ -1,8 +1,10 @@
+include: "mutect2.snakefile"
 configfile: "{}/ref.yaml".format(workflow.basedir)
 
 rule pVACtools_all:
   input:
-    expand(directory("pVACtools/{tumor}/pVACseq"), tumor = config["pairs"])
+    expand(directory("pVACtools/{tumor}/split_vcf"), tumor = config["pairs"])
+#    expand(directory("pVACtools/{tumor}/pVACseq"), tumor = config["pairs"])
 
 rule make_env:
   input:
@@ -35,7 +37,7 @@ rule make_env:
 
 rule VEP:
   input:
-    vcf_in = lambda wildcards: "runs/{tumor}/FilterByOrientationBias_" + config['pairs'][wildcards.tumor] + "/out.vcf",
+    vcf_in = rules.FilterByOrientationBias.output.vcf,
     signal = rules.make_env.output.signal
   output:
     vcf_out = "pVACtools/{tumor}/VEP/{tumor}_VEP.vcf",
@@ -150,10 +152,10 @@ rule split_vcf:
   params:
   threads: 1
   resources:
-    mem_mb = 4000
+    mem_mb = 16000
   shell:
     """
-      python3 {workflow.basedir}/scripts_dir/split_up_vcf.py {input.vcf_in} {output.out_dir} {wildcards.tumor} 22
+      python3 {workflow.basedir}/scripts_dir/split_up_vcf_by_line.py {input.vcf_in} {output.out_dir}/{wildcards.tumor} {workflow.basedir}/scripts_dir/valid_split_sites 300
     """
 
 rule pVACseq:
