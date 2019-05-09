@@ -1,3 +1,4 @@
+include: "pre_pro_af_merge.snakefile"
 configfile: "{}/ref.yaml".format(workflow.basedir)
 
 rule run_Strelka:
@@ -6,8 +7,8 @@ rule run_Strelka:
 
 rule Strelka_config:
   input:
-    tumor_bam = "runs/{tumor}/ApplyBQSR/recal.bam",
-    normal_bam = lambda wildcards: "runs/" + config["pairs"][wildcards.tumor] + "/ApplyBQSR/recal.bam"
+    tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam",
+    normal_bam = lambda wildcards: "GATK_runs/" + config["pairs"][wildcards.tumor] + "/ApplyBQSR/" + config["pairs"][wildcards.tumor] + "_recal.bam"
   output:
     out_run = "Strelka_runs/{tumor}/runWorkflow.py"
   conda:
