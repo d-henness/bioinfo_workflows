@@ -1,6 +1,6 @@
 configfile: "{}/ref.yaml".format(workflow.basedir)
 
-include: "pre_pro_bf_merge.snakefile"
+include: "pre_pro_bf_merge_alt_bed.snakefile"
 
 merged = config["merge_libs"]
 

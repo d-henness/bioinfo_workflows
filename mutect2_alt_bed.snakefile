@@ -1,6 +1,6 @@
 configfile: "{}/ref.yaml".format(workflow.basedir)
 
-include: "pre_pro_af_merge.snakefile"
+include: "pre_pro_af_merge_alt_bed.snakefile"
 
 tumors = config["pairs"]
 normals = [config["pairs"][tumor] for tumor in tumors]

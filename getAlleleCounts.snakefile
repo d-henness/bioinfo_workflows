@@ -14,7 +14,7 @@ rule tumCounts:
 	
 rule getHETsites:
   input:
-    lambda wildcards: "runs/" + config["pairs"][wildcards.tumor] + "/ApplyBQSR/" + config["pairs"][wildcards.tumor] + "_recal.bam"
+    lambda wildcards: "GATK_runs/" + config["pairs"][wildcards.tumor] + "/ApplyBQSR/" + config["pairs"][wildcards.tumor] + "_recal.bam"
 #   lambda wildcards: config["samples"][config["pairings"][wildcards.tumor]]
   output:
     "results/titan/hetPosns/{tumor}/{tumor}.chr{chr}.vcf"
@@ -38,7 +38,7 @@ rule getHETsites:
 rule getAlleleCountsByChr:
   input:
     hetSites="results/titan/hetPosns/{tumor}/{tumor}.chr{chr}.vcf",
-    tumBam = "runs/{tumor}/ApplyBQSR/{tumor}_recal.bam"
+    tumBam = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam"
 #    tumBam=lambda wildcards: config["samples"][wildcards.tumor]
   output:
     "results/titan/tumCounts/{tumor}/{tumor}.tumCounts.chr{chr}.txt"
