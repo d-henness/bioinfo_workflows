@@ -59,3 +59,6 @@
 
 #iedb-install-directory
 "iedb-install-directory": "/path/to/bioinfo_workflows/mhc_X"
+
+# alt bed files
+"choi_capture": "/path/to/refs/choi_capture/170907_HG38_CCDS1X_REZ_capture_targets_padded_100_each_side.bed"

@@ -13,7 +13,6 @@
 #"ref_bwt": "gs://broad-/data/shared/hg38//v0/Homo_sapiens_assembly38.fasta.64.bwt"
 #"ref_ann": "gs://broad-/data/shared/hg38//v0/Homo_sapiens_assembly38.fasta.64.ann"
 #"ref_pac": "gs://broad-/data/shared/hg38//v0/Homo_sapiens_assembly38.fasta.64.pac"
-
 # Java options for pre_pro step
 "SamToFastqAndBwaMem.java_opt": "-Xmx3000m"
 "MergeBamAlignment.java_opt": "-Xmx3000m"
@@ -24,7 +23,7 @@
 "GatherBqsrReports.java_opt": "-Xmx3000m"
 "ApplyBQSR.java_opt": "-Xmx3000m"
 "GatherBamFiles.java_opt": "-Xmx2000m"
-#_COMMENT3": "KNOWN SITES RESOURCES"
+#_COMMENT3": "KNOWN SITES RESOURCES" 
 "dbSNP_vcf": "/data/shared/hg38//Homo_sapiens_assembly38.dbsnp138.vcf"
 "dbSNP_vcf_index": "/data/shared/hg38//Homo_sapiens_assembly38.dbsnp138.vcf.idx"
 #"known_indels_sites_VCFs": [
@@ -54,9 +53,12 @@
 "vep_version": "ensembl-vep-95.2-0"
 "vep_cache": "/data/shared/hg38//VEP/homo_sapiens/95_GRCh38/vep" # version 95
 "vep_plug_dir": "/usr/local/bioinfo_workflows/vep_plugins/VEP_plugins"
-"condel_config": "/usr/local/bioinfo_workflows/vep_plugins/VEP_plugins/config/Condel/config/"
+"condel_config": "/usr/local/bioinfo_workflows/vep_plugins/VEP_plugins/config/Condel/config"
 "dbNSFP_config": "/usr/local/bioinfo_workflows/vep_plugins/dbNSFP_data/dbNSFP3.5a.gz" # may need to edit
 "loftool_config": "/usr/local/bioinfo_workflows/vep_plugins/VEP_plugins/LoFtool_scores.txt"
 
 #iedb-install-directory
 "iedb-install-directory": "/usr/local/bioinfo_workflows/mhc_X"
+
+# alt bed files
+"choi_capture": "/data/shared/hg38//choi_capture/170907_HG38_CCDS1X_REZ_capture_targets_padded_100_each_side.bed"
