@@ -51,7 +51,7 @@ rule SamToFastqAndBwaMem:
     exclude_list = ''
   threads: 4
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * int(config["SamToFastqAndBwaMem.java_opt"].strip("-Xmx")) + 1000,
+    mem_mb = lambda wildcards, attempt: attempt * (int(config["SamToFastqAndBwaMem.java_opt"].strip("-Xmx")) + 6000),
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   benchmark:
     "benchmarks/{library}.SamToFastqAndBwaMem.benchmark.txt"

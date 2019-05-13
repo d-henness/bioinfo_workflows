@@ -42,7 +42,7 @@ rule phylowgs_all:
 #   expand("phylowgs/{tumor}/pre_pro_cnv/cnvs_filter.txt", tumor = config["pairs"]),
 #    expand("phylowgs/{sample_pairs}/parse_cnv_and_vcf/cnv_data.txt", tumor = config["pairs"], sample_pairs = config["phylowgs_samples"])
 #   expand("phylowgs/{sample_pairs}/run_phylo/", tumor = config["pairs"], sample_pairs = config["phylowgs_samples"]),
-    expand("phylowgs/{sample_pairs}/visualize_data/{sample_pairs}_summ.json.gz", sample_pairs = config["phylowgs_samples"])
+    expand("phylowgs/{sample_pairs}/visualize_data/{sample_pairs}.summ.json.gz", sample_pairs = config["phylowgs_samples"])
 
 # rule pre_pro_varscan:
 #   input:
@@ -250,7 +250,7 @@ rule run_phylo:
     "envs_dir/phylowgs.yaml"
   params:
     out_dir = "phylowgs/{tumor}/run_phylo/"
-  threads: 4
+  threads: 5
   resources:
     mem_mb = 4000
   benchmark:
@@ -260,7 +260,7 @@ rule run_phylo:
   shell:
     """
       python2 {workflow.basedir}/phylowgs/multievolve.py  \
-        --num-chains 4  \
+        --num-chains {threads}  \
         --ssms {input.var}  \
         --cnvs {input.cnv}  \
         -O {params.out_dir} &> {log}
@@ -270,9 +270,9 @@ rule visualize_data:
   input:
     zip_file = rules.run_phylo.output.out_zip
   output:
-    tree_summary = "phylowgs/{tumor}/visualize_data/{tumor}_summ.json.gz",
-    mutlist = "phylowgs/{tumor}/visualize_data/{tumor}_muts.json.gz",
-    mutass = "phylowgs/{tumor}/visualize_data/{tumor}_mutass.json.gz",
+    tree_summary = "phylowgs/{tumor}/visualize_data/{tumor}.summ.json.gz",
+    mutlist = "phylowgs/{tumor}/visualize_data/{tumor}.muts.json.gz",
+    mutass = "phylowgs/{tumor}/visualize_data/{tumor}.mutass.zip",
   conda:
     "envs_dir/phylowgs.yaml"
   params:
@@ -297,3 +297,6 @@ rule visualize_data:
       {output.mutlist}  \
       {output.mutass} &> {log}
     """
+# uncomment this if multiprimary tumors are expected
+#      --include-multiprimary &> {log}
+#    """

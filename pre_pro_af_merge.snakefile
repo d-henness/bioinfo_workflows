@@ -25,7 +25,7 @@ rule MarkDuplicates:
     MarkDuplicates_input
   output:
     bam = temp("GATK_runs/{merge}/MarkDuplicates/dup.bam"),
-    metrics = temp("GATK_runs/{merge}/MarkDuplicates/metrics.duplicate_metrics"),
+    metrics = "GATK_runs/{merge}/MarkDuplicates/metrics.duplicate_metrics",
     temp_dir = temp(directory("GATK_runs/{merge}/MarkDuplicates/tmp/"))
   conda:
     "envs_dir/pre_proc.yaml"
@@ -50,6 +50,7 @@ rule MarkDuplicates:
       --VALIDATION_STRINGENCY SILENT \
       --OPTICAL_DUPLICATE_PIXEL_DISTANCE 2500 \
       --ASSUME_SORT_ORDER "queryname" \
+      --TAGGING_POLICY All \
       --CREATE_MD5_FILE true	\
       --TMP_DIR {output.temp_dir} \
       &> {log}
