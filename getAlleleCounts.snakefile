@@ -22,9 +22,6 @@ rule getHETsites:
     refFasta=config["refFasta"],
     snpDB=config["snpVCF"],
     samtoolsCmd=config["samTools"],
-    mem=config["std_mem"],
-    runtime=config["std_runtime"],
-    pe=config["std_numCores"]
   conda:
     "envs_dir/Titan.yaml"
   resources:
@@ -49,9 +46,6 @@ rule getAlleleCountsByChr:
     mapQ=config["map_quality"],
     baseQ=config["base_quality"],
     vcfQ=config["vcf_quality"],
-    mem=config["std_mem"],
-    runtime=config["std_runtime"],
-    pe=config["std_numCores"]
   conda:
     "envs_dir/Titan.yaml"
   resources:
@@ -66,8 +60,6 @@ rule catAlleleCountFiles:
     expand("results/titan/tumCounts/{{tumor}}/{{tumor}}.tumCounts.chr{chr}.txt", chr=CHRS)
   output:
     "results/titan/tumCounts/{tumor}.tumCounts.txt"
-  params:
-    mem=config["std_mem"],
   resources:
     mem_mb = 4096
   log:
