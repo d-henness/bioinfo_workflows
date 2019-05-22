@@ -17,10 +17,6 @@ rule all_Titan:
 rule makeOutDir:
   output:
     "results/titan/hmm/titanCNA_ploidy{ploidy}/"
-  params:
-    mem=config["std_mem"],
-    runtime=config["std_runtime"],
-    pe=config["std_numCores"]
   resources:
     mem_mb = 4096
   shell:
@@ -56,9 +52,6 @@ rule runTitanCNA:
     #alleleModel=config["TitanCNA_alleleModel"],
     txnExpLen=config["TitanCNA_txnExpLen"],
     plotYlim=config["TitanCNA_plotYlim"],
-    mem=config["TitanCNA_mem"],
-    runtime=config["TitanCNA_runtime"],
-    pe=config["TitanCNA_pe"]
   conda:
     "envs_dir/Titan.yaml"
   resources:
@@ -82,9 +75,6 @@ rule selectSolution:
     ploidyDirs="results/titan/hmm/titanCNA_ploidy2",
     solutionRscript=config["TitanCNA_selectSolutionRscript"],
     threshold=config["TitanCNA_solutionThreshold"],
-    mem=config["std_mem"],
-    runtime=config["std_runtime"],
-    pe=config["std_numCores"]
   conda:
     "envs_dir/Titan.yaml"
   resources:

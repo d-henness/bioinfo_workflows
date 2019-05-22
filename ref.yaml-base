@@ -1,3 +1,5 @@
+# path to bioinfo_workflows directory
+"bioinfo_workflows_path": "/path/to/bioinfo_workflows/"
 # path to reference directory
 "data_path": "/path/to/refs"
 
@@ -50,7 +52,13 @@
 # VEP
 "vep_version": "ensembl-vep-95.2-0"
 "vep_cache": "/path/to/refs/VEP/homo_sapiens/95_GRCh38/vep" # version 95
-#"vep_plug_dir": "/usr/local/bioinfo_workflows/vep_plugins"
+"vep_plug_dir": "/path/to/bioinfo_workflows/vep_plugins/VEP_plugins"
+"condel_config": "/path/to/bioinfo_workflows/vep_plugins/VEP_plugins/config/Condel/config"
+"dbNSFP_config": "/path/to/bioinfo_workflows/vep_plugins/dbNSFP_data/dbNSFP3.5a.gz" # may need to edit
+"loftool_config": "/path/to/bioinfo_workflows/vep_plugins/VEP_plugins/LoFtool_scores.txt"
 
 #iedb-install-directory
-"iedb-install-directory": "/usr/local/bioinfo_workflows/mhc_X"
+"iedb-install-directory": "/path/to/bioinfo_workflows/mhc_X"
+
+# alt bed files
+"choi_capture": "/path/to/refs/choi_capture/170907_HG38_CCDS1X_REZ_capture_targets_padded_100_each_side.bed"

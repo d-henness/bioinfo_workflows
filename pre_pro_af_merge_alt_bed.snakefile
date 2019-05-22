@@ -1,6 +1,6 @@
 configfile: "{}/ref.yaml".format(workflow.basedir)
 
-include: "pre_pro_bf_merge.snakefile"
+include: "pre_pro_bf_merge_alt_bed.snakefile"
 
 merged = config["merge_libs"]
 
@@ -52,7 +52,6 @@ rule MarkDuplicates:
       --ASSUME_SORT_ORDER "queryname" \
       --TAGGING_POLICY All \
       --CREATE_MD5_FILE true	\
-      --TAGGING_POLICY All \
       --TMP_DIR {output.temp_dir} \
       &> {log}
     """
@@ -118,7 +117,7 @@ rule BaseRecalibrator:
     known_indels = config["known_indels"],
     a1000G_index = config["a1000G_index"],
     known_indels_index = config["known_indels_index"],
-    interval = config["exom_padded"],
+    interval = config["choi_capture"],
     java_opts = config["BaseRecalibrator.java_opt"],
     exclude_list = ''
   resources:

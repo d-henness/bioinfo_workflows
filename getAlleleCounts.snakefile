@@ -14,7 +14,7 @@ rule tumCounts:
 	
 rule getHETsites:
   input:
-    lambda wildcards: "runs/" + config["pairs"][wildcards.tumor] + "/ApplyBQSR/recal.bam"
+    lambda wildcards: "GATK_runs/" + config["pairs"][wildcards.tumor] + "/ApplyBQSR/" + config["pairs"][wildcards.tumor] + "_recal.bam"
 #   lambda wildcards: config["samples"][config["pairings"][wildcards.tumor]]
   output:
     "results/titan/hetPosns/{tumor}/{tumor}.chr{chr}.vcf"
@@ -22,9 +22,6 @@ rule getHETsites:
     refFasta=config["refFasta"],
     snpDB=config["snpVCF"],
     samtoolsCmd=config["samTools"],
-    mem=config["std_mem"],
-    runtime=config["std_runtime"],
-    pe=config["std_numCores"]
   conda:
     "envs_dir/Titan.yaml"
   resources:
@@ -38,7 +35,7 @@ rule getHETsites:
 rule getAlleleCountsByChr:
   input:
     hetSites="results/titan/hetPosns/{tumor}/{tumor}.chr{chr}.vcf",
-    tumBam = "runs/{tumor}/ApplyBQSR/recal.bam"
+    tumBam = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam"
 #    tumBam=lambda wildcards: config["samples"][wildcards.tumor]
   output:
     "results/titan/tumCounts/{tumor}/{tumor}.tumCounts.chr{chr}.txt"
@@ -49,9 +46,6 @@ rule getAlleleCountsByChr:
     mapQ=config["map_quality"],
     baseQ=config["base_quality"],
     vcfQ=config["vcf_quality"],
-    mem=config["std_mem"],
-    runtime=config["std_runtime"],
-    pe=config["std_numCores"]
   conda:
     "envs_dir/Titan.yaml"
   resources:
@@ -66,8 +60,6 @@ rule catAlleleCountFiles:
     expand("results/titan/tumCounts/{{tumor}}/{{tumor}}.tumCounts.chr{chr}.txt", chr=CHRS)
   output:
     "results/titan/tumCounts/{tumor}.tumCounts.txt"
-  params:
-    mem=config["std_mem"],
   resources:
     mem_mb = 4096
   log:

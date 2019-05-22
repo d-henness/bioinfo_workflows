@@ -1,16 +1,18 @@
+# path to bioinfo_workflows directory
+"bioinfo_workflows_path": "/home/dhenness/bioinfo_workflows/"
 # path to reference directory
-"data_path": "/home/dhenness/robert_project/hg38"
+"data_path": "/home/dhenness/projects/def-rgni0001/hg38/"
 
 # change these as needed
-"ref_dict": "/home/dhenness/robert_project/hg38/Homo_sapiens_assembly38.dict"
-"ref_fasta": "/home/dhenness/robert_project/hg38/Homo_sapiens_assembly38.fasta"
-"ref_fasta_index": "/home/dhenness/robert_project/hg38/Homo_sapiens_assembly38.fasta.fai"
-#"ref_alt": "gs://broad-/home/dhenness/robert_project/hg38/v0/Homo_sapiens_assembly38.fasta.64.alt"
-#"ref_sa": "gs://broad-/home/dhenness/robert_project/hg38/v0/Homo_sapiens_assembly38.fasta.64.sa"
-#"ref_amb": "gs://broad-/home/dhenness/robert_project/hg38/v0/Homo_sapiens_assembly38.fasta.64.amb"
-#"ref_bwt": "gs://broad-/home/dhenness/robert_project/hg38/v0/Homo_sapiens_assembly38.fasta.64.bwt"
-#"ref_ann": "gs://broad-/home/dhenness/robert_project/hg38/v0/Homo_sapiens_assembly38.fasta.64.ann"
-#"ref_pac": "gs://broad-/home/dhenness/robert_project/hg38/v0/Homo_sapiens_assembly38.fasta.64.pac"
+"ref_dict": "/home/dhenness/projects/def-rgni0001/hg38//Homo_sapiens_assembly38.dict"
+"ref_fasta": "/home/dhenness/projects/def-rgni0001/hg38//Homo_sapiens_assembly38.fasta"
+"ref_fasta_index": "/home/dhenness/projects/def-rgni0001/hg38//Homo_sapiens_assembly38.fasta.fai"
+#"ref_alt": "gs://broad-/home/dhenness/projects/def-rgni0001/hg38//v0/Homo_sapiens_assembly38.fasta.64.alt"
+#"ref_sa": "gs://broad-/home/dhenness/projects/def-rgni0001/hg38//v0/Homo_sapiens_assembly38.fasta.64.sa"
+#"ref_amb": "gs://broad-/home/dhenness/projects/def-rgni0001/hg38//v0/Homo_sapiens_assembly38.fasta.64.amb"
+#"ref_bwt": "gs://broad-/home/dhenness/projects/def-rgni0001/hg38//v0/Homo_sapiens_assembly38.fasta.64.bwt"
+#"ref_ann": "gs://broad-/home/dhenness/projects/def-rgni0001/hg38//v0/Homo_sapiens_assembly38.fasta.64.ann"
+#"ref_pac": "gs://broad-/home/dhenness/projects/def-rgni0001/hg38//v0/Homo_sapiens_assembly38.fasta.64.pac"
 # Java options for pre_pro step
 "SamToFastqAndBwaMem.java_opt": "-Xmx3000m"
 "MergeBamAlignment.java_opt": "-Xmx3000m"
@@ -22,35 +24,41 @@
 "ApplyBQSR.java_opt": "-Xmx3000m"
 "GatherBamFiles.java_opt": "-Xmx2000m"
 #_COMMENT3": "KNOWN SITES RESOURCES" 
-"dbSNP_vcf": "/home/dhenness/robert_project/hg38/Homo_sapiens_assembly38.dbsnp138.vcf"
-"dbSNP_vcf_index": "/home/dhenness/robert_project/hg38/Homo_sapiens_assembly38.dbsnp138.vcf.idx"
+"dbSNP_vcf": "/home/dhenness/projects/def-rgni0001/hg38//Homo_sapiens_assembly38.dbsnp138.vcf"
+"dbSNP_vcf_index": "/home/dhenness/projects/def-rgni0001/hg38//Homo_sapiens_assembly38.dbsnp138.vcf.idx"
 #"known_indels_sites_VCFs": [
-"a1000G": "/home/dhenness/robert_project/hg38/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz"
-"known_indels": "/home/dhenness/robert_project/hg38/Homo_sapiens_assembly38.known_indels.vcf.gz"
+"a1000G": "/home/dhenness/projects/def-rgni0001/hg38//Mills_and_1000G_gold_standard.indels.hg38.vcf.gz"
+"known_indels": "/home/dhenness/projects/def-rgni0001/hg38//Homo_sapiens_assembly38.known_indels.vcf.gz"
 #]
 #"PreProcessingForVariantDiscovery_GATK4.known_indels_sites_indices": [
-"a1000G_index": "/home/dhenness/robert_project/hg38/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz.tbi"
-"known_indels_index": "/home/dhenness/robert_project/hg38/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi"
+"a1000G_index": "/home/dhenness/projects/def-rgni0001/hg38//Mills_and_1000G_gold_standard.indels.hg38.vcf.gz.tbi"
+"known_indels_index": "/home/dhenness/projects/def-rgni0001/hg38//Homo_sapiens_assembly38.known_indels.vcf.gz.tbi"
 #]
 #
 #For mutect2
-"gnomad": "/home/dhenness/robert_project/hg38/af-only-gnomad.hg38.vcf.gz"
-"gnomad_index": "/home/dhenness/robert_project/hg38/af-only-gnomad.hg38.vcf.gz.tbi"
-"exom_padded_primary": "/home/dhenness/robert_project/hg38/remapped_S07604624_Padded_primaryOnly.bed"
-"exom_padded": "/home/dhenness/robert_project/hg38/remapped_S07604624_Padded.bed"
-"variants_for_contamination": "/home/dhenness/robert_project/hg38/small_exac_common_3.hg38.vcf.gz"
-"variants_for_contamination_index": "/home/dhenness/robert_project/hg38/small_exac_common_3.hg38.vcf.gz.tbi"
+"gnomad": "/home/dhenness/projects/def-rgni0001/hg38//af-only-gnomad.hg38.vcf.gz"
+"gnomad_index": "/home/dhenness/projects/def-rgni0001/hg38//af-only-gnomad.hg38.vcf.gz.tbi"
+"exom_padded_primary": "/home/dhenness/projects/def-rgni0001/hg38//remapped_S07604624_Padded_primaryOnly.bed"
+"exom_padded": "/home/dhenness/projects/def-rgni0001/hg38//remapped_S07604624_Padded.bed"
+"variants_for_contamination": "/home/dhenness/projects/def-rgni0001/hg38//small_exac_common_3.hg38.vcf.gz"
+"variants_for_contamination_index": "/home/dhenness/projects/def-rgni0001/hg38//small_exac_common_3.hg38.vcf.gz.tbi"
 "data_sources": "/home/dylan/mutect_data/funcotator_dataSources.v1.4.20180829s/"
 # for rna-seq
-"ref_fasta_rna":  "/home/dhenness/robert_project/hg38/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna"
-"ref_gtf_rna":  "/home/dhenness/robert_project/hg38/gencode.v29.annotation.gtf"
-"bowtie2_rrna": "/home/dhenness/robert_project/hg38/ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/ncrna/Homo_sapiens.GRCh38.ncrna.rRNA"
-"bowtie2_cdna": "/home/dhenness/robert_project/hg38/ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.bowtie2.index"
+"ref_fasta_rna":  "/home/dhenness/projects/def-rgni0001/hg38//GCA_000001405.15_GRCh38_no_alt_analysis_set.fna"
+"ref_gtf_rna":  "/home/dhenness/projects/def-rgni0001/hg38//gencode.v29.annotation.gtf"
+"bowtie2_rrna": "/home/dhenness/projects/def-rgni0001/hg38//ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/ncrna/Homo_sapiens.GRCh38.ncrna.rRNA"
+"bowtie2_cdna": "/home/dhenness/projects/def-rgni0001/hg38//ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.bowtie2.index"
 
 # VEP
 "vep_version": "ensembl-vep-95.2-0"
-"vep_cache": "/home/dhenness/robert_project/hg38/VEP/homo_sapiens/95_GRCh38/vep" # version 95
-#"vep_plug_dir": "/usr/local/bioinfo_workflows/vep_plugins"
+"vep_cache": "/home/dhenness/projects/def-rgni0001/hg38//VEP/homo_sapiens/95_GRCh38/vep" # version 95
+"vep_plug_dir": "/home/dhenness/bioinfo_workflows/vep_plugins/VEP_plugins"
+"condel_config": "/home/dhenness/bioinfo_workflows/vep_plugins/VEP_plugins/config/Condel/config"
+"dbNSFP_config": "/home/dhenness/bioinfo_workflows/vep_plugins/dbNSFP_data/dbNSFP3.5a.gz" # may need to edit
+"loftool_config": "/home/dhenness/bioinfo_workflows/vep_plugins/VEP_plugins/LoFtool_scores.txt"
 
 #iedb-install-directory
-"iedb-install-directory": "/usr/local/bioinfo_workflows/mhc_X"
+"iedb-install-directory": "/home/dhenness/bioinfo_workflows/mhc_X"
+
+# alt bed files
+"choi_capture": "/home/dhenness/projects/def-rgni0001/hg38//choi_capture/170907_HG38_CCDS1X_REZ_capture_targets_padded_100_each_side.bed"
