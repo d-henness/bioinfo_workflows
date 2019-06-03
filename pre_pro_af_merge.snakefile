@@ -38,7 +38,7 @@ rule MarkDuplicates:
     exclude_list = ''
   resources:
     mem_mb = lambda wildcards, attempt: attempt * (int(config["MarkDuplicates.java_opt"].strip("-Xmx")) + 1000),
-    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
+    time_min = lambda wildcards, attempt: attempt * 2 * 24 * 60,	# time in minutes
   benchmark:
     "benchmarks/{merge}.MarkDuplicates.benchmark.txt"
   shell:
@@ -50,7 +50,6 @@ rule MarkDuplicates:
       --VALIDATION_STRINGENCY SILENT \
       --OPTICAL_DUPLICATE_PIXEL_DISTANCE 2500 \
       --ASSUME_SORT_ORDER "queryname" \
-      --TAGGING_POLICY All \
       --CREATE_MD5_FILE true	\
       --TAGGING_POLICY All \
       --TMP_DIR {output.temp_dir} \
