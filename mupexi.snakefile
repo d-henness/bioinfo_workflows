@@ -150,7 +150,7 @@ rule mupexi_chr1:
     out_dir = "mupexi_runs/{tumor}/mupexi/chr1/",
   threads: 1
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 1024 * 16,
+    mem_mb = lambda wildcards, attempt: attempt * 1024 * 20,
   shell:
     """
       hla_string=$(sed -En '/[A-C]\*/{{s/(\\t([A-C])\*)/\\tHLA-\\2/g;p}}' {input.hlas} | sed -E 's/\s/\,/g; s/^[^,]*,//; s/,[^,]*,[^,]*$//')
@@ -179,7 +179,7 @@ rule mupexi_chr2:
     out_dir = "mupexi_runs/{tumor}/mupexi/chr2/",
   threads: 1
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 1024 * 16,
+    mem_mb = lambda wildcards, attempt: attempt * 1024 * 20,
   shell:
     """
       hla_string=$(sed -En '/[A-C]\*/{{s/(\\t([A-C])\*)/\\tHLA-\\2/g;p}}' {input.hlas} | sed -E 's/\s/\,/g; s/^[^,]*,//; s/,[^,]*,[^,]*$//')
@@ -208,7 +208,7 @@ rule mupexi_chr3:
     out_dir = "mupexi_runs/{tumor}/mupexi/chr3/",
   threads: 1
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 1024 * 12,
+    mem_mb = lambda wildcards, attempt: attempt * 1024 * 20,
   shell:
     """
       hla_string=$(sed -En '/[A-C]\*/{{s/(\\t([A-C])\*)/\\tHLA-\\2/g;p}}' {input.hlas} | sed -E 's/\s/\,/g; s/^[^,]*,//; s/,[^,]*,[^,]*$//')
@@ -411,7 +411,7 @@ rule mupexi_chr10:
     out_dir = "mupexi_runs/{tumor}/mupexi/chr10/",
   threads: 1
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 1024 * 10,
+    mem_mb = lambda wildcards, attempt: attempt * 1024 * 16,
   shell:
     """
       hla_string=$(sed -En '/[A-C]\*/{{s/(\\t([A-C])\*)/\\tHLA-\\2/g;p}}' {input.hlas} | sed -E 's/\s/\,/g; s/^[^,]*,//; s/,[^,]*,[^,]*$//')
@@ -440,7 +440,7 @@ rule mupexi_chr11:
     out_dir = "mupexi_runs/{tumor}/mupexi/chr11/",
   threads: 1
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 1024 * 10,
+    mem_mb = lambda wildcards, attempt: attempt * 1024 * 16,
   shell:
     """
       hla_string=$(sed -En '/[A-C]\*/{{s/(\\t([A-C])\*)/\\tHLA-\\2/g;p}}' {input.hlas} | sed -E 's/\s/\,/g; s/^[^,]*,//; s/,[^,]*,[^,]*$//')
@@ -469,7 +469,7 @@ rule mupexi_chr12:
     out_dir = "mupexi_runs/{tumor}/mupexi/chr12/",
   threads: 1
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 1024 * 10,
+    mem_mb = lambda wildcards, attempt: attempt * 1024 * 16,
   shell:
     """
       hla_string=$(sed -En '/[A-C]\*/{{s/(\\t([A-C])\*)/\\tHLA-\\2/g;p}}' {input.hlas} | sed -E 's/\s/\,/g; s/^[^,]*,//; s/,[^,]*,[^,]*$//')
@@ -498,7 +498,7 @@ rule mupexi_chr13:
     out_dir = "mupexi_runs/{tumor}/mupexi/chr13/",
   threads: 1
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 1024 * 10,
+    mem_mb = lambda wildcards, attempt: attempt * 1024 * 16,
   shell:
     """
       hla_string=$(sed -En '/[A-C]\*/{{s/(\\t([A-C])\*)/\\tHLA-\\2/g;p}}' {input.hlas} | sed -E 's/\s/\,/g; s/^[^,]*,//; s/,[^,]*,[^,]*$//')
@@ -527,7 +527,7 @@ rule mupexi_chr14:
     out_dir = "mupexi_runs/{tumor}/mupexi/chr14/",
   threads: 1
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 1024 * 10,
+    mem_mb = lambda wildcards, attempt: attempt * 1024 * 16,
   shell:
     """
       hla_string=$(sed -En '/[A-C]\*/{{s/(\\t([A-C])\*)/\\tHLA-\\2/g;p}}' {input.hlas} | sed -E 's/\s/\,/g; s/^[^,]*,//; s/,[^,]*,[^,]*$//')
@@ -556,7 +556,7 @@ rule mupexi_chr15:
     out_dir = "mupexi_runs/{tumor}/mupexi/chr15/",
   threads: 1
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 1024 * 10,
+    mem_mb = lambda wildcards, attempt: attempt * 1024 * 16,
   shell:
     """
       hla_string=$(sed -En '/[A-C]\*/{{s/(\\t([A-C])\*)/\\tHLA-\\2/g;p}}' {input.hlas} | sed -E 's/\s/\,/g; s/^[^,]*,//; s/,[^,]*,[^,]*$//')
@@ -585,7 +585,7 @@ rule mupexi_chr16:
     out_dir = "mupexi_runs/{tumor}/mupexi/chr16/",
   threads: 1
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 1024 * 10,
+    mem_mb = lambda wildcards, attempt: attempt * 1024 * 16,
   shell:
     """
       hla_string=$(sed -En '/[A-C]\*/{{s/(\\t([A-C])\*)/\\tHLA-\\2/g;p}}' {input.hlas} | sed -E 's/\s/\,/g; s/^[^,]*,//; s/,[^,]*,[^,]*$//')
@@ -614,7 +614,7 @@ rule mupexi_chr17:
     out_dir = "mupexi_runs/{tumor}/mupexi/chr17/",
   threads: 1
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 1024 * 10,
+    mem_mb = lambda wildcards, attempt: attempt * 1024 * 16,
   shell:
     """
       hla_string=$(sed -En '/[A-C]\*/{{s/(\\t([A-C])\*)/\\tHLA-\\2/g;p}}' {input.hlas} | sed -E 's/\s/\,/g; s/^[^,]*,//; s/,[^,]*,[^,]*$//')
@@ -643,7 +643,7 @@ rule mupexi_chr18:
     out_dir = "mupexi_runs/{tumor}/mupexi/chr18/",
   threads: 1
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 1024 * 10,
+    mem_mb = lambda wildcards, attempt: attempt * 1024 * 16,
   shell:
     """
       hla_string=$(sed -En '/[A-C]\*/{{s/(\\t([A-C])\*)/\\tHLA-\\2/g;p}}' {input.hlas} | sed -E 's/\s/\,/g; s/^[^,]*,//; s/,[^,]*,[^,]*$//')
@@ -672,7 +672,7 @@ rule mupexi_chr19:
     out_dir = "mupexi_runs/{tumor}/mupexi/chr19/",
   threads: 1
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 1024 * 10,
+    mem_mb = lambda wildcards, attempt: attempt * 1024 * 16,
   shell:
     """
       hla_string=$(sed -En '/[A-C]\*/{{s/(\\t([A-C])\*)/\\tHLA-\\2/g;p}}' {input.hlas} | sed -E 's/\s/\,/g; s/^[^,]*,//; s/,[^,]*,[^,]*$//')
