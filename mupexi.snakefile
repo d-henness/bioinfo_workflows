@@ -159,7 +159,7 @@ rule mupexi_chr1:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr2:
@@ -188,7 +188,7 @@ rule mupexi_chr2:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr3:
@@ -217,7 +217,7 @@ rule mupexi_chr3:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr4:
@@ -246,7 +246,7 @@ rule mupexi_chr4:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr5:
@@ -275,7 +275,7 @@ rule mupexi_chr5:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr6:
@@ -304,7 +304,7 @@ rule mupexi_chr6:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr7:
@@ -333,7 +333,7 @@ rule mupexi_chr7:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr8:
@@ -362,7 +362,7 @@ rule mupexi_chr8:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr9:
@@ -391,7 +391,7 @@ rule mupexi_chr9:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr10:
@@ -420,7 +420,7 @@ rule mupexi_chr10:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr11:
@@ -449,7 +449,7 @@ rule mupexi_chr11:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr12:
@@ -478,7 +478,7 @@ rule mupexi_chr12:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr13:
@@ -507,7 +507,7 @@ rule mupexi_chr13:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr14:
@@ -536,7 +536,7 @@ rule mupexi_chr14:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr15:
@@ -565,7 +565,7 @@ rule mupexi_chr15:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr16:
@@ -594,7 +594,7 @@ rule mupexi_chr16:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr17:
@@ -623,7 +623,7 @@ rule mupexi_chr17:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr18:
@@ -652,7 +652,7 @@ rule mupexi_chr18:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr19:
@@ -681,7 +681,7 @@ rule mupexi_chr19:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr20:
@@ -710,7 +710,7 @@ rule mupexi_chr20:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr21:
@@ -739,7 +739,7 @@ rule mupexi_chr21:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr22:
@@ -768,7 +768,7 @@ rule mupexi_chr22:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chrX:
@@ -797,7 +797,7 @@ rule mupexi_chrX:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chrY:
@@ -826,7 +826,7 @@ rule mupexi_chrY:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule merge_mupexi:
