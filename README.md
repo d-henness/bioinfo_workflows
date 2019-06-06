@@ -14,11 +14,7 @@ currently supported workflows:
 * VarScan
 * MuPeXI (kind of)
 
-<<<<<<< HEAD
-Note that only MuTect2 calculations can currently be run in a simple way. Many workflows will need to be manually edited in order to work on a different machine/user. This will be addressed in the future.
-=======
 ~~Note that only MuTect2 calculations can currently be run in a simple way. Many workflows will need to be manually editted inorder to work on a different machine/user. This will be addressed in the future.~~ Most workflows have been completely hooked together, but not all have good time and memory estimates.
->>>>>>> 0f7b7b14ca89eb4a2fb1e9d154014b29f8868e1e
 
 ## Example command to run MuTect2 calculations
 ```
