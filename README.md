@@ -36,6 +36,11 @@ snakemake -s path/to/mutect2.snakefile  \
 * (optional) -p: print the shell command that runs a particular job, this is useful for debugging but is not actully needed.
 * (optional) -n: print out all steps that will be run but won't actually run them, this is useful to make sure that the jobs to be run match what you expect.
 
+One liner
+```
+snakemake -s path/to/mutect2.snakefile    --configfile path/to/configfile.yaml    --jobs xx    --use-conda   --cluster 'sbatch --cpus-per-task={threads} --mem-per-cpu={resources.mem_mb} --time={resources.time_min}'   -p   --restart-times 3   --cluster-status /path/to/scripts_dir/slurm_cluster_status.py
+```
+
 ## Example configfile.yaml file
 snakemake needs a config file to tell it where job specific data is located and also how the data is related.
 Here is an example yaml file for a mutect run. There are three different libraries from one patient to be run:
