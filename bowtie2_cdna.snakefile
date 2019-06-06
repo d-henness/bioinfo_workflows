@@ -32,7 +32,8 @@ rule fastp_paired:
   conda:
     "envs_dir/bowtie2.yaml"
   resources:
-    mem_mb = 4000
+    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,  # time in minutes
   threads: 1
   benchmark:
     "bowtie2_cdna/benchmark/{rna_lib}_fastp.log"
@@ -53,7 +54,8 @@ rule fastp_unpaired:
   conda:
     "envs_dir/bowtie2.yaml"
   resources:
-    mem_mb = 4000
+    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,  # time in minutes
   threads: 1
   benchmark:
     "bowtie2_cdna/benchmark/{rna_lib}_fastp_up.log"
@@ -76,7 +78,8 @@ rule bowtie2:
     regions = config["bowtie2_cdna"],
     input_cmd = bowtie2_input
   resources:
-    mem_mb = 4000
+    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,  # time in minutes
   threads: 1
   benchmark:
     "bowtie2_cdna/benchmark/{rna_lib}_bowtie2.log"
