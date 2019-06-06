@@ -24,6 +24,7 @@ snakemake -s path/to/mutect2.snakefile  \
           --use-conda \
           --cluster 'sbatch --cpus-per-task={threads} --mem-per-cpu={resources.mem_mb} --time={resources.time_min}' \
           -p \
+          --restart-times 3 \
           --cluster-status /path/to/scripts_dir/slurm_cluster_status.py
 ```
 * -s: gives the snakefile for the pipeline we want.
