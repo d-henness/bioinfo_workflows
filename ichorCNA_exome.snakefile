@@ -10,7 +10,7 @@ rule ichor_all:
 
 rule read_counter:
   input:
-    "runs/{samples}/ApplyBQSR/recal.bam"
+    "GATK_runs/{samples}/ApplyBQSR/{samples}_recal.bam"
   output:
     "results/readDepth/{samples}.bin{binSize}.wig"		
   conda:    

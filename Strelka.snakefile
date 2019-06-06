@@ -1,3 +1,4 @@
+include: "pre_pro_af_merge.snakefile"
 configfile: "{}/ref.yaml".format(workflow.basedir)
 
 rule run_Strelka:
@@ -6,15 +7,15 @@ rule run_Strelka:
 
 rule Strelka_config:
   input:
-    tumor_bam = "runs/{tumor}/ApplyBQSR/recal.bam",
-    normal_bam = lambda wildcards: "runs/" + config["pairs"][wildcards.tumor] + "/ApplyBQSR/recal.bam"
+    tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam",
+    normal_bam = lambda wildcards: "GATK_runs/" + config["pairs"][wildcards.tumor] + "/ApplyBQSR/" + config["pairs"][wildcards.tumor] + "_recal.bam"
   output:
     out_run = "Strelka_runs/{tumor}/runWorkflow.py"
   conda:
     "envs_dir/Strelka_env.yaml"
   params:
     ref_fasta = config["ref_fasta"],
-    bed_file = "/data/shared/hg38/remapped_S07604624_Padded_primaryOnly.bed.gz"
+    bed_file = "{config['data_path']}/remapped_S07604624_Padded_primaryOnly.bed.gz"
   threads: 1
   resources:
     mem_mb = 1000

@@ -4,7 +4,12 @@ channels:
  - defaults
 dependencies:
  - python=2.7
- - variant-effect-predictor=87
+ - ensembl-vep=94
  - biopython=1.73
  - numpy
  - pandas
+ - optitype=1.3.2
+ - razers3=3.5.0
+ - samtools
+ - psutil
+ - tcsh
