@@ -1,26 +1,26 @@
 configfile: "{}/ref.yaml".format(workflow.basedir)
 
 def kallisto_input(wildcards):
-  if len(config['libraries'][wildcards.rna_lib]) == 1:
+  if len(config['rna_libraries'][wildcards.rna_lib]) == 1:
     return f"--single kallisto/{wildcards.rna_lib}/fastp/{wildcards.rna_lib}_1.fq.gz -l 150 -s 50"
-  elif len(config['libraries'][wildcards.rna_lib]) == 2:
+  elif len(config['rna_libraries'][wildcards.rna_lib]) == 2:
     return f"kallisto/{wildcards.rna_lib}/fastp/{wildcards.rna_lib}_1.fq.gz kallisto/{wildcards.rna_lib}/fastp/{wildcards.rna_lib}_2.fq.gz"
 
 def fastp_paired_input(wildcards):
-  if len(config['libraries'][wildcards.rna_lib]) == 2:
-    return [config['libraries'][wildcards.rna_lib][0], config['libraries'][wildcards.rna_lib][1]]
+  if len(config['rna_libraries'][wildcards.rna_lib]) == 2:
+    return [config['rna_libraries'][wildcards.rna_lib][0], config['rna_libraries'][wildcards.rna_lib][1]]
   else:
     return ""
 
 def fastp_unpaired_input(wildcards):
-  if len(config['libraries'][wildcards.rna_lib]) == 1:
-    return f"{config['libraries'][wildcards.rna_lib][0]}"
+  if len(config['rna_libraries'][wildcards.rna_lib]) == 1:
+    return f"{config['rna_libraries'][wildcards.rna_lib][0]}"
   else:
     return ""
 
 rule all:
   input:
-    expand("kallisto/{rna_lib}/kallisto/abundance.h5", rna_lib = config["libraries"])
+    expand("kallisto/{rna_lib}/kallisto/abundance.h5", rna_lib = config["rna_libraries"])
 
 rule fastp_paired:
   input:
@@ -73,7 +73,8 @@ rule kallisto:
   input:
     signal = "kallisto/{rna_lib}/fastp/{rna_lib}_signal.txt",
   output:
-    abundance = "kallisto/{rna_lib}/kallisto/abundance.h5"
+    abundance = "kallisto/{rna_lib}/kallisto/abundance.h5",
+    mean_exp = "kallisto/{rna_lib}/kallisto/{rna_lib}_mean_exp.tsv",
   conda:
     "envs_dir/kallisto.yaml"
   params:
@@ -98,4 +99,5 @@ rule kallisto:
       kallisto h5dump \
         --output-dir=kallisto/{wildcards.rna_lib}/kallisto \
         kallisto/{wildcards.rna_lib}/kallisto/abundance.h5 &> {log.h5dump}
+      python3 {config["bioinfo_workflows_path"]}/scripts_dir/get_mean_exp.py kallisto/{wildcards.rna_lib}/kallisto/h5dump > {output.mean_exp}
     """

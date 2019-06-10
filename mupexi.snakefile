@@ -10,6 +10,13 @@ def make_normal_set(tumors):
       normals.append(tumors[tumor])
   return normals
 
+def kallisto_runs(tumor):
+  try:
+    return f"kallisto/{config['rna_pairs'][tumor]}/kallisto/{config['rna_pairs'][tumor]}_mean_exp.tsv"
+  except:
+    return f"mupexi_runs/{config['pairs'][tumor]}/optitype/{config['pairs'][tumor]}_result.tsv"
+
+
 noramls = make_normal_set(config['pairs'])
 rule run_mupexi:
   input:
@@ -137,7 +144,8 @@ rule split_vcf_files:
 rule mupexi_chr1:
   input:
     vcf = rules.split_vcf_files.output.chr1,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr1/{tumor}.mupexi",
   conda:
@@ -161,13 +169,20 @@ rule mupexi_chr1:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr2:
   input:
     vcf = rules.split_vcf_files.output.chr2,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr2/{tumor}.mupexi",
   conda:
@@ -191,13 +206,20 @@ rule mupexi_chr2:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr3:
   input:
     vcf = rules.split_vcf_files.output.chr3,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr3/{tumor}.mupexi",
   conda:
@@ -221,13 +243,20 @@ rule mupexi_chr3:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr4:
   input:
     vcf = rules.split_vcf_files.output.chr4,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr4/{tumor}.mupexi",
   conda:
@@ -251,13 +280,20 @@ rule mupexi_chr4:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr5:
   input:
     vcf = rules.split_vcf_files.output.chr5,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr5/{tumor}.mupexi",
   conda:
@@ -281,13 +317,20 @@ rule mupexi_chr5:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr6:
   input:
     vcf = rules.split_vcf_files.output.chr6,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr6/{tumor}.mupexi",
   conda:
@@ -311,13 +354,20 @@ rule mupexi_chr6:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr7:
   input:
     vcf = rules.split_vcf_files.output.chr7,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr7/{tumor}.mupexi",
   conda:
@@ -341,13 +391,20 @@ rule mupexi_chr7:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr8:
   input:
     vcf = rules.split_vcf_files.output.chr8,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr8/{tumor}.mupexi",
   conda:
@@ -371,13 +428,20 @@ rule mupexi_chr8:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr9:
   input:
     vcf = rules.split_vcf_files.output.chr9,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr9/{tumor}.mupexi",
   conda:
@@ -401,13 +465,20 @@ rule mupexi_chr9:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr10:
   input:
     vcf = rules.split_vcf_files.output.chr10,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr10/{tumor}.mupexi",
   conda:
@@ -431,13 +502,20 @@ rule mupexi_chr10:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr11:
   input:
     vcf = rules.split_vcf_files.output.chr11,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr11/{tumor}.mupexi",
   conda:
@@ -461,13 +539,20 @@ rule mupexi_chr11:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr12:
   input:
     vcf = rules.split_vcf_files.output.chr12,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr12/{tumor}.mupexi",
   conda:
@@ -491,13 +576,20 @@ rule mupexi_chr12:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr13:
   input:
     vcf = rules.split_vcf_files.output.chr13,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr13/{tumor}.mupexi",
   conda:
@@ -521,13 +613,20 @@ rule mupexi_chr13:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr14:
   input:
     vcf = rules.split_vcf_files.output.chr14,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr14/{tumor}.mupexi",
   conda:
@@ -551,13 +650,20 @@ rule mupexi_chr14:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr15:
   input:
     vcf = rules.split_vcf_files.output.chr15,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr15/{tumor}.mupexi",
   conda:
@@ -581,13 +687,20 @@ rule mupexi_chr15:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr16:
   input:
     vcf = rules.split_vcf_files.output.chr16,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr16/{tumor}.mupexi",
   conda:
@@ -611,13 +724,20 @@ rule mupexi_chr16:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr17:
   input:
     vcf = rules.split_vcf_files.output.chr17,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr17/{tumor}.mupexi",
   conda:
@@ -641,13 +761,20 @@ rule mupexi_chr17:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr18:
   input:
     vcf = rules.split_vcf_files.output.chr18,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr18/{tumor}.mupexi",
   conda:
@@ -671,13 +798,20 @@ rule mupexi_chr18:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr19:
   input:
     vcf = rules.split_vcf_files.output.chr19,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr19/{tumor}.mupexi",
   conda:
@@ -701,13 +835,20 @@ rule mupexi_chr19:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr20:
   input:
     vcf = rules.split_vcf_files.output.chr20,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr20/{tumor}.mupexi",
   conda:
@@ -731,13 +872,20 @@ rule mupexi_chr20:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr21:
   input:
     vcf = rules.split_vcf_files.output.chr21,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr21/{tumor}.mupexi",
   conda:
@@ -761,13 +909,20 @@ rule mupexi_chr21:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chr22:
   input:
     vcf = rules.split_vcf_files.output.chr22,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chr22/{tumor}.mupexi",
   conda:
@@ -791,13 +946,20 @@ rule mupexi_chr22:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chrX:
   input:
     vcf = rules.split_vcf_files.output.chrX,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chrX/{tumor}.mupexi",
   conda:
@@ -821,13 +983,20 @@ rule mupexi_chrX:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule mupexi_chrY:
   input:
     vcf = rules.split_vcf_files.output.chrY,
-    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv"
+    hlas = lambda wildcards: f"mupexi_runs/{config['pairs'][wildcards.tumor]}/optitype/{config['pairs'][wildcards.tumor]}_result.tsv",
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
   output:
     mupexi_out = "mupexi_runs/{tumor}/mupexi/chrY/{tumor}.mupexi",
   conda:
@@ -851,7 +1020,13 @@ rule mupexi_chrY:
         echo Problem with hla file
         exit 1
       fi
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+
+      rna_var=''
+      if [[ "kallisto"* == "{input.rna}" ]]; then
+        rna_var="-e {input.rna} "
+      fi
+
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
     """
 
 rule merge_mupexi:
