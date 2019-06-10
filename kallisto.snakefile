@@ -32,7 +32,8 @@ rule fastp_paired:
   conda:
     "envs_dir/kallisto.yaml"
   resources:
-    mem_mb = 4000
+    mem_mb = lambda wildcards, attempt: attempt * (2 * 1024),
+    time_min = lambda wildcards, attempt: attempt * (1 * 60),	# time in minutes
   threads: 1
   params:
     adapter_sequence = config["illumina_adapter"],
@@ -55,7 +56,8 @@ rule fastp_unpaired:
   conda:
     "envs_dir/kallisto.yaml"
   resources:
-    mem_mb = 4000
+    mem_mb = lambda wildcards, attempt: attempt * (2 * 1024),
+    time_min = lambda wildcards, attempt: attempt * (1 * 60),	# time in minutes
   threads: 1
   params:
     adapter_sequence = config["illumina_adapter"],
@@ -79,9 +81,11 @@ rule kallisto:
     "envs_dir/kallisto.yaml"
   params:
     index = config["kallisto_index"],
-    input_cmd = kallisto_input
+    input_cmd = kallisto_input,
+    bioinfo_workflows_path = config["bioinfo_workflows_path"],
   resources:
-    mem_mb = 16000
+    mem_mb = lambda wildcards, attempt: attempt * (16 * 1024),
+    time_min = lambda wildcards, attempt: attempt * (24 * 60),	# time in minutes
   threads: 1
   benchmark:
     "kallisto/benchmark/{rna_lib}_kallisto.benchmark"
@@ -99,5 +103,6 @@ rule kallisto:
       kallisto h5dump \
         --output-dir=kallisto/{wildcards.rna_lib}/kallisto \
         kallisto/{wildcards.rna_lib}/kallisto/abundance.h5 &> {log.h5dump}
-      python3 {config["bioinfo_workflows_path"]}/scripts_dir/get_mean_exp.py kallisto/{wildcards.rna_lib}/kallisto/h5dump > {output.mean_exp}
+
+      python3 {params.bioinfo_workflows_path}/scripts_dir/get_mean_exp.py kallisto/{wildcards.rna_lib}/kallisto/h5dump > {output.mean_exp}
     """
