@@ -4,6 +4,7 @@
 "data_path": "/data/shared/hg38/"
 
 # change these as needed
+"illumina_adapter": "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA"
 "ref_dict": "/data/shared/hg38//Homo_sapiens_assembly38.dict"
 "ref_fasta": "/data/shared/hg38//Homo_sapiens_assembly38.fasta"
 "ref_fasta_index": "/data/shared/hg38//Homo_sapiens_assembly38.fasta.fai"
@@ -59,6 +60,9 @@
 
 #iedb-install-directory
 "iedb-install-directory": "/usr/local/bioinfo_workflows/mhc_X"
+
+#kallisto index
+"kallisto_index": "/data/shared/hg38//ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.kallisto.index"
 
 # alt bed files
 "choi_capture": "/data/shared/hg38//choi_capture/170907_HG38_CCDS1X_REZ_capture_targets_padded_100_each_side.bed"

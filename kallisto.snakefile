@@ -34,13 +34,15 @@ rule fastp_paired:
   resources:
     mem_mb = 4000
   threads: 1
+  params:
+    adapter_sequence = config["illumina_adapter"],
   benchmark:
     "kallisto/benchmark/{rna_lib}_fastp.benchmark"
   log:
     "kallisto/log/{rna_lib}_fastp.log"
   shell:
     """
-      fastp -i {input[0]} -I {input[1]} -o {output.fq1_out} -O {output.fq2_out} &> {log}
+      fastp -i {input[0]} -I {input[1]} -o {output.fq1_out} -O {output.fq2_out} --adapter_sequence={params.adapter_sequence} &> {log}
       echo "finished" > {output.signal}
     """
 
@@ -55,13 +57,15 @@ rule fastp_unpaired:
   resources:
     mem_mb = 4000
   threads: 1
+  params:
+    adapter_sequence = config["illumina_adapter"],
   benchmark:
     "kallisto/benchmark/{rna_lib}_fastp_up.benchmark"
   log:
     "kallisto/log/{rna_lib}_fastp_up.log"
   shell:
     """
-      fastp -i {input} -o {output.fq1_out} --adapter_sequence=AGATCGGAAGAGCACACGTCTGAACTCCAGTCA &> {log}
+      fastp -i {input} -o {output.fq1_out} --adapter_sequence={params.adapter_sequence} &> {log}
       echo "finished" > {output.signal}
     """
 
@@ -73,7 +77,7 @@ rule kallisto:
   conda:
     "envs_dir/kallisto.yaml"
   params:
-    index = "/data/shared/hg38/ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.kallisto.index",
+    index = config["kallisto_index"],
     input_cmd = kallisto_input
   resources:
     mem_mb = 16000

@@ -1,15 +1,16 @@
 configfile: "{}/ref.yaml".format(workflow.basedir)
 
 include: "mutect2.snakefile"
+include: "kallisto.snakefile"
 
-def make_noraml_set(tumors):
+def make_normal_set(tumors):
   normals = []
   for tumor in tumors:
     if tumors[tumor] not in normals:
       normals.append(tumors[tumor])
   return normals
 
-noramls = make_noraml_set(config['pairs'])
+noramls = make_normal_set(config['pairs'])
 rule run_mupexi:
   input:
 #   expand("mupexi_runs/{lib}/optitype/{lib}_result.tsv", lib = noramls),
