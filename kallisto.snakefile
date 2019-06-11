@@ -101,7 +101,7 @@ rule kallisto:
         --threads={threads} &> {log.quant}
 
       kallisto h5dump \
-        --output-dir=kallisto/{wildcards.rna_lib}/kallisto \
+        --output-dir=kallisto/{wildcards.rna_lib}/kallisto/h5dump \
         kallisto/{wildcards.rna_lib}/kallisto/abundance.h5 &> {log.h5dump}
 
       python3 {params.bioinfo_workflows_path}/scripts_dir/get_mean_exp.py kallisto/{wildcards.rna_lib}/kallisto/h5dump > {output.mean_exp}
