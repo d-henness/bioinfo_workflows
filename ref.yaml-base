@@ -49,6 +49,7 @@
 "ref_gtf_rna":  "/path/to/refs/gencode.v29.annotation.gtf"
 "bowtie2_rrna": "/path/to/refs/ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/ncrna/Homo_sapiens.GRCh38.ncrna.rRNA"
 "bowtie2_cdna": "/path/to/refs/ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.bowtie2.index"
+"hisat2_rna_WG": "/path/to/refs/grch38_snp_tran/genome_snp_tran"
 
 # VEP
 "vep_version": "ensembl-vep-95.2-0"
