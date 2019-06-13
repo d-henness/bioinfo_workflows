@@ -14,26 +14,32 @@ currently supported workflows:
 * VarScan
 * MuPeXI (kind of)
 
-Note that only MuTect2 calculations can currently be run in a simple way. Many workflows will need to be manually edited in order to work on a different machine/user. This will be addressed in the future.
+~~Note that only MuTect2 calculations can currently be run in a simple way. Many workflows will need to be manually editted inorder to work on a different machine/user. This will be addressed in the future.~~ Most workflows have been completely hooked together, but not all have good time and memory estimates.
 
 ## Example command to run MuTect2 calculations
 ```
 snakemake -s path/to/mutect2.snakefile  \
           --configfile path/to/configfile.yaml  \
-          --jobs 1000  \
+          --jobs xx  \
           --use-conda \
-          --cluster 'sbatch --cpus-per-task={threads} --mem={resources.mem_mb} --time={resources.time_min}' \
+          --cluster 'sbatch --cpus-per-task={threads} --mem-per-cpu={resources.mem_mb} --time={resources.time_min}' \
+          -p \
           --restart-times 3 \
-          -p
+          --cluster-status /path/to/scripts_dir/slurm_cluster_status.py
 ```
-* -s: gives the snakefile for the pipeline we want
-* --configfile: the path to the job specific yaml config file, see below for an example and formatting
-* --jobs: the maximum number of jobs that snakemake will try to run at once. Check to see if you have any limits
-* --use-conda: allows snakemake to use conda environments to install the needed programs
-* --cluster: needed for running the calculations on a cluster, here I am assuming that the cluster is using the slurm scheduler
-* (optional) --restart-times: the number of times snakemake will try to restart a job that failed. Each restart increases the memory and time requested
-* (optional) -p: print the shell command that runs a particular job, this is useful for debugging but is not actually needed
-* (optional) -n: print out all steps that will be run but won't actually run them, this is useful to make sure that the jobs to be run match what you expect
+* -s: gives the snakefile for the pipeline we want.
+* --configfile: the path to the job specific yaml config file, see below for an example and formatting.
+* --jobs: the maximum number of jobs that snakemake will try to submit at once. Check with sys admins to figure out this limit.
+* --use-conda: allows snakemake to use conda enviroments to install the needed programs.
+* --cluster: needed for running the calculations on a cluster, here I am assuming that the cluster is using the slurm scheduler.
+* --cluster-status: needed so that snakemake can detect job timeouts. This will only work for the slurm scheduler.
+* (optional) -p: print the shell command that runs a particular job, this is useful for debugging but is not actully needed.
+* (optional) -n: print out all steps that will be run but won't actually run them, this is useful to make sure that the jobs to be run match what you expect.
+
+One liner
+```
+snakemake -s path/to/mutect2.snakefile    --configfile path/to/configfile.yaml    --jobs xx    --use-conda   --cluster 'sbatch --cpus-per-task={threads} --mem-per-cpu={resources.mem_mb} --time={resources.time_min}'   -p   --restart-times 3   --cluster-status /path/to/scripts_dir/slurm_cluster_status.py
+```
 
 ## Example configfile.yaml file
 snakemake needs a config file to tell it where job specific data is located and also how the data is related.
@@ -56,8 +62,8 @@ pairs:
   tumor_1:  normal_0
 ```
 
-The libraries and merge_libs sections can be generated automatically using the make_config.py script (in scripts_dir).
-It takes one argument which is a string that matches something that all libraries we want to work on contain.
+The libraries and merge_libs sections can be genreated automatically using the make_config_2.py script (in scripts_dir).
+It takes one or more arguments which are a strings that matche something that all libraries we want to work on contain.
 For instance we want to do runs on the fq.gz files in the directories called RG4-2, RG4-3, RG4_PBMC, RG5-1, RG5-2, and RG5_PBMC.
 We would run the following command in a directory that contains all of these other directories:
 

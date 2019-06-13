@@ -4,6 +4,7 @@
 "data_path": "/path/to/refs"
 
 # change these as needed
+"illumina_adapter": "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA"
 "ref_dict": "/path/to/refs/Homo_sapiens_assembly38.dict"
 "ref_fasta": "/path/to/refs/Homo_sapiens_assembly38.fasta"
 "ref_fasta_index": "/path/to/refs/Homo_sapiens_assembly38.fasta.fai"
@@ -48,6 +49,7 @@
 "ref_gtf_rna":  "/path/to/refs/gencode.v29.annotation.gtf"
 "bowtie2_rrna": "/path/to/refs/ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/ncrna/Homo_sapiens.GRCh38.ncrna.rRNA"
 "bowtie2_cdna": "/path/to/refs/ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.bowtie2.index"
+"hisat2_rna_WG": "/path/to/refs/grch38_snp_tran/genome_snp_tran"
 
 # VEP
 "vep_version": "ensembl-vep-95.2-0"
@@ -59,6 +61,9 @@
 
 #iedb-install-directory
 "iedb-install-directory": "/path/to/bioinfo_workflows/mhc_X"
+
+#kallisto index
+"kallisto_index": "/path/to/refs/ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.kallisto.index"
 
 # alt bed files
 "choi_capture": "/path/to/refs/choi_capture/170907_HG38_CCDS1X_REZ_capture_targets_padded_100_each_side.bed"

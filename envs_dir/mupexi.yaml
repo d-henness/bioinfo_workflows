@@ -12,3 +12,4 @@ dependencies:
  - razers3=3.5.0
  - samtools
  - psutil
+ - tcsh
