@@ -17,7 +17,7 @@ def MarkDuplicates_input(wildcards):
 def MarkDuplicates_input_string(wildcards):
   bam_files = []
   for library in config["merge_libs"][wildcards.merge]:
-    bam_files.append(f"--INPUT GATK_runs/{library}/MergeBamAlignment/merge.bam")
+    bam_files.append(f"--INPUT $SLURM_TMPDIR/{wildcards.merge}/MarkDuplicates/{library}.bam")
   return ' '.join(bam_files)
 
 rule MarkDuplicates:
@@ -26,7 +26,6 @@ rule MarkDuplicates:
   output:
     bam = temp("GATK_runs/{merge}/MarkDuplicates/dup.bam"),
     metrics = "GATK_runs/{merge}/MarkDuplicates/metrics.duplicate_metrics",
-    temp_dir = temp(directory("GATK_runs/{merge}/MarkDuplicates/tmp/"))
   conda:
     "envs_dir/pre_proc.yaml"
   log:
@@ -43,6 +42,12 @@ rule MarkDuplicates:
     "benchmarks/{merge}.MarkDuplicates.benchmark.txt"
   shell:
     """
+      for file in {input}; do
+        lib=$(echo $file | sed -E 's,GATK_runs/([^/]+)/.*,\\1,')
+        mkdir -p $SLURM_TMPDIR/{wildcards.merge}/MarkDuplicates
+        cp $file $SLURM_TMPDIR/{wildcards.merge}/MarkDuplicates/$lib.bam
+      done
+
       gatk --java-options "{params.java_opts}"	MarkDuplicates \
       {params.libs_string} \
       --OUTPUT {output.bam} \
@@ -52,7 +57,7 @@ rule MarkDuplicates:
       --ASSUME_SORT_ORDER "queryname" \
       --CREATE_MD5_FILE true	\
       --TAGGING_POLICY All \
-      --TMP_DIR {output.temp_dir} \
+      --TMP_DIR $SLURM_TMPDIR/{wildcards.merge}/MarkDuplicates/ \
       &> {log}
     """
 rule SortAndFixTags:
