@@ -607,7 +607,6 @@ rule mupexi_chr13:
   resources:
     time_min = lambda wildcards, attempt: attempt * 24 * 60,
     mem_mb = lambda wildcards, attempt: attempt * 1024 * 8,
-    time_min = lambda wildcards, attempt: attempt * 3 * 24 * 60,	# time in minutes
   shell:
     """
       hla_string=$(sed -En '/[A-C]\*/{{s/(\\t([A-C])\*)/\\tHLA-\\2/g;p}}' {input.hlas} | sed -E 's/\s/\,/g; s/^[^,]*,//; s/,[^,]*,[^,]*$//')
@@ -645,7 +644,6 @@ rule mupexi_chr14:
   resources:
     time_min = lambda wildcards, attempt: attempt * 24 * 60,
     mem_mb = lambda wildcards, attempt: attempt * 1024 * 8,
-    time_min = lambda wildcards, attempt: attempt * 3 * 24 * 60,	# time in minutes
   shell:
     """
       hla_string=$(sed -En '/[A-C]\*/{{s/(\\t([A-C])\*)/\\tHLA-\\2/g;p}}' {input.hlas} | sed -E 's/\s/\,/g; s/^[^,]*,//; s/,[^,]*,[^,]*$//')
@@ -683,7 +681,6 @@ rule mupexi_chr15:
   resources:
     time_min = lambda wildcards, attempt: attempt * 24 * 60,
     mem_mb = lambda wildcards, attempt: attempt * 1024 * 8,
-    time_min = lambda wildcards, attempt: attempt * 3 * 24 * 60,	# time in minutes
   shell:
     """
       hla_string=$(sed -En '/[A-C]\*/{{s/(\\t([A-C])\*)/\\tHLA-\\2/g;p}}' {input.hlas} | sed -E 's/\s/\,/g; s/^[^,]*,//; s/,[^,]*,[^,]*$//')
