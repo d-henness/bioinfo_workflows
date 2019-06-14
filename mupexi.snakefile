@@ -171,7 +171,7 @@ rule mupexi_chr1:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -208,7 +208,7 @@ rule mupexi_chr2:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -245,7 +245,7 @@ rule mupexi_chr3:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -282,7 +282,7 @@ rule mupexi_chr4:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -319,7 +319,7 @@ rule mupexi_chr5:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -356,7 +356,7 @@ rule mupexi_chr6:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -393,7 +393,7 @@ rule mupexi_chr7:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -430,7 +430,7 @@ rule mupexi_chr8:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -467,7 +467,7 @@ rule mupexi_chr9:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -504,7 +504,7 @@ rule mupexi_chr10:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -541,7 +541,7 @@ rule mupexi_chr11:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -578,7 +578,7 @@ rule mupexi_chr12:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -615,7 +615,7 @@ rule mupexi_chr13:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -652,7 +652,7 @@ rule mupexi_chr14:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -689,7 +689,7 @@ rule mupexi_chr15:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -726,7 +726,7 @@ rule mupexi_chr16:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -763,7 +763,7 @@ rule mupexi_chr17:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -800,7 +800,7 @@ rule mupexi_chr18:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -837,7 +837,7 @@ rule mupexi_chr19:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -874,7 +874,7 @@ rule mupexi_chr20:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -911,7 +911,7 @@ rule mupexi_chr21:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -948,7 +948,7 @@ rule mupexi_chr22:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -985,7 +985,7 @@ rule mupexi_chrX:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
@@ -1022,7 +1022,7 @@ rule mupexi_chrY:
       fi
 
       rna_var=''
-      if [[ "kallisto"* == "{input.rna}" ]]; then
+      if [[ "{input.rna}" == "kallisto"* ]]; then
         rna_var="-e {input.rna} "
       fi
 
