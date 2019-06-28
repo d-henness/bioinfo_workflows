@@ -183,5 +183,5 @@ rule ApplyBQSR:
       if [[ -e GATK_runs/{wildcards.merge}/ApplyBQSR/{wildcards.merge}_recal.bai ]]; then
         mv GATK_runs/{wildcards.merge}/ApplyBQSR/{wildcards.merge}_recal.bai GATK_runs/{wildcards.merge}/ApplyBQSR/{wildcards.merge}_recal.bam.bai
       fi
-      samtools stats -t {params.interval} {output.bam_out} > {output.stats}
+      samtools stats  -c 0,2000,1 -t {params.interval} {output.bam_out} > {output.stats}
     """

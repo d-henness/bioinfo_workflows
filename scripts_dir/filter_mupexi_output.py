@@ -3,7 +3,7 @@ import operator
 
 def parse_line(line, rna):
     parsed_line = {}
-    line_split = line.strip().split()
+    line_split = line.strip().split('\t')
     # correct as of mupexi version 1.2.0
     mupexi_cols = ["HLA_allele", "Norm_peptide", "Norm_MHCrank_EL", "Mut_peptide", "Mut_MHCrank_EL", "Gene_ID", "Transcript_ID", "Amino_Acid_Change", "Allele_Frequency", "Mismatches", "peptide_position", "Chr", "Genomic_Position", "Protein_position", "Mutation_Consequence", "Gene_Symbol", "Cancer_Driver_Gene", "Proteome_Peptide_Match", "Expression_Level", "Mutant_affinity_score", "Normal_affinity_score", "Expression_score", "priority_Score"]
     for i, col in enumerate(mupexi_cols):
@@ -27,7 +27,11 @@ whole_line = {}
 with open(args.mupexi_file, 'r') as data:
     for i, line in enumerate(data):
         if i > 5:
-            parsed_line = parse_line(line, args.rna)
+            try:
+                parsed_line = parse_line(line, args.rna)
+            except:
+                print(args.mupexi_file, line)
+                quit()
             # Filter for neoantigens with Mut_MHC_rank_EL =< 0.5 AND Mut_peptide with exactly 9 letters AND Allele_frequency > 0.25
             if (parsed_line['Mut_MHCrank_EL'] <= 0.5) and (len(parsed_line['Mut_peptide']) == 9) and (parsed_line['Allele_Frequency'] > 0.25):
                 if args.rna:

@@ -161,6 +161,7 @@ rule ApplyBQSR:
     a1000G_index = config["a1000G_index"],
     known_indels_index = config["known_indels_index"],
     java_opts = config["ApplyBQSR.java_opt"],
+    interval = config["choi_capture"],
     exclude_list = ''
   resources:
     mem_mb = lambda wildcards, attempt: attempt * (int(config["ApplyBQSR.java_opt"].strip("-Xmx")) + 1000),
@@ -182,5 +183,5 @@ rule ApplyBQSR:
       if [[ -e GATK_runs/{wildcards.merge}/ApplyBQSR/{wildcards.merge}_recal.bai ]]; then
         mv GATK_runs/{wildcards.merge}/ApplyBQSR/{wildcards.merge}_recal.bai GATK_runs/{wildcards.merge}/ApplyBQSR/{wildcards.merge}_recal.bam.bai
       fi
-      samtools stats {output.bam_out} > {output.stats}
+      samtools stats -t {params.interval} {output.bam_out} > {output.stats}
     """
