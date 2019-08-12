@@ -1,6 +1,6 @@
 configfile: "{}/ref.yaml".format(workflow.basedir)
 
-include: "mutect2.snakefile"
+include: "mutect2_alt_bed.snakefile"
 include: "Strelka.snakefile"
 #include: "TitanCNA.snakefile"
 
@@ -95,6 +95,8 @@ rule make_overlap_mut_and_strel:
   output:
     overlap_vcf_snp = "vep_stats/{tumor}/prepro_vcfs/overlap_mut_and_strel_snp/0003.vcf",
     overlap_vcf_indel = "vep_stats/{tumor}/prepro_vcfs/overlap_mut_and_strel_indel/0003.vcf",
+    overlap_vcf_snp_mutect2 = "vep_stats/{tumor}/prepro_vcfs/overlap_mut_and_strel_snp/0002.vcf",
+    overlap_vcf_indel_mutect2 = "vep_stats/{tumor}/prepro_vcfs/overlap_mut_and_strel_indel/0002.vcf",
   conda:
     "envs_dir/phylowgs.yaml"
   params:

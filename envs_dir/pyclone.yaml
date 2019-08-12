@@ -1,0 +1,7 @@
+channels:
+ - conda-forge
+ - bioconda
+ - defaults
+ - aroth85
+dependencies:
+ - pyclone=0.13.1

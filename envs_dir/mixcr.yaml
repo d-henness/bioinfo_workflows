@@ -1,0 +1,8 @@
+name: mixcr
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - mixcr=3.0.7
+  - fastp=0.19.7

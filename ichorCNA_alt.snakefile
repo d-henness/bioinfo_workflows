@@ -1,6 +1,6 @@
 configfile: "{}/ichorCNA/config_hg38.yaml".format(workflow.basedir)
 
-include: "pre_pro_af_merge.snakefile"
+include: "./pre_pro_af_merge_alt_bed.snakefile"
 
 rule ichor_all:
   input: 
@@ -60,7 +60,7 @@ rule ichorCNA:
     chrTrain=config["ichorCNA_chrTrain"],
     genomeStyle=config["ichorCNA_genomeStyle"],
     centromere=config["ichorCNA_centromere"],
-    exons=config["ichorCNA_exons_choi"],
+    exons=config["alt_bed"],
     txnE=config["ichorCNA_txnE"],
     txnStrength=config["ichorCNA_txnStrength"],
     fracReadsChrYMale="0.001",
