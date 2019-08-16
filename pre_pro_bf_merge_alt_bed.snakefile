@@ -1,6 +1,6 @@
 configfile: "{}/ref.yaml".format(workflow.basedir)
 
-rule make_alig:
+rule run_pre_pro_bf:
   input:
 #    expand("GATK_runs/{library}/MergeBamAlignment/merge.bam", library = config["libraries"])
     expand("GATK_runs/{library}/ubam/unprocessed.bam", library = config["libraries"])

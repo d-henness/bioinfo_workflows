@@ -1,6 +1,6 @@
 configfile: "{}/ref.yaml".format(workflow.basedir)
 
-include: "mutect2.snakefile"
+include: "./mutect2_alt_bed.snakefile"
 include: "Strelka.snakefile"
 #include: "TitanCNA.snakefile"
 

@@ -13,7 +13,7 @@ insertions = 0
 deletions = 0
 frameshift = 0
 # get data from all files with a mupexi extension
-for directory in sorted(os.listdir(args.base_dir)):
+for directory in sorted([f"{args.base_dir}/{dir_to_check}" for dir_to_check in os.listdir(args.base_dir)]):
     if os.path.isdir(directory):
         found = False
         mupexi_file = ''

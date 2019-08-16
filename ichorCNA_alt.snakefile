@@ -1,14 +1,16 @@
 configfile: "{}/ichorCNA/config_hg38.yaml".format(workflow.basedir)
 
-rule all:
+include: "./pre_pro_af_merge_alt_bed.snakefile"
+
+rule ichor_all:
   input: 
-    expand("results/ichorCNA/{tumor}/{tumor}.cna.seg", tumor=config["pairings"]),
+    expand("results/ichorCNA/{tumor}/{tumor}.cna.seg", tumor=config["pairs"]),
 #   expand("results/ichorCNA/{tumor}/{tumor}.cna.seg", tumor=config["samples"]),
-    expand("results/readDepth/{samples}.bin{binSize}.wig", samples=config["samples"], binSize=str(config["binSize"]))
+    expand("results/readDepth/{samples}.bin{binSize}.wig", samples=config["merge_libs"], binSize=str(config["binSize"]))
 
 rule read_counter:
   input:
-    lambda wildcards: config["samples"][wildcards.samples]
+    "GATK_runs/{samples}/ApplyBQSR/{samples}_recal.bam"
   output:
     "results/readDepth/{samples}.bin{binSize}.wig"		
   conda:    
@@ -28,9 +30,9 @@ rule read_counter:
 rule ichorCNA:
   input:
     tum="results/readDepth/{tumor}.bin" + str(config["binSize"]) + ".wig",
-    norm=lambda wildcards: "results/readDepth/" + config["pairings"][wildcards.tumor] + ".bin" + str(config["binSize"]) + ".wig"
+    norm=lambda wildcards: "results/readDepth/" + config["pairs"][wildcards.tumor] + ".bin" + str(config["binSize"]) + ".wig"
   output:
-    #corrDepth="results/ichorCNA/{tumor}/{tumor}.correctedDepth.txt",
+    corrDepth="results/ichorCNA/{tumor}/{tumor}.correctedDepth.txt",
     #param="results/ichorCNA/{tumor}/{tumor}.params.txt",
     cna="results/ichorCNA/{tumor}/{tumor}.cna.seg",
     #segTxt="results/ichorCNA/{tumor}/{tumor}.seg.txt",
@@ -58,7 +60,7 @@ rule ichorCNA:
     chrTrain=config["ichorCNA_chrTrain"],
     genomeStyle=config["ichorCNA_genomeStyle"],
     centromere=config["ichorCNA_centromere"],
-    exons=config["ichorCNA_exons"],
+    exons=config["alt_bed"],
     txnE=config["ichorCNA_txnE"],
     txnStrength=config["ichorCNA_txnStrength"],
     fracReadsChrYMale="0.001",
@@ -74,11 +76,11 @@ rule ichorCNA:
             --id {params.id}  \
             --libdir {params.libdir} \
             --WIG {input.tum} \
+            --NORMWIG {input.norm}  \
             --gcWig {params.gcwig} \
-            --NORMWIG {input.norm} \
             --mapWig {params.mapwig} \
             --ploidy \"{params.ploidy}\" \
-            --normal \"{params.normal}\" \
+            --exons.bed {params.exons}  \
             --maxCN {params.maxCN} \
             --includeHOMD {params.includeHOMD} \
             --chrs \"{params.chrs}\" \

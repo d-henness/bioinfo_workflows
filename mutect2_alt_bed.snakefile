@@ -30,7 +30,7 @@ rule CollectF1R2Counts:
     ref_fai = config["ref_fasta_index"],
     ref_dict = config["ref_dict"],
     gnomad = config["gnomad"],
-    interval = config["choi_capture"],
+    interval = config["alt_bed"],
     exclude_list = ''
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
@@ -89,32 +89,44 @@ rule M2:
   conda:
     "envs_dir/pre_proc.yaml"
   input:
-    normal_bam = "GATK_runs/{normal}/ApplyBQSR/{normal}_recal.bam",
-    normal_bia = "GATK_runs/{normal}/ApplyBQSR/{normal}_recal.bam.bai",
+    normal_bam = lambda wildcards: f"GATK_runs/{config['pairs'][wildcards.tumor]}/ApplyBQSR/{config['pairs'][wildcards.tumor]}_recal.bam",
+    normal_bai = lambda wildcards: f"GATK_runs/{config['pairs'][wildcards.tumor]}/ApplyBQSR/{config['pairs'][wildcards.tumor]}_recal.bam.bai",
     tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam",
     tumor_bai = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam.bai",
     art_tab = rules.LearnReadOrientationModel.output
   output:
-    vcf = temp("GATK_runs/{tumor}/M2_{normal}/out.vcf"),
-    vcf_index = temp("GATK_runs/{tumor}/M2_{normal}/out.vcf.idx"),
-    bam_out = temp("GATK_runs/{tumor}/M2_{normal}/out.bam"),
-    tumor_name = temp("GATK_runs/{tumor}/M2_{normal}/tumor_name.txt"),
-    normal_name = temp("GATK_runs/{tumor}/M2_{normal}/normal_name.txt"),
+    vcf = temp("GATK_runs/{tumor}/M2/out.vcf"),
+    vcf_index = temp("GATK_runs/{tumor}/M2/out.vcf.idx"),
+    bam_out = temp("GATK_runs/{tumor}/M2/out.bam"),
+    tumor_name = temp("GATK_runs/{tumor}/M2/tumor_name.txt"),
+    normal_name = temp("GATK_runs/{tumor}/M2/normal_name.txt"),
+#  input:
+#    normal_bam = "GATK_runs/{normal}/ApplyBQSR/{normal}_recal.bam",
+#    normal_bia = "GATK_runs/{normal}/ApplyBQSR/{normal}_recal.bam.bai",
+#    tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam",
+#    tumor_bai = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam.bai",
+#    art_tab = rules.LearnReadOrientationModel.output
+#  output:
+#    vcf = temp("GATK_runs/{tumor}/M2_{normal}/out.vcf"),
+#    vcf_index = temp("GATK_runs/{tumor}/M2_{normal}/out.vcf.idx"),
+#    bam_out = temp("GATK_runs/{tumor}/M2_{normal}/out.bam"),
+#    tumor_name = temp("GATK_runs/{tumor}/M2_{normal}/tumor_name.txt"),
+#    normal_name = temp("GATK_runs/{tumor}/M2_{normal}/normal_name.txt"),
   params:
     ref_fasta = config["ref_fasta"],
     ref_fai = config["ref_fasta_index"],
     ref_dict = config["ref_dict"],
     gnomad = config["gnomad"],
-    interval = config["choi_capture"],
+    interval = config["alt_bed"],
     exclude_list = 'neuron,biolx95'
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60 * 30,	# time in minutes
   threads: 4 # default for mutect asks for 4 threads
   log:
-    "GATK_runs/{tumor}/M2_{normal}/out.log"
+    "GATK_runs/{tumor}/M2/out.log"
   benchmark:
-    "benchmarks/{tumor}_{normal}.M2.benchmark.txt"
+    "benchmarks/{tumor}.M2.benchmark.txt"
   shell:
     """
       gatk --java-options -Xmx4000m GetSampleName -R {params.ref_fasta} -I {input.tumor_bam} -O {output.tumor_name} -encode
@@ -156,7 +168,7 @@ rule CollectSequencingArtifactMetrics:
     ref_fai = config["ref_fasta_index"],
     ref_dict = config["ref_dict"],
     gnomad = config["gnomad"],
-    interval = config["choi_capture"],
+    interval = config["alt_bed"],
     exclude_list = ''
   benchmark:
     "benchmarks/{tumor}.CollectSequencingArtifactMetrics.benchmark.txt"
@@ -170,18 +182,20 @@ rule CalculateContamination:
   input:
     tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam",
     tumor_bai = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam.bai",
-    normal_bam = "GATK_runs/{normal}/ApplyBQSR/{normal}_recal.bam",
-    normal_bia = "GATK_runs/{normal}/ApplyBQSR/{normal}_recal.bam.bai",
+    normal_bam = lambda wildcards: f"GATK_runs/{config['pairs'][wildcards.tumor]}/ApplyBQSR/{config['pairs'][wildcards.tumor]}_recal.bam",
+    normal_bai = lambda wildcards: f"GATK_runs/{config['pairs'][wildcards.tumor]}/ApplyBQSR/{config['pairs'][wildcards.tumor]}_recal.bam.bai",
+#    normal_bam = "GATK_runs/{normal}/ApplyBQSR/{normal}_recal.bam",
+#    normal_bia = "GATK_runs/{normal}/ApplyBQSR/{normal}_recal.bam.bai",
   output:
-    normal_pil_tab = temp("GATK_runs/{tumor}/CalculateContamination_{normal}/normal_pileups.table"),
-    pil_tab = temp("GATK_runs/{tumor}/CalculateContamination_{normal}/pileups.table"),
-    con_tab = temp("GATK_runs/{tumor}/CalculateContamination_{normal}/con_tab.table"),
-    seg_tab = temp("GATK_runs/{tumor}/CalculateContamination_{normal}/seg_tab.table"),
+    normal_pil_tab = temp("GATK_runs/{tumor}/CalculateContamination/normal_pileups.table"),
+    pil_tab = temp("GATK_runs/{tumor}/CalculateContamination/pileups.table"),
+    con_tab = temp("GATK_runs/{tumor}/CalculateContamination/con_tab.table"),
+    seg_tab = temp("GATK_runs/{tumor}/CalculateContamination/seg_tab.table"),
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
-    "GATK_runs/{tumor}/CalculateContamination_{normal}/out.log"
+    "GATK_runs/{tumor}/CalculateContamination/out.log"
   conda:
     "envs_dir/pre_proc.yaml"
   params:
@@ -189,12 +203,12 @@ rule CalculateContamination:
     ref_fai = config["ref_fasta_index"],
     ref_dict = config["ref_dict"],
     gnomad = config["gnomad"],
-    interval = config["choi_capture"],
+    interval = config["alt_bed"],
     variants_con = config["variants_for_contamination"],
     variants_con_index = config["variants_for_contamination_index"],
     exclude_list = ''
   benchmark:
-    "benchmarks/{tumor}_{normal}.CalculateContamination.benchmark.txt"
+    "benchmarks/{tumor}.CalculateContamination.benchmark.txt"
   shell:
     """
       gatk --java-options -Xmx4000m GetPileupSummaries -I {input.normal_bam} --interval-set-rule INTERSECTION -L {params.interval} \
@@ -211,26 +225,26 @@ rule MergeVCFs:
     vcfs = rules.M2.output.vcf,
     vcf_index = rules.M2.output.vcf_index,
   output:
-    merged_vcf = temp("GATK_runs/{tumor}/MergeVCFs_{normal}/out.vcf"),
-    merged_vcf_index = temp("GATK_runs/{tumor}/MergeVCFs_{normal}/out.vcf.idx"),
+    merged_vcf = temp("GATK_runs/{tumor}/MergeVCFs/out.vcf"),
+    merged_vcf_index = temp("GATK_runs/{tumor}/MergeVCFs/out.vcf.idx"),
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
-    "GATK_runs/{tumor}/MergeVCFs_{normal}/out.log",
+    "GATK_runs/{tumor}/MergeVCFs/out.log",
   params:
     ref_fasta = config["ref_fasta"],
     ref_fai = config["ref_fasta_index"],
     ref_dict = config["ref_dict"],
     gnomad = config["gnomad"],
-    interval = config["choi_capture"],
+    interval = config["alt_bed"],
     variants_con = config["variants_for_contamination"],
     variants_con_index = config["variants_for_contamination_index"],
     exclude_list = ''
   benchmark:
-    "benchmarks/{tumor}_{normal}.MergeVCFs.benchmark.txt"
+    "benchmarks/{tumor}.MergeVCFs.benchmark.txt"
   shell:
     """
       gatk --java-options -Xmx4000m MergeVcfs -I {input.vcfs} -O {output.merged_vcf} &> {log}
@@ -243,26 +257,26 @@ rule Filter:
     con_tab = rules.CalculateContamination.output.con_tab,
     maf_seg = rules.CalculateContamination.output.seg_tab,
   output:
-    filt_vcf = temp("GATK_runs/{tumor}/Filter_{normal}/out.vcf"),
-    filt_vcf_index = temp("GATK_runs/{tumor}/Filter_{normal}/out.vcf.idx"),
+    filt_vcf = temp("GATK_runs/{tumor}/Filter/out.vcf"),
+    filt_vcf_index = temp("GATK_runs/{tumor}/Filter/out.vcf.idx"),
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
-    "GATK_runs/{tumor}/Filter_{normal}/out.log"
+    "GATK_runs/{tumor}/Filter/out.log"
   params:
     ref_fasta = config["ref_fasta"],
     ref_fai = config["ref_fasta_index"],
     ref_dict = config["ref_dict"],
     gnomad = config["gnomad"],
-    interval = config["choi_capture"],
+    interval = config["alt_bed"],
     variants_con = config["variants_for_contamination"],
     variants_con_index = config["variants_for_contamination_index"],
     exclude_list = ''
   benchmark:
-    "benchmarks/{tumor}_{normal}.Filter.benchmark.txt"
+    "benchmarks/{tumor}.Filter.benchmark.txt"
   shell:
     """
       gatk --java-options -Xmx4000m FilterMutectCalls -V {input.vcf} \
@@ -277,26 +291,26 @@ rule FilterByOrientationBias:
     vcf_index = rules.Filter.output.filt_vcf_index,
     ada_det_met = rules.CollectSequencingArtifactMetrics.output.ada_det_met
   output:
-    vcf = "GATK_runs/{tumor}/FilterByOrientationBias_{normal}/{tumor}.vcf",
-    vcf_index = "GATK_runs/{tumor}/FilterByOrientationBias_{normal}/{tumor}.vcf.idx",
+    vcf = "GATK_runs/{tumor}/FilterByOrientationBias/{tumor}.vcf",
+    vcf_index = "GATK_runs/{tumor}/FilterByOrientationBias/{tumor}.vcf.idx",
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
-    "GATK_runs/{tumor}/FilterByOrientationBias_{normal}/out.log"
+    "GATK_runs/{tumor}/FilterByOrientationBias/out.log"
   params:
     ref_fasta = config["ref_fasta"],
     ref_fai = config["ref_fasta_index"],
     ref_dict = config["ref_dict"],
     gnomad = config["gnomad"],
-    interval = config["choi_capture"],
+    interval = config["alt_bed"],
     variants_con = config["variants_for_contamination"],
     variants_con_index = config["variants_for_contamination_index"],
     exclude_list = ''
   benchmark:
-    "benchmarks/{tumor}_{normal}.FilterByOrientationBias.benchmark.txt"
+    "benchmarks/{tumor}.FilterByOrientationBias.benchmark.txt"
   shell:
     """
       gatk --java-options -Xmx4000m FilterByOrientationBias \
@@ -306,49 +320,49 @@ rule FilterByOrientationBias:
     """
 # removed final_artifact_modes
 
-rule FuncotateMaf:
-  input:
-    vcf = rules.FilterByOrientationBias.output.vcf,
-    vcf_index = rules.FilterByOrientationBias.output.vcf_index,
-  output:
-    final_out_name = "GATK_runs/{tumor}/FuncotateMaf_{normal}/out.vcf.maf.annotated",
-  resources:
-    mem_mb = lambda wildcards, attempt: attempt * 5000,
-    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
-  log:
-    "GATK_runs/{tumor}/FuncotateMaf_{normal}/out.log",
-  conda:
-    "envs_dir/pre_proc.yaml"
-  params:
-    ref_fasta = config["ref_fasta"],
-    ref_fai = config["ref_fasta_index"],
-    ref_dict = config["ref_dict"],
-    gnomad = config["gnomad"],
-    interval = config["choi_capture"],
-    variants_con = config["variants_for_contamination"],
-    variants_con_index = config["variants_for_contamination_index"],
-    data_sources = config["data_sources"],
-    ref_ver = "hg38",
-    output_format = "MAF",
-    exclude_list = ''
-  benchmark:
-    "benchmarks/{tumor}_{normal}.FuncotateMaf.benchmark.txt"
-  shell:
-    """
-      gatk --java-options -Xmx4000m Funcotator \
-        --data-sources-path {params.data_sources} \
-        --ref-version {params.ref_ver} \
-        --output-file-format {params.output_format} \
-        -R {params.ref_fasta} \
-        -V {input.vcf} \
-        -O {output.final_out_name} \
-        -L {params.interval} \
-        --annotation-default normal_barcode:{wildcards.normal} \
-        --annotation-default tumor_barcode:{wildcards.tumor} \
-    """
-# took out
-#         ${"--transcript-selection-mode " + transcript_selection_mode} \
-#         ${"--transcript-list " + transcript_selection_list} \
-#        --annotation-default Center:${default="Unknown" sequencing_center} \
-#        --annotation-default source:${default="Unknown" sequence_source} \
-#         ${filter_funcotations_args} \
+#rule FuncotateMaf:
+#  input:
+#    vcf = rules.FilterByOrientationBias.output.vcf,
+#    vcf_index = rules.FilterByOrientationBias.output.vcf_index,
+#  output:
+#    final_out_name = "GATK_runs/{tumor}/FuncotateMaf_{normal}/out.vcf.maf.annotated",
+#  resources:
+#    mem_mb = lambda wildcards, attempt: attempt * 5000,
+#    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
+#  log:
+#    "GATK_runs/{tumor}/FuncotateMaf_{normal}/out.log",
+#  conda:
+#    "envs_dir/pre_proc.yaml"
+#  params:
+#    ref_fasta = config["ref_fasta"],
+#    ref_fai = config["ref_fasta_index"],
+#    ref_dict = config["ref_dict"],
+#    gnomad = config["gnomad"],
+#    interval = config["alt_bed"],
+#    variants_con = config["variants_for_contamination"],
+#    variants_con_index = config["variants_for_contamination_index"],
+#    data_sources = config["data_sources"],
+#    ref_ver = "hg38",
+#    output_format = "MAF",
+#    exclude_list = ''
+#  benchmark:
+#    "benchmarks/{tumor}_{normal}.FuncotateMaf.benchmark.txt"
+#  shell:
+#    """
+#      gatk --java-options -Xmx4000m Funcotator \
+#        --data-sources-path {params.data_sources} \
+#        --ref-version {params.ref_ver} \
+#        --output-file-format {params.output_format} \
+#        -R {params.ref_fasta} \
+#        -V {input.vcf} \
+#        -O {output.final_out_name} \
+#        -L {params.interval} \
+#        --annotation-default normal_barcode:{wildcards.normal} \
+#        --annotation-default tumor_barcode:{wildcards.tumor} \
+#    """
+## took out
+##         ${"--transcript-selection-mode " + transcript_selection_mode} \
+##         ${"--transcript-list " + transcript_selection_list} \
+##        --annotation-default Center:${default="Unknown" sequencing_center} \
+##        --annotation-default source:${default="Unknown" sequence_source} \
+##         ${filter_funcotations_args} \
