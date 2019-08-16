@@ -121,7 +121,7 @@ rule M2:
     exclude_list = 'neuron,biolx95'
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 5000,
-    time_min = lambda wildcards, attempt: attempt * 24 * 60 * 30,	# time in minutes
+    time_min = lambda wildcards, attempt: attempt * 24 * 60 * 3,	# time in minutes
   threads: 4 # default for mutect asks for 4 threads
   log:
     "GATK_runs/{tumor}/M2/out.log"

@@ -49,6 +49,7 @@
 "ref_gtf_rna":  "/home/dhenness/projects/def-rgni0001/hg38//gencode.v29.annotation.gtf"
 "bowtie2_rrna": "/home/dhenness/projects/def-rgni0001/hg38//ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/ncrna/Homo_sapiens.GRCh38.ncrna.rRNA"
 "bowtie2_cdna": "/home/dhenness/projects/def-rgni0001/hg38//ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.bowtie2.index"
+"hisat2_rna_WG": "/home/dhenness/projects/def-rgni0001/hg38//grch38_snp_tran/genome_snp_tran"
 
 # VEP
 "vep_version": "ensembl-vep-95.2-0"
@@ -62,7 +63,7 @@
 "iedb-install-directory": "/home/dhenness/bioinfo_workflows/mhc_X"
 
 #kallisto index
-"kallisto_index": "/data/shared/hg38/ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.kallisto.index"
+"kallisto_index": "/home/dhenness/projects/def-rgni0001/hg38//ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.kallisto.index"
 
 # alt bed files
 "choi_capture": "/home/dhenness/projects/def-rgni0001/hg38//choi_capture/170907_HG38_CCDS1X_REZ_capture_targets_padded_100_each_side.bed"

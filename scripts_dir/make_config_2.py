@@ -23,8 +23,9 @@ def main():
                     lib_string = "{:}_{:}:  ['{:}', '{:}']".format(i, j, reads_list[(j * 2)], reads_list[(j * 2) + 1])
                     libs.append(lib_string)
                     merge_lib_string = "{:}{:}_{:}, ".format(merge_lib_string, i, j)
-                merge_lib_string = "{:}]".format(merge_lib_string[:-2])
-                merge_libs.append(merge_lib_string)
+                if reads_list != []:
+                    merge_lib_string = "{:}]".format(merge_lib_string[:-2])
+                    merge_libs.append(merge_lib_string)
 
     print(f"alt_bed:  {args.bed_file}")
 
