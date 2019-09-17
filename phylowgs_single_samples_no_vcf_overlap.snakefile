@@ -2,7 +2,7 @@ configfile: "{}/ref.yaml".format(workflow.basedir)
 
 include: "./mutect2_alt_bed.snakefile"
 include: "Strelka.snakefile"
-#include: "TitanCNA.snakefile"
+#include: "TitanCNA_alt.snakefile"
 
 def parse_cnv_and_vcf_cnv_input_list(wildcards):
   input_list = []
@@ -42,7 +42,7 @@ rule phylowgs_all:
 #   expand("phylowgs/{tumor}/pre_pro_cnv/cnvs_filter.txt", tumor = config["pairs"]),
 #    expand("phylowgs/{sample_pairs}/parse_cnv_and_vcf/cnv_data.txt", tumor = config["pairs"], sample_pairs = config["phylowgs_samples"])
 #   expand("phylowgs/{sample_pairs}/run_phylo/", tumor = config["pairs"], sample_pairs = config["phylowgs_samples"]),
-    expand("phylowgs/{sample_pairs}/visualize_data/{sample_pairs}.summ.json.gz", sample_pairs = config["phylowgs_samples"])
+    expand("phylowgs/{tumor}/get_best_tree/best_tree.txt", tumor = config["pairs"])
 
 # rule pre_pro_varscan:
 #   input:
@@ -201,7 +201,8 @@ rule parse_cnvs:
     mem_mb = 4000
   shell:
     '''
-      PURITY=$(cat {input.cnv} | sed 's/\,[^\t]*//' | grep '{wildcards.tumor}_cluster' | awk '{{print $6}}')
+      PURITY=$(cat {input.cnv} | sed -E 's/\,[^[:space:]]*//' | grep -E '\s{wildcards.tumor}_cluster' | awk '{{print $6}}')
+      echo "--------PURITY $PURITY--------"
       TITANFILE1=$(grep '{wildcards.tumor}_cluster' {input.cnv} | sed 's/.*results\//results\//; s/$/\.segs.txt/')
       TITANFILE2=$(echo $TITANFILE1 | sed 's/.*\///; s/^/phylowgs\/{wildcards.tumor}\/pre_pro_cnv\//')
       if [[ !(-d phylowgs/{wildcards.tumor}/pre_pro_cnv) ]]; then
@@ -216,8 +217,8 @@ rule parse_cnvs:
 
 rule parse_cnv_and_vcf:
   input:
-    cnv_input = parse_cnv_and_vcf_cnv_input_list,
-    vcf_input = parse_cnv_and_vcf_vcf_input_list,
+    cnv_input = rules.parse_cnvs.output.post_filter,
+    vcf_input = rules.pre_pro_mutect.output.split_filter_vfc,
   output:
     out_cnv = "phylowgs/{tumor}/parse_cnv_and_vcf/cnv_data.txt",
     out_var = "phylowgs/{tumor}/parse_cnv_and_vcf/ssm_data.txt",
@@ -226,17 +227,18 @@ rule parse_cnv_and_vcf:
     "envs_dir/phylowgs.yaml"
   resources:
     mem_mb = 4000
-  params:
-    cnv_input = parse_cnv_and_vcf_cnv_command_string,
-    vcf_input = parse_cnv_and_vcf_vcf_command_string,
+#  params:
+#    cnv_input = parse_cnv_and_vcf_cnv_command_string,
+#    vcf_input = parse_cnv_and_vcf_vcf_command_string,
   shell:
     """
       $CONDA_PREFIX/share/phylowgs/parser/create_phylowgs_inputs.py \
         --output-cnvs {output.out_cnv}  \
         --output-variants {output.out_var}  \
         --output-params {output.out_param}  \
-        {params.cnv_input}  \
-        {params.vcf_input}
+        --cnvs S0={input.cnv_input}  \
+        --vcf-type S0=mutect_smchet \
+        S0={input.vcf_input}
     """
 
 rule run_phylo:
@@ -275,11 +277,11 @@ rule visualize_data:
     mutass = "phylowgs/{tumor}/visualize_data/{tumor}.mutass.zip",
   conda:
     "envs_dir/phylowgs.yaml"
-  params:
-    dataset_names = lambda wildcards: [sample for sample in config["phylowgs_samples"][wildcards.tumor]]
+#  params:
+#    dataset_names = "{tumor}"
   threads: 1
   resources:
-    mem_mb = 4000
+    mem_mb = 8000
   benchmark:
     "phylowgs/benchmarks/{tumor}.visualize_data.benchmark"
   log:
@@ -295,8 +297,42 @@ rule visualize_data:
       {input.zip_file}  \
       {output.tree_summary}  \
       {output.mutlist}  \
+      --include-multiprimary \
       {output.mutass} &> {log}
     """
+
+rule get_best_tree:
+  input:
+    tree_summary = rules.visualize_data.output.tree_summary,
+    mutlist = rules.visualize_data.output.mutlist,
+    mutass = rules.visualize_data.output.mutass,
+    ssm_data = rules.parse_cnv_and_vcf.output.out_var,
+    vcf = "vep_stats/{tumor}/VEP/{tumor}_snp_VEP.vcf",
+  output:
+    best_tree = "phylowgs/{tumor}/get_best_tree/best_tree.txt"
+  conda:
+    "envs_dir/phylowgs.yaml"
+  threads: 1
+  resources:
+    mem_mb = 4000
+  benchmark:
+    "phylowgs/benchmarks/{tumor}.get_best_tree.benchmark"
+  log:
+    "phylowgs/logs/{tumor}.get_best_tree.log"
+  params:
+    out_dir = "phylowgs/{tumor}/get_best_tree/",
+    bioinfo_workflows_path = config["bioinfo_workflows_path"],
+  shell:
+    """
+      {params.bioinfo_workflows_path}/scripts_dir/get_snvs_from_phylo.py \
+        -m {input.mutlist} \
+        -s {input.tree_summary} \
+        -t {input.mutass} \
+        -S {input.ssm_data} \
+        -o {params.out_dir} \
+        {input.vcf}
+    """
+
 # uncomment this if multiprimary tumors are expected
 #      --include-multiprimary &> {log}
 #    """

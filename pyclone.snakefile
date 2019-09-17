@@ -146,7 +146,8 @@ rule pyclone_run_analysis:
   log: "pyclone/log/{tumor}_run_analysis.log"
   benchmark: "pyclone/benchmarks/{tumor}_run_analysis.benchmark"
   resources:
-    mem_mb = 4000
+    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   shell:
     """
     PyClone run_analysis --config_file {input.yaml_run} &> {log}
@@ -164,7 +165,8 @@ rule pyclone_plot_loci:
   log: "pyclone/log/{tumor}_plot_loci_{plot_loci_type}.log"
   benchmark: "pyclone/benchmarks/{tumor}_plot_loci_{plot_loci_type}.benchmark"
   resources:
-    mem_mb = 4000
+    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   shell:
     """
     PyClone plot_loci \
@@ -187,7 +189,8 @@ rule pyclone_plot_clusters:
   log: "pyclone/log/{tumor}_plot_clusters_{plot_type}.log"
   benchmark: "pyclone/benchmarks/{tumor}_plot_clusters_{plot_type}.benchmark"
   resources:
-    mem_mb = 4000
+    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   shell:
     """
     PyClone plot_clusters \
@@ -210,7 +213,8 @@ rule pyclone_build_tables:
   log: "pyclone/log/{tumor}_build_tables_{table_type}.log"
   benchmark: "pyclone/benchmarks/{tumor}_build_tables_{table_type}.benchmark"
   resources:
-    mem_mb = 4000
+    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   shell:
     """
     PyClone build_table \

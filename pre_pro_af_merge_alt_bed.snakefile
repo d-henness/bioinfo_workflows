@@ -17,7 +17,7 @@ def MarkDuplicates_input(wildcards):
 def MarkDuplicates_input_string(wildcards):
   bam_files = []
   for library in config["merge_libs"][wildcards.merge]:
-    bam_files.append(f"--INPUT GATK_runs/{library}/MergeBamAlignment/merge.bam")
+    bam_files.append(f"--INPUT /tmp/$SLURM_JOB_ID/{wildcards.merge}/MarkDuplicates/{library}.bam")
   return ' '.join(bam_files)
 
 rule MarkDuplicates:
@@ -26,7 +26,6 @@ rule MarkDuplicates:
   output:
     bam = temp("GATK_runs/{merge}/MarkDuplicates/dup.bam"),
     metrics = "GATK_runs/{merge}/MarkDuplicates/metrics.duplicate_metrics",
-    temp_dir = temp(directory("GATK_runs/{merge}/MarkDuplicates/tmp/"))
   conda:
     "envs_dir/pre_proc.yaml"
   log:
@@ -35,14 +34,22 @@ rule MarkDuplicates:
     ref_fasta = config["ref_fasta"],
     java_opts = config["MarkDuplicates.java_opt"],
     libs_string = MarkDuplicates_input_string,
-    exclude_list = ''
+    exclude_list = '',
+    temp_dir = "/tmp/$SLURM_JOB_ID/{merge}/MarkDuplicates/tmp",
   resources:
     mem_mb = lambda wildcards, attempt: attempt * (int(config["MarkDuplicates.java_opt"].strip("-Xmx")) + 1000),
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
+    io = 1, # used to indicate that this is an io heavy job and should not have many running at once
   benchmark:
     "benchmarks/{merge}.MarkDuplicates.benchmark.txt"
   shell:
     """
+      for file in {input}; do
+        lib=$(echo $file | sed -E 's,GATK_runs/([^/]+)/.*,\\1,')
+        mkdir -p {params.temp_dir}
+        cp $file /tmp/$SLURM_JOB_ID/{wildcards.merge}/MarkDuplicates/$lib.bam
+      done
+
       gatk --java-options "{params.java_opts}"	MarkDuplicates \
       {params.libs_string} \
       --OUTPUT {output.bam} \
@@ -52,7 +59,7 @@ rule MarkDuplicates:
       --ASSUME_SORT_ORDER "queryname" \
       --TAGGING_POLICY All \
       --CREATE_MD5_FILE true	\
-      --TMP_DIR {output.temp_dir} \
+      --TMP_DIR {params.temp_dir} \
       &> {log}
     """
 rule SortAndFixTags:

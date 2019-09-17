@@ -7,13 +7,7 @@ normals = [config["pairs"][tumor] for tumor in tumors]
 
 rule mutect_all:
   input:
-#   expand("GATK_runs/{tumor}/M2_{normal}/out.vcf", zip, tumor = tumors, normal = normals)
-#   expand("GATK_runs/{tumor}/CollectSequencingArtifactMetrics/gatk.pre_adapter_detail_metrics", tumor = tumors)
-#   expand("GATK_runs/{tumor}/CalculateContamination_{normal}/seg_tab.table", tumor = tumors, normal = normals)
-#   expand("GATK_runs/{tumor}/MergeVCFs_{normal}/out.vcf", tumor = tumors, normal = normals)
-#   expand("GATK_runs/{tumor}/Filter_{normal}/out.vcf", tumor = tumors, normal = normals)
-    expand("GATK_runs/{tumor}/FilterByOrientationBias_{normal}/{tumor}.vcf", zip, tumor = tumors, normal = normals)
-#   expand("GATK_runs/{tumor}/FuncotateMaf_{normal}/out.vcf.maf.annotated", zip, tumor = tumors, normal = normals) There is an issue with funcotator, uncomment this if a fix is found
+    expand("GATK_runs/{tumor}/FilterByOrientationBias/{tumor}.vcf", tumor = tumors)
 
 
 rule CollectF1R2Counts:

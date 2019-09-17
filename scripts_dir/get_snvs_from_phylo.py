@@ -4,6 +4,7 @@ import sys
 import os
 import io
 import argparse
+import gzip
 from zipfile import ZipFile
 from operator import itemgetter
 import json
@@ -28,8 +29,8 @@ def main():
     ap.add_argument('-o', '--output-dir', required=True)
     args = ap.parse_args()
 
-    muts = json.loads(open(args.muts).read())
-    summ = json.loads(open(args.summ).read())
+    muts = json.loads(gzip.open(args.muts, 'rt').read())
+    summ = json.loads(gzip.open(args.summ, 'rt').read())
 
     #put in so ssms can be mapped correctly
     ssms_map = {}
@@ -54,6 +55,9 @@ def main():
     best_tree = str(sorted_densities[0][0])
     best_tree_info = summ['trees'][best_tree]
 
+    with open(f"{args.output_dir}/best_tree.txt", 'w') as data:
+        data.write(f"{best_tree}\n")
+
     with ZipFile(args.trees) as trees_zip:
         best_tree_data = json.loads(trees_zip.open('{}.json'.format(best_tree)).read().decode('utf-8'))
         print(best_tree_data)
@@ -62,8 +66,7 @@ def main():
 
     for vcf in args.vcf:
         basename = os.path.basename(vcf)
-        lib = basename[:basename.find('EXOME')+5]
-        lib_dir = "{}/{}".format(args.output_dir, os.path.splitext(vcf)[0])
+        lib_dir = f"{args.output_dir}/{basename}"
         os.makedirs(lib_dir, exist_ok=True)
 
         for pop, assignments in best_tree_data['mut_assignments'].items():
@@ -78,7 +81,7 @@ def main():
 
             population_vcf = "{}/{}.vcf".format(lib_dir, pop)
 
-            with open(vcf) as vcf_h, open(population_vcf, 'w') as out_h:
+            with open(vcf, 'r') as vcf_h, open(population_vcf, 'w') as out_h:
                 for line in vcf_h:
                     if line.startswith('#'):
                         out_h.write(line)

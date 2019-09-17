@@ -32,20 +32,16 @@ def parse_cnv_and_vcf_vcf_command_string(wildcards):
 
 rule vep_stats_all:
   input:
-    expand("vep_stats/{tumor}/VEP/{tumor}_snp_VEP_parsed.csv", tumor = config['pairs']),
-    expand("vep_stats/{tumor}/VEP/{tumor}_indel_VEP_parsed.csv", tumor = config['pairs']),
-#    expand("vep_stats/{tumor}/VEP/{tumor}_snp_VEP.vcf", tumor = config["pairs"]),
-#    expand("vep_stats/{tumor}/VEP/{tumor}_indel_VEP.vcf", tumor = config["pairs"]),
-#    expand("vep_stats/{group}/VEP_overlap_snp/0003.vcf", group = config["groups"]),
-#    expand("vep_stats/{group}/VEP_overlap_indel/0003.vcf", group = config["groups"]),
+    expand("vep_stats/{tumor}/VEP/{tumor}_snp_VEP_parsed.csv", tumor = config["pairs"]),
+    expand("vep_stats/{tumor}/VEP/{tumor}_indel_VEP_parsed.csv", tumor = config["pairs"]),
 
 
 rule pre_pro_mutect:
   input:
-    vcf = lambda wildcards : f"runs/{wildcards.tumor}/FilterByOrientationBias_{config['pairs'][wildcards.tumor]}/{wildcards.tumor}.vcf",
+    vcf = lambda wildcards : f"GATK_runs/{wildcards.tumor}/FilterByOrientationBias/{wildcards.tumor}.vcf",
   output:
-    split_filter_vcf_zip = "vep_stats/{tumor}/prepro_vcfs/pre_pro_mutect/mutect.split.filter.vcf.gz",
-    split_filter_vcf = temp("vep_stats/{tumor}/prepro_vcfs/pre_pro_mutect/out.split.filter.vcf"),
+    split_filter_indel_vcf = temp("vep_stats/{tumor}/prepro_vcfs/pre_pro_mutect/{tumor}.indel.filter.vcf"),
+    split_filter_snp_vcf = temp("vep_stats/{tumor}/prepro_vcfs/pre_pro_mutect/{tumor}.snp.filter.vcf"),
     split_vcf = temp("vep_stats/{tumor}/prepro_vcfs/pre_pro_mutect/out.split.vcf"),
   params:
     ref_fasta = config["ref_fasta"],
@@ -56,81 +52,29 @@ rule pre_pro_mutect:
   shell:
     """
       bcftools norm -f {params.ref_fasta} -m - -o {output.split_vcf} {input.vcf}
-      bcftools filter -i "FILTER='PASS'" {output.split_vcf} -o {output.split_filter_vcf}
-      bgzip -c {output.split_filter_vcf} > {output.split_filter_vcf_zip}
-      bcftools index -f {output.split_filter_vcf_zip}
-    """
-
-rule pre_pro_strelka:
-  input:
-    vcf_snp = rules.Strelka_execute.output.vcfs_snvs,
-    vcf_indel = rules.Strelka_execute.output.vcfs_indels
-  output:
-    split_filter_vcf_zip = "vep_stats/{tumor}/prepro_vcfs/pre_pro_strelka/strelka.split.filter.vcf.gz",
-    split_filter_vcf = temp("vep_stats/{tumor}/prepro_vcfs/pre_pro_strelka/out.split.filter.vcf"),
-    norm_vcf_indel = temp("vep_stats/{tumor}/prepro_vcfs/pre_pro_strelka/norm_vcf_indel.vcf"),
-    filter_vcf_indel = temp("vep_stats/{tumor}/prepro_vcfs/pre_pro_strelka/filter_vcf_indel.vcf"),
-    filter_vcf_indel_zip = "vep_stats/{tumor}/prepro_vcfs/pre_pro_strelka/filter_vcf_indel.vcf.gz",
-  params:
-    ref_fasta = config["ref_fasta"],
-  conda:
-    "envs_dir/phylowgs.yaml"
-  resources:
-    mem_mb = 4000
-  shell:
-    """
-      bcftools norm -f {params.ref_fasta} -m - -o {output.norm_vcf_indel} {input.vcf_indel}
-      bcftools filter -i "FILTER='PASS'" {output.norm_vcf_indel} -o {output.filter_vcf_indel}
-      bgzip -c {output.filter_vcf_indel} > {output.filter_vcf_indel_zip}
-      bcftools index -f {output.filter_vcf_indel_zip}
-
-      bcftools filter -i "FILTER='PASS'" {input.vcf_snp} -o {output.split_filter_vcf}
-      bgzip -c {output.split_filter_vcf} > {output.split_filter_vcf_zip}
-      bcftools index -f {output.split_filter_vcf_zip}
-    """
-
-rule make_overlap_mut_and_strel:
-  input:
-    mut = rules.pre_pro_mutect.output.split_filter_vcf_zip,
-    strel_snp = rules.pre_pro_strelka.output.split_filter_vcf_zip,
-    strel_indel = rules.pre_pro_strelka.output.filter_vcf_indel_zip,
-  output:
-    overlap_vcf_snp = "vep_stats/{tumor}/prepro_vcfs/overlap_mut_and_strel_snp/0003.vcf",
-    overlap_vcf_indel = "vep_stats/{tumor}/prepro_vcfs/overlap_mut_and_strel_indel/0003.vcf",
-    overlap_vcf_snp_mutect2 = "vep_stats/{tumor}/prepro_vcfs/overlap_mut_and_strel_snp/0002.vcf",
-    overlap_vcf_indel_mutect2 = "vep_stats/{tumor}/prepro_vcfs/overlap_mut_and_strel_indel/0002.vcf",
-  conda:
-    "envs_dir/phylowgs.yaml"
-  params:
-    out_dir_snp = "vep_stats/{tumor}/prepro_vcfs/overlap_mut_and_strel_snp",
-    out_dir_indel = "vep_stats/{tumor}/prepro_vcfs/overlap_mut_and_strel_indel",
-  resources:
-    mem_mb = 4000
-  shell:
-    """
-      bcftools isec -p {params.out_dir_snp} {input.mut} {input.strel_snp}
-      bcftools isec -p {params.out_dir_indel} {input.mut} {input.strel_indel}
+      bcftools filter -i "FILTER='PASS' && TYPE='indel'" {output.split_vcf} -o {output.split_filter_indel_vcf}
+      bcftools filter -i "FILTER='PASS' && TYPE='snp'" {output.split_vcf} -o {output.split_filter_snp_vcf}
     """
 
 rule VEP_snp:
   input:
-    vcf_in = rules.make_overlap_mut_and_strel.output.overlap_vcf_snp,
+    vcf_in = rules.pre_pro_mutect.output.split_filter_snp_vcf,
   output:
     vcf_out = "vep_stats/{tumor}/VEP/{tumor}_snp_VEP.vcf",
     vcf_out_zip = "vep_stats/{tumor}/VEP/{tumor}_snp_VEP.vcf.gz",
+    summary = "vep_stats/{tumor}/VEP/{tumor}_snp_VEP.vcf_summary.html",
     parsed_output = "vep_stats/{tumor}/VEP/{tumor}_snp_VEP_parsed.csv",
-    summary = "vep_stats/{tumor}/VEP/{tumor}_snp_VEP.vcf_summary.html"
   conda: "envs_dir/phylowgs.yaml"
   log: "vep_stats/log/{tumor}_snp_VEP.log"
   benchmark: "vep_stats/benchmark/{tumor}_snp_VEP.benchmark"
   params:
     ref_fasta = config["ref_fasta"],
-    bioinfo_workflows_path = config["bioinfo_workflows_path"],
     vep_cache = config["vep_cache"],
     vep_plugins = config["vep_plug_dir"],
     dbNSFP_config = config["dbNSFP_config"],
     condel_config = config["condel_config"],
     loftool_config = config["loftool_config"],
+    bioinfo_workflows_path = config["bioinfo_workflows_path"],
   threads: 1
   resources:
     mem_mb = 4000
@@ -175,7 +119,7 @@ rule VEP_snp:
 
 rule VEP_indel:
   input:
-    vcf_in = rules.make_overlap_mut_and_strel.output.overlap_vcf_indel,
+    vcf_in = rules.pre_pro_mutect.output.split_filter_indel_vcf,
   output:
     vcf_out = "vep_stats/{tumor}/VEP/{tumor}_indel_VEP.vcf",
     vcf_out_zip = "vep_stats/{tumor}/VEP/{tumor}_indel_VEP.vcf.gz",
@@ -186,12 +130,12 @@ rule VEP_indel:
   benchmark: "vep_stats/benchmark/{tumor}_indel_VEP.benchmark"
   params:
     ref_fasta = config["ref_fasta"],
-    bioinfo_workflows_path = config["bioinfo_workflows_path"],
     vep_cache = config["vep_cache"],
     vep_plugins = config["vep_plug_dir"],
     dbNSFP_config = config["dbNSFP_config"],
     condel_config = config["condel_config"],
     loftool_config = config["loftool_config"],
+    bioinfo_workflows_path = config["bioinfo_workflows_path"],
   threads: 1
   resources:
     mem_mb = 4000

@@ -66,4 +66,8 @@
 "kallisto_index": "/data/shared/hg38/ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.kallisto.index"
 
 # alt bed files
-"choi_capture": "/data/shared/hg38/choi_capture/170907_HG38_CCDS1X_REZ_capture_targets_padded_100_each_side.bed"
+# no longer used as bed files are given in main config file
+#"choi_capture": "/data/shared/hg38/choi_capture/170907_HG38_CCDS1X_REZ_capture_targets_padded_100_each_side.bed"
+
+#STAR
+"star_genomeDir": "/data/shared/hg38/STAR_index/ensembl_95/"
