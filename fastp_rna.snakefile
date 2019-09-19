@@ -26,7 +26,7 @@ rule fastp_paired:
   conda:
     "envs_dir/kallisto.yaml"
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * (4 * 1024),
+    mem_mb = lambda wildcards, attempt: attempt * (6 * 1024),
     time_min = lambda wildcards, attempt: attempt * (1 * 60),	# time in minutes
   threads: 1
   params:
@@ -50,7 +50,7 @@ rule fastp_unpaired:
   conda:
     "envs_dir/kallisto.yaml"
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * (4 * 1024),
+    mem_mb = lambda wildcards, attempt: attempt * (6 * 1024),
     time_min = lambda wildcards, attempt: attempt * (1 * 60),	# time in minutes
   threads: 1
   params:
