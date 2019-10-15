@@ -1,6 +1,6 @@
 configfile: "{}/ref.yaml".format(workflow.basedir)
 
-include: "mutect2.snakefile"
+include: "./mutect2_alt_bed.snakefile"
 include: "kallisto.snakefile"
 
 def make_normal_set(tumors):
@@ -200,6 +200,10 @@ rule mupexi_chr2:
     mem_mb = lambda wildcards, attempt: attempt * 1024 * 16,
   shell:
     """
+      echo "--------------here---------------------"
+      which python
+      /usr/bin/env python --version
+      echo "--------------here---------------------"
       hla_string=$(sed -En '/[A-C]\*/{{s/(\\t([A-C])\*)/\\tHLA-\\2/g;p}}' {input.hlas} | sed -E 's/\s/\,/g; s/^[^,]*,//; s/,[^,]*,[^,]*$//')
 
       if [[ "$hla_string" == '' ]]; then

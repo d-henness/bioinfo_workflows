@@ -71,3 +71,7 @@
 
 #STAR
 "star_genomeDir": "/data/shared/hg38/STAR_index/ensembl_95/"
+"ensembl_95_fasta": "/data/shared/hg38/ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
+
+#GATK3 setup
+"GATK3_bz2": "/data/shared/hg38/GenomeAnalysisTK-3.8-1-0-gf15c1c3ef.tar.bz2"

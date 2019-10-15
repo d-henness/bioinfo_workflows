@@ -1,0 +1,7 @@
+channels:
+ - conda-forge
+ - bioconda
+ - defaults
+dependencies:
+ - gatk=3.8
+ - samtools

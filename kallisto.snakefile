@@ -4,7 +4,7 @@ include: "fastp_rna.snakefile"
 
 # this will only work on paired fastq inputs
 def kallisto_input(wildcards):
-  return " ".join([f"kallisto/{lib}/fastp/{lib}_1.fq.gz kallisto/{lib}/fastp/{lib}_2.fq.gz" for lib in config['rna_merge_libs'][wildcards.rna_lib]])
+  return " ".join([f"fastp/{lib}/fastp/{lib}_1.fq.gz fastp/{lib}/fastp/{lib}_2.fq.gz" for lib in config["rna_merge_libs"][wildcards.rna_lib]])
 
 rule kallisto_all:
   input:
@@ -12,7 +12,7 @@ rule kallisto_all:
 
 rule kallisto:
   input:
-    signal = lambda wildcards: [f"kallisto/{lib}/fastp/{lib}_signal.txt" for lib in config['rna_merge_libs'][wildcards.rna_lib]]
+    signal = lambda wildcards: [f"fastp/{lib}/fastp/{lib}_signal.txt" for lib in config['rna_merge_libs'][wildcards.rna_lib]]
   output:
     abundance = "kallisto/{rna_lib}/kallisto/abundance.h5",
     mean_exp = "kallisto/{rna_lib}/kallisto/{rna_lib}_mean_exp.tsv",

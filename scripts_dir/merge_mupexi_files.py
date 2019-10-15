@@ -27,15 +27,18 @@ for directory in sorted([f"{args.base_dir}/{dir_to_check}" for dir_to_check in o
             with open(directory + '/' + mupexi_file) as data:
                 all_data.append(data.readlines())
             mupexi_log = mupexi_file[:-len(".mupexi")] + ".log"
-            with open(directory + '/' + mupexi_log) as data:
-                all_lines = data.readlines()
-                for i, line in enumerate(all_lines):
-                    if "missense" in line:
-                        missense += int(line.split()[1])
-                        insertions += int(all_lines[i+1].split()[0])
-                        deletions += int(all_lines[i+2].split()[0])
-                        frameshift += int(all_lines[i+3].split()[0])
-                        break
+            if os.path.isfile(directory + '/' + mupexi_log):
+                with open(directory + '/' + mupexi_log) as data:
+                    all_lines = data.readlines()
+                    for i, line in enumerate(all_lines):
+                        if "missense" in line:
+                            missense += int(line.split()[1])
+                            insertions += int(all_lines[i+1].split()[0])
+                            deletions += int(all_lines[i+2].split()[0])
+                            frameshift += int(all_lines[i+3].split()[0])
+                            break
+            else:
+                print('Did not find mupexi log file in {:}'.format(directory))
         else:
             print('Did not find mupexi file in {:}'.format(directory))
 

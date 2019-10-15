@@ -23,9 +23,36 @@ rule make_env:
 # todo put in installation of VEP cashe
 # todo put in installation of MHC classes
   shell:
+#for computecanada
     """
+      echo "--------tensorflow---------"
+      pip install tensorflow_cpu==1.13.1+computecanada --no-index
+      echo "--------other dependencies---------"
+      pip install \
+        requests \
+        PyYAML \
+        connexion==1.4.2 \
+        biopython \
+        networkx \
+        simanneal \
+        pandas \
+        wget \
+        mhcflurry \
+        mhcnuggets \
+        pysam \
+        Pillow \
+        pymp-pypi \
+        connexion==1.4.2 \
+        py-postgresql \
+        watchdog \
+        flask-cors \
+        bokeh==0.13.0 \
+        tornado==5.0.2 \
+        swagger-spec-validator==2.1.0 \
+        jsonschema==2.6.0
+
       echo "--------pvactools--------"
-      pip install pvactools
+      pip install pvactools[API] --no-deps
       echo "--------vcf-annotation-tools--------"
       pip install vcf-annotation-tools
       echo "--------install_vep_plugin--------"
