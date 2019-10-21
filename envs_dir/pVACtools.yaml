@@ -12,3 +12,4 @@ dependencies:
  - tensorflow
  - pandas
  - pillow
+ - pysam
