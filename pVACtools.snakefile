@@ -186,22 +186,22 @@ rule VEP:
 ##      vcf-readcount-annotator {output.snv_out} {input.indel_in} DNA -s $tumor_sample -t indel -o {output.snv_and_indel_out} &> {log.indel_log}
 ##    """
 #
-#rule add_expression_data:
-#  input:
-#    vcf_in = rules.VEP.output.vcf_out,
-#    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
-#  output:
-#    vcf_out = "pVACtools/{tumor}/add_expression_data/{tumor}.vcf"
-#  conda: "./envs_dir/pVACtools.yaml"
-#  log: "pVACtools/benchmark/{tumor}_add_coverage_data_p3.benchmark"
-#  benchmark: "pVACtools/benchmark/{tumor}_add_coverage_data_p3.benchmark"
-#  threads: 1
-#  resources:
-#    mem_mb = 4000
-#  shell:
-#    """
-#      vcf-expression-annotator {input.vcf_in} {input.rna} kallisto
-#    """
+rule add_expression_data:
+  input:
+    vcf_in = rules.VEP.output.vcf_out,
+    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
+  output:
+    vcf_out = "pVACtools/{tumor}/add_expression_data/{tumor}.vcf"
+  conda: "./envs_dir/pVACtools.yaml"
+  log: "pVACtools/benchmark/{tumor}_add_coverage_data_p3.benchmark"
+  benchmark: "pVACtools/benchmark/{tumor}_add_coverage_data_p3.benchmark"
+  threads: 1
+  resources:
+    mem_mb = 4000
+  shell:
+    """
+      vcf-expression-annotator {input.vcf_in} {input.rna} kallisto
+    """
 #
 #
 ##rule split_vcf_files:
