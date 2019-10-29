@@ -1,5 +1,5 @@
 #include: "mutect2_alt_bed.snakefile"
-#include: "kallisto.snakefile"
+include: "kallisto.snakefile"
 
 configfile: "{}/ref.yaml".format(workflow.basedir)
 
@@ -80,7 +80,7 @@ rule make_env:
 
 rule VEP:
   input:
-    vcf_in = "MF_data_summary/vcf/{tumor}.vcf",
+    vcf_in = "GATK_runs/{tumor}/FilterByOrientationBias/{tumor}.vcf",
     signal = rules.make_env.output.signal
   output:
     vcf_out = "pVACtools/{tumor}/VEP/{tumor}_VEP.vcf",
@@ -94,8 +94,8 @@ rule VEP:
 #    vep_plugins = config["vep_plug_dir"],
   threads: 1
   resources:
-    mem_mb = 4000,
-    time_min = 10,
+    mem_mb = 5000,
+    time_min = 30,
   shell:
     """
       vep \
@@ -190,7 +190,7 @@ rule VEP:
 rule add_expression_data:
   input:
     vcf_in = rules.VEP.output.vcf_out,
-    rna = "MF_data_summary/kall_rna/{tumor}_abundance.tsv",
+    rna = lambda wildcards: f"kallisto/{config['rna_pairs'][wildcards.tumor]}/kallisto/{config['rna_pairs'][wildcards.tumor]}_mean_exp.tsv",
   output:
     vcf_out = "pVACtools/{tumor}/add_expression_data/{tumor}.vcf"
   conda: "./envs_dir/pVACtools.yaml"
