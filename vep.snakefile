@@ -8,6 +8,7 @@ rule VEP:
   input:
     vcf_in = lambda wildcards: config["tumors"][wildcards.tumor],
   output:
+    vcf_pass_only = "vep/{tumor}/VEP/{tumor}_pass_only.vcf",
     vcf_out = "vep/{tumor}/VEP/{tumor}_VEP.vcf",
     vcf_out_zip = "vep/{tumor}/VEP/{tumor}_VEP.vcf.gz",
     summary = "vep/{tumor}/VEP/{tumor}_VEP.vcf_summary.html",
@@ -28,8 +29,9 @@ rule VEP:
     mem_mb = 4000
   shell:
     """
+      bcftools filter -i "FILTER='PASS'" {input.vcf_in} -o {output.vcf_pass_only}
       vep \
-        --input_file {input.vcf_in} \
+        --input_file {output.vcf_pass_only} \
         --output_file {output.vcf_out} \
         --format vcf \
         --vcf \

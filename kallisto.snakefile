@@ -19,7 +19,7 @@ rule kallisto:
   conda:
     "envs_dir/kallisto.yaml"
   params:
-    index = config["kallisto_index"],
+    index = config["kallisto_index_98"],
     input_cmd = kallisto_input,
     bioinfo_workflows_path = config["bioinfo_workflows_path"],
   resources:

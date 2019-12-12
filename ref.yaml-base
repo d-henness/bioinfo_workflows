@@ -63,7 +63,8 @@
 "iedb-install-directory": "/path/to/bioinfo_workflows/mhc_X"
 
 #kallisto index
-"kallisto_index": "/path/to/refs/ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.kallisto.index"
+"kallisto_index_95": "/path/to/refs/ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.kallisto.index"
+"kallisto_index_98": "/path/to/refs/ftp.ensembl.org/pub/release-98/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.kallisto.index"
 
 # alt bed files
 # no longer used as bed files are given in main config file

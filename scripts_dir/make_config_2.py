@@ -17,7 +17,7 @@ def main():
                 reads_list = []
                 merge_lib_string = "{:}:  [".format(i)
                 for seq in sorted(os.listdir(i)):
-                    if (('.fastq' in seq) or ('.gz' in seq)) and ('cut_u' not in seq):
+                    if (seq.endswith('.fastq') or seq.endswith('.fq.gz')) and ('cut_u' not in seq):
                         reads_list.append(os.getcwd() + '/' + i + '/' + seq)
                 for j in range(int(len(reads_list)/2)):
                     lib_string = "{:}_{:}:  ['{:}', '{:}']".format(i, j, reads_list[(j * 2)], reads_list[(j * 2) + 1])

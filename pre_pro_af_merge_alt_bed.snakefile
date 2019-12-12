@@ -124,7 +124,7 @@ rule BaseRecalibrator:
     known_indels = config["known_indels"],
     a1000G_index = config["a1000G_index"],
     known_indels_index = config["known_indels_index"],
-    interval = config["alt_bed"],
+    interval = f"-L {config['alt_bed']}" if config['alt_bed'] is not None else "",
     java_opts = config["BaseRecalibrator.java_opt"],
     exclude_list = ''
   resources:
@@ -137,7 +137,7 @@ rule BaseRecalibrator:
       gatk --java-options "{params.java_opts}" BaseRecalibrator \
       -R {params.ref_fasta} \
       -I {input.bam} \
-      -L {params.interval} \
+      {params.interval} \
       --use-original-qualities \
       -O {output.recal} \
       --known-sites {params.dbSNP_vcf} \
