@@ -6,3 +6,10 @@ dependencies:
  - ensembl-vep=95.2
  - python=3.5
  - vt=2015.11.10
+ - pytorch
+ - libstdcxx-ng
+ - cython
+ - tensorflow
+ - pandas
+ - pillow
+ - pysam

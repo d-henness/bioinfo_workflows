@@ -1,4 +1,4 @@
-include: "mutect2_alt_bed.snakefile"
+#include: "mutect2_alt_bed.snakefile"
 include: "kallisto.snakefile"
 
 configfile: "{}/ref.yaml".format(workflow.basedir)
@@ -18,6 +18,7 @@ def kallisto_runs(tumor):
 
 rule pVACtools_all:
   input:
+    "pVACtools/make_env/signal.txt",
     expand("pVACtools/{tumor}/add_expression_data/{tumor}.vcf", tumor = config["pairs"])
 #    expand(directory("pVACtools/{tumor}/pVACseq"), tumor = config["pairs"])
 
@@ -79,7 +80,7 @@ rule make_env:
 
 rule VEP:
   input:
-    vcf_in = rules.FilterByOrientationBias.output.vcf,
+    vcf_in = "GATK_runs/{tumor}/FilterByOrientationBias/{tumor}.vcf",
     signal = rules.make_env.output.signal
   output:
     vcf_out = "pVACtools/{tumor}/VEP/{tumor}_VEP.vcf",
@@ -93,8 +94,8 @@ rule VEP:
 #    vep_plugins = config["vep_plug_dir"],
   threads: 1
   resources:
-    mem_mb = 4000,
-    time_min = 10,
+    mem_mb = 5000,
+    time_min = 30,
   shell:
     """
       vep \
@@ -189,18 +190,20 @@ rule VEP:
 rule add_expression_data:
   input:
     vcf_in = rules.VEP.output.vcf_out,
-    rna = lambda wildcards: kallisto_runs(wildcards.tumor),
+    rna = lambda wildcards: f"kallisto/{config['rna_pairs'][wildcards.tumor]}/kallisto/{config['rna_pairs'][wildcards.tumor]}_mean_exp.tsv",
   output:
     vcf_out = "pVACtools/{tumor}/add_expression_data/{tumor}.vcf"
   conda: "./envs_dir/pVACtools.yaml"
-  log: "pVACtools/benchmark/{tumor}_add_coverage_data_p3.benchmark"
-  benchmark: "pVACtools/benchmark/{tumor}_add_coverage_data_p3.benchmark"
+  log: "pVACtools/log/{tumor}_add_expression_data.log"
+  benchmark: "pVACtools/benchmark/{tumor}_add_expression_data.benchmark"
   threads: 1
   resources:
-    mem_mb = 4000
+    mem_mb = 4000,
+    time_min = 24 * 60,
   shell:
     """
-      vcf-expression-annotator {input.vcf_in} {input.rna} kallisto
+      sample=$(grep 'tumor_sample' {input.vcf_in} | sed 's/.*=//')
+      vcf-expression-annotator -o {output.vcf_out} -s $sample {input.vcf_in} {input.rna} kallisto transcript &> {log}
     """
 #
 #
