@@ -11,14 +11,17 @@ def main():
     libs = []
     merge_libs = []
 
-    for i in sorted(os.listdir('.')):
-        for dir_name_short in args.dir_string:
-            if os.path.isdir(i) and (dir_name_short in i) and not ('tmp' in i):
+
+    for dir_name_short in args.dir_string:
+        path, basename = os.path.split(dir_name_short)
+        print(path, basename)
+        for i in sorted(os.listdir(path)):
+            if (os.path.isdir(f"{path}/{i}") or os.path.islink(f"{path}/{i}")) and (i.startswith(basename)) and not ('tmp' in i):
                 reads_list = []
                 merge_lib_string = "{:}:  [".format(i)
-                for seq in sorted(os.listdir(i)):
+                for seq in sorted(os.listdir(f"{path}/{i}")):
                     if (seq.endswith('.fastq') or seq.endswith('.fq.gz')) and ('cut_u' not in seq):
-                        reads_list.append(os.getcwd() + '/' + i + '/' + seq)
+                        reads_list.append(os.getcwd() + '/' + path + '/' + i + '/' + seq)
                 for j in range(int(len(reads_list)/2)):
                     lib_string = "{:}_{:}:  ['{:}', '{:}']".format(i, j, reads_list[(j * 2)], reads_list[(j * 2) + 1])
                     libs.append(lib_string)
