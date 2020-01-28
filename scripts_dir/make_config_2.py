@@ -41,7 +41,7 @@ def main():
     if args.rna:
         print('rna_merge_libs:')
     else:
-        print('rna_merge_libs:')
+        print('merge_libs:')
     for i in range(len(merge_libs)):
         print("  {:}".format(merge_libs[i]))
 
