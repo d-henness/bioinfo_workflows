@@ -1,3 +1,6 @@
+configfile: "{}/ref.yaml".format(workflow.basedir)
+
+
 rule mixcr_all:
     input:
       expand("mixcr/{sample}/mixcr/{sample}_clones.txt", sample = config["libraries"])
@@ -7,6 +10,7 @@ def mixcr_input(wildcards):
     return f"mixcr/{wildcards.sample}/fastp/{wildcards.sample}_1.fq.gz"
   elif len(config['libraries'][wildcards.sample]) == 2:
     return f"mixcr/{wildcards.sample}/fastp/{wildcards.sample}_1.fq.gz mixcr/{wildcards.sample}/fastp/{wildcards.sample}_2.fq.gz"
+
 
 def fastp_paired_input(wildcards):
   if len(config['libraries'][wildcards.sample]) == 2:
@@ -30,56 +34,80 @@ rule fastp_paired:
   conda:
     "envs_dir/mixcr.yaml"
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 5000,
-    time_min = lambda wildcards, attempt: attempt * 24 * 60,  # time in minutes
-  threads: 1
+    mem_mb = lambda wildcards, attempt: attempt * (6 * 1024),
+    time_min = lambda wildcards, attempt: attempt * (1 * 60),	# time in minutes
+  threads: 4 # master, writer, worker, reader
+  params:
+    adapter_sequence = config["illumina_adapter"],
+    temp_dir = "/tmp/$SLURM_JOB_ID/{sample}/fastp_paired/tmp",
+    fq1 = "{sample}_1.fq.gz",
+    fq2 = "{sample}_2.fq.gz",
   benchmark: "mixcr/benchmark/{sample}_fastp.benchmark"
-  log: "mixcr/log/{sample}_fastp.log"
-  shell:
-    """
-      fastp -i {input[0]} -I {input[1]} -o {output.fq1_out} -O {output.fq2_out} &> {log}
-      echo "finished" > {output.signal}
-    """
-
-rule fastp_unpaired:
-  input:
-    fastp_unpaired_input
-  output:
-    fq1_out = "mixcr/{sample}/fastp/{sample}_1.fq.gz",
-    signal = "mixcr/{sample}/fastp/{sample}_signal.txt",
-  conda:
-    "envs_dir/mixcr.yaml"
-  resources:
-    mem_mb = lambda wildcards, attempt: attempt * 5000,
-    time_min = lambda wildcards, attempt: attempt * 24 * 60,  # time in minutes
-  threads: 1
-  benchmark:
-    "mixcr/benchmark/{sample}_fastp_up.benchmark"
   log:
-    "mixcr/log/{sample}_fastp_up.log"
+    overall = "mixcr/log/{sample}_fastp.log",
+    json = "mixcr/{sample}/fastp/{sample}_log.json",
+    html = "mixcr/{sample}/fastp/{sample}_log.html",
   shell:
     """
-      fastp -i {input} -o {output.fq1_out} --adapter_sequence=AGATCGGAAGAGCACACGTCTGAACTCCAGTCA &> {log}
+      mkdir -p {params.temp_dir}
+      cp {input[0]} {params.temp_dir}/{params.fq1}
+      cp {input[1]} {params.temp_dir}/{params.fq2}
+
+      echo copy complete
+
+      fastp -i {params.temp_dir}/{params.fq1} \
+        -I {params.temp_dir}/{params.fq2} \
+        -o {output.fq1_out} \
+        -O {output.fq2_out} \
+        -w 1 \
+        -j {log.json} \
+        -h {log.html} \
+        --detect_adapter_for_pe &> {log.overall}
       echo "finished" > {output.signal}
     """
 
+
+# will need to be changed to deal with io issues
+#rule fastp_unpaired:
+#  input:
+#    fastp_unpaired_input
+#  output:
+#    fq1_out = "mixcr/{sample}/fastp/{sample}_1.fq.gz",
+#    signal = "mixcr/{sample}/fastp/{sample}_signal.txt",
+#  conda:
+#    "envs_dir/mixcr.yaml"
+#  resources:
+#    mem_mb = lambda wildcards, attempt: attempt * 5000,
+#    time_min = lambda wildcards, attempt: attempt * 24 * 60,  # time in minutes
+#  threads: 1
+#  benchmark:
+#    "mixcr/benchmark/{sample}_fastp_up.benchmark"
+#  log:
+#    "mixcr/log/{sample}_fastp_up.log"
+#  shell:
+#    """
+#      fastp -i {input} -o {output.fq1_out} --adapter_sequence=AGATCGGAAGAGCACACGTCTGAACTCCAGTCA &> {log}
+#      echo "finished" > {output.signal}
+#    """
+
+alignment_threads = 4
 rule mixcr_align:
   input:
     signal = "mixcr/{sample}/fastp/{sample}_signal.txt",
   output:
     alignments = "mixcr/{sample}/mixcr/alignments.vdjca",
-  threads: 4
   conda: "envs_dir/mixcr.yaml",
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 7 * 1024,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,  # time in minutes
   params:
     input_cmd = mixcr_input,
+  threads: 1 + alignment_threads
   benchmark: "mixcr/benchmark/{sample}_mixcr_align.benchmark"
   log: "mixcr/log/{sample}_mixcr_align.log",
   shell:
     """
-      mixcr align --species hsa -t {threads} -r {log} {params.input_cmd} {output.alignments}
+      mixcr align --species hsa -t {alignment_threads} -r {log} {params.input_cmd} {output.alignments}
     """
 
 rule mixcr_assemble:

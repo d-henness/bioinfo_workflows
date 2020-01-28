@@ -4,5 +4,5 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - mixcr=3.0.7
+  - mixcr=3.0.12
   - fastp=0.19.7

@@ -167,8 +167,8 @@ rule ApplyBQSR:
     known_indels = config["known_indels"],
     a1000G_index = config["a1000G_index"],
     known_indels_index = config["known_indels_index"],
+    interval = f"-L {config['alt_bed']}" if config['alt_bed'] is not None else "",
     java_opts = config["ApplyBQSR.java_opt"],
-    interval = config["alt_bed"],
     exclude_list = ''
   resources:
     mem_mb = lambda wildcards, attempt: attempt * (int(config["ApplyBQSR.java_opt"].strip("-Xmx")) + 1000),
@@ -190,5 +190,5 @@ rule ApplyBQSR:
       if [[ -e GATK_runs/{wildcards.merge}/ApplyBQSR/{wildcards.merge}_recal.bai ]]; then
         mv GATK_runs/{wildcards.merge}/ApplyBQSR/{wildcards.merge}_recal.bai GATK_runs/{wildcards.merge}/ApplyBQSR/{wildcards.merge}_recal.bam.bai
       fi
-      samtools stats -t {params.interval} {output.bam_out} > {output.stats}
+      samtools stats {params.interval} {output.bam_out} > {output.stats}
     """
