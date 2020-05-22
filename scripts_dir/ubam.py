@@ -17,5 +17,5 @@ else:
     line_split = line.split(':')
     flow_cell = line_split[2]
     lane = line_split[3]
-ubam_command = shlex.split(f'picard FastqToSam FASTQ={read1} FASTQ2={read2} OUTPUT={output_bam} READ_GROUP_NAME="{flow_cell}.{lane}.{library}" SAMPLE_NAME="{library}" LIBRARY_NAME="{library}" PLATFORM_UNIT="{flow_cell}.{lane}.{library}" PLATFORM=ILLUMINA TMP_DIR="{flow_cell}.{lane}.{library}_tmp"')
+ubam_command = shlex.split(f'picard FastqToSam FASTQ={read1} FASTQ2={read2} OUTPUT={output_bam} READ_GROUP_NAME="{flow_cell}.{lane}.{library}" SAMPLE_NAME="{library}" LIBRARY_NAME="{library}" PLATFORM_UNIT="{flow_cell}.{lane}.{library}" PLATFORM=ILLUMINA TMP_DIR="/tmp/$USER/$SLURM_JOB_ID/{flow_cell}.{lane}.{library}_tmp"')
 subprocess.check_call(ubam_command)

@@ -1,8 +1,9 @@
+# for whatever reason, mixcr is no longer in bioconda. Will need to manually install it.
 name: mixcr
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - mixcr=3.0.12
   - fastp=0.19.7
+  - java-jdk

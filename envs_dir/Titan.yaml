@@ -13,3 +13,4 @@ dependencies:
  - bioconductor-bsgenome.hsapiens.ucsc.hg38
  - samtools
  - bcftools
+ - pysam

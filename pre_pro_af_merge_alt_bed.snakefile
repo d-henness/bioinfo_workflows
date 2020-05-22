@@ -17,7 +17,7 @@ def MarkDuplicates_input(wildcards):
 def MarkDuplicates_input_string(wildcards):
   bam_files = []
   for library in config["merge_libs"][wildcards.merge]:
-    bam_files.append(f"--INPUT /tmp/$SLURM_JOB_ID/{wildcards.merge}/MarkDuplicates/{library}.bam")
+    bam_files.append(f"--INPUT GATK_runs/{library}/MergeBamAlignment/merge.bam")
   return ' '.join(bam_files)
 
 rule MarkDuplicates:
@@ -44,11 +44,7 @@ rule MarkDuplicates:
     "benchmarks/{merge}.MarkDuplicates.benchmark.txt"
   shell:
     """
-      for file in {input}; do
-        lib=$(echo $file | sed -E 's,GATK_runs/([^/]+)/.*,\\1,')
-        mkdir -p {params.temp_dir}
-        cp $file /tmp/$SLURM_JOB_ID/{wildcards.merge}/MarkDuplicates/$lib.bam
-      done
+      mkdir -p {params.temp_dir}
 
       gatk --java-options "{params.java_opts}"	MarkDuplicates \
       {params.libs_string} \
@@ -68,7 +64,6 @@ rule SortAndFixTags:
   output:
     out_bam = temp("GATK_runs/{merge}/SortAndFixTags/sorted.bam"),
     out_bai = temp("GATK_runs/{merge}/SortAndFixTags/sorted.bai"),
-    temp_dir = temp(directory("GATK_runs/{merge}/SortAndFixTags/tmp/"))
   conda:
     "envs_dir/pre_proc.yaml"
   log:
@@ -78,7 +73,8 @@ rule SortAndFixTags:
     ref_fasta = config["ref_fasta"],
     java_opts_sort = config["SortAndFixTags.java_opt_sort"],
     java_opts_fix = config["SortAndFixTags.java_opt_fix"],
-    exclude_list = ''
+    exclude_list = '',
+    temp_dir = "/tmp/$SLURM_JOB_ID/{merge}/SortAndFixTags/tmp",
   resources:
     mem_mb = lambda wildcards, attempt: attempt * (int(config["SortAndFixTags.java_opt_sort"].strip("-Xmx")) + int(config["SortAndFixTags.java_opt_fix"].strip("-Xmx")) + 1000),
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
@@ -86,13 +82,15 @@ rule SortAndFixTags:
     "benchmarks/{merge}.SortAndFixTags.benchmark.txt"
   shell:
     """
+      mkdir -p {params.temp_dir}
+
       gatk --java-options "{params.java_opts_sort}" SortSam \
       --INPUT {input} \
       --OUTPUT /dev/stdout \
       --SORT_ORDER "coordinate" \
       --CREATE_INDEX false \
       --CREATE_MD5_FILE false \
-      --TMP_DIR {output.temp_dir} \
+      --TMP_DIR {params.temp_dir} \
       2> {log.log1} \
       | \
       gatk --java-options "{params.java_opts_fix}" SetNmAndUqTags \
@@ -101,7 +99,7 @@ rule SortAndFixTags:
       --CREATE_INDEX true \
       --CREATE_MD5_FILE true \
 			--REFERENCE_SEQUENCE {params.ref_fasta} \
-      --TMP_DIR {output.temp_dir} \
+      --TMP_DIR {params.temp_dir} \
       &> {log.log2}
     """
 
@@ -126,7 +124,8 @@ rule BaseRecalibrator:
     known_indels_index = config["known_indels_index"],
     interval = f"-L {config['alt_bed']}" if config['alt_bed'] is not None else "",
     java_opts = config["BaseRecalibrator.java_opt"],
-    exclude_list = ''
+    exclude_list = '',
+    temp_dir = "/tmp/$SLURM_JOB_ID/{merge}/BaseRecalibrator/tmp",
   resources:
     mem_mb = lambda wildcards, attempt: attempt * (int(config["BaseRecalibrator.java_opt"].strip("-Xmx")) + 1000),
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
@@ -134,6 +133,8 @@ rule BaseRecalibrator:
     "benchmarks/{merge}.BaseRecalibrator.benchmark.txt"
   shell:
     """
+      mkdir -p {params.temp_dir}
+
       gatk --java-options "{params.java_opts}" BaseRecalibrator \
       -R {params.ref_fasta} \
       -I {input.bam} \
@@ -167,8 +168,9 @@ rule ApplyBQSR:
     known_indels = config["known_indels"],
     a1000G_index = config["a1000G_index"],
     known_indels_index = config["known_indels_index"],
-    interval = f"-L {config['alt_bed']}" if config['alt_bed'] is not None else "",
+    interval = f"-t {config['alt_bed']}" if config['alt_bed'] is not None else "",
     java_opts = config["ApplyBQSR.java_opt"],
+    temp_dir = "/tmp/$SLURM_JOB_ID/{merge}/ApplyBQSR/tmp",
     exclude_list = ''
   resources:
     mem_mb = lambda wildcards, attempt: attempt * (int(config["ApplyBQSR.java_opt"].strip("-Xmx")) + 1000),
@@ -177,6 +179,8 @@ rule ApplyBQSR:
     "benchmarks/{merge}.ApplyBQSR.benchmark.txt"
   shell:
     """
+      mkdir -p {params.temp_dir}
+
       gatk --java-options "{params.java_opts}" ApplyBQSR \
         -R {params.ref_fasta} \
         -I {input.bam} \

@@ -7,7 +7,7 @@ normals = [config["pairs"][tumor] for tumor in tumors]
 
 rule mutect_all:
   input:
-    expand("GATK_runs/{tumor}/FilterByOrientationBias/{tumor}.vcf", tumor = tumors)
+    expand("GATK_runs/{tumor}/VEP/{tumor}.vcf", tumor = tumors)
 
 
 rule CollectF1R2Counts:
@@ -311,6 +311,66 @@ rule FilterByOrientationBias:
         -V {input.vcf} \
         -P {input.ada_det_met} \
         -O {output.vcf} &> {log}
+    """
+
+rule VEP:
+  input:
+    vcf = rules.FilterByOrientationBias.output.vcf,
+  output:
+    vcf_out = "GATK_runs/{tumor}/VEP/{tumor}.vcf",
+    vcf_out_zip = "vep/{tumor}/VEP/{tumor}_VEP.vcf.gz",
+    summary = "GATK_runs/{tumor}/VEP/{tumor}.vcf_summary.html",
+    parsed_output = "GATK_runs/{tumor}/VEP/{tumor}_VEP_parsed.csv",
+  conda: "envs_dir/phylowgs.yaml"
+  log: "GATK_runs/log/{tumor}_VEP.log"
+  benchmark: "GATK_runs/benchmark/{tumor}_snp_VEP.benchmark"
+  params:
+    ref_fasta = config["ref_fasta"],
+    vep_cache = config["vep_cache"],
+    vep_plugins = config["vep_plug_dir"],
+    dbNSFP_config = config["dbNSFP_config"],
+    condel_config = config["condel_config"],
+    loftool_config = config["loftool_config"],
+    bioinfo_workflows_path = config["bioinfo_workflows_path"],
+  threads: 1
+  resources:
+    mem_mb = 4000
+  shell:
+    """
+      vep \
+        --input_file {input.vcf} \
+        --output_file {output.vcf_out} \
+        --format vcf \
+        --vcf \
+        --symbol \
+        --terms SO \
+        --tsl \
+        --hgvs \
+        --hgvsg \
+        --fasta {params.ref_fasta} \
+        --offline --cache --dir_cache {params.vep_cache} \
+        --dir_plugins {params.vep_plugins} \
+        --plugin Downstream \
+        --plugin dbNSFP,{params.dbNSFP_config},ALL \
+        --plugin Condel,{params.condel_config},b,2 \
+        --plugin LoFtool,{params.loftool_config} \
+        --plugin Blosum62 \
+        --pick \
+        --sift b \
+        --polyphen b \
+        --transcript_version &> {log}
+      bgzip -c {output.vcf_out} > {output.vcf_out_zip}
+      bcftools index -f {output.vcf_out_zip}
+
+      python3 {params.bioinfo_workflows_path}/scripts_dir/vep_vcf_parser.py \
+        -f SYMBOL Gene Consequence SIFT PolyPhen Condel LoFtool BLOSUM62 \
+        -v {output.vcf_out} > {output.parsed_output}
+
+      if [[ !(-d easy_transfer) ]]; then
+        mkdir easy_transfer
+      fi
+
+      cp {output.vcf_out} {output.parsed_output} easy_transfer
     """
 # removed final_artifact_modes
 

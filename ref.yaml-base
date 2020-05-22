@@ -76,3 +76,6 @@
 
 #GATK3 setup
 "GATK3_bz2": "/path/to/refs/GenomeAnalysisTK-3.8-1-0-gf15c1c3ef.tar.bz2"
+
+#rsem
+"rsem_index": "/path/to/refs/rsem_homo_sapien_ref/rsem_homo_sapien_ref"

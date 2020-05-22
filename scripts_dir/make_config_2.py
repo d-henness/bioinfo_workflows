@@ -15,17 +15,24 @@ def main():
 
     for dir_name_short in args.dir_string:
         path, basename = os.path.split(dir_name_short)
+        if path == "":
+            path = "."
         for i in sorted(os.listdir(path)):
             if (os.path.isdir(f"{path}/{i}") or os.path.islink(f"{path}/{i}")) and (i.startswith(basename)) and not ('tmp' in i):
                 reads_list = []
-                merge_lib_string = "{:}:  [".format(i)
+                try:
+                    lib = int(i)
+                    lib = f"\"{lib}\""
+                except:
+                    lib = i
+                merge_lib_string = "{:}:  [".format(lib)
                 for seq in sorted(os.listdir(f"{path}/{i}")):
-                    if (seq.endswith('.fastq') or seq.endswith('.fq.gz')) and ('cut_u' not in seq):
+                    if (seq.endswith('.fastq') or seq.endswith('.fastq.gz') or seq.endswith('.fq.gz') or seq.endswith('.fq')) and ('cut_u' not in seq):
                         reads_list.append(os.getcwd() + '/' + path + '/' + i + '/' + seq)
                 for j in range(int(len(reads_list)/2)):
-                    lib_string = "{:}_{:}:  ['{:}', '{:}']".format(i, j, reads_list[(j * 2)], reads_list[(j * 2) + 1])
+                    lib_string = "\"{:}_{:}\":  ['{:}', '{:}']".format(i, j, reads_list[(j * 2)], reads_list[(j * 2) + 1])
                     libs.append(lib_string)
-                    merge_lib_string = "{:}{:}_{:}, ".format(merge_lib_string, i, j)
+                    merge_lib_string = "\"{:}{:}_{:}\", ".format(merge_lib_string, i, j)
                 merge_lib_string = "{:}]".format(merge_lib_string[:-2])
                 merge_libs.append(merge_lib_string)
 
@@ -41,7 +48,7 @@ def main():
     if args.rna:
         print('rna_merge_libs:')
     else:
-        print('rna_merge_libs:')
+        print('merge_libs:')
     for i in range(len(merge_libs)):
         print("  {:}".format(merge_libs[i]))
 
