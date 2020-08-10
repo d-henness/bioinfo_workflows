@@ -1,3 +1,6 @@
+# TODO
+* automatically download other git repos when needed
+
 # Bioinformatics workflows
 currently supported workflows:
 * GATK preprocessing
