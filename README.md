@@ -1,8 +1,3 @@
-# TODO
-* add in the time resources for all workflows
-* stitch up workflows so only the final step needs to be executed
-* add a setup script so that paths do not need to be manually edited
-
 # Bioinformatics workflows
 currently supported workflows:
 * GATK preprocessing
