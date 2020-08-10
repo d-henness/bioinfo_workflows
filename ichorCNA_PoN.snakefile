@@ -18,7 +18,7 @@ rule read_counter:
   output:
     "results/readDepth/{samples}.bin{binSize}.wig"
   conda:
-    "envs_dir/ichorCNA_env.yaml"
+    "envs_dir/ichorCNA_env_pon.yaml"
 	params:
 		readCounter = config["readCounterScript"],
 		binSize = config["binSize"],
@@ -34,7 +34,7 @@ rule read_counter:
 rule install_ichorCNA:
   output: "signal.txt"
   conda:
-    "envs_dir/ichorCNA_env.yaml"
+    "envs_dir/ichorCNA_env_pon.yaml"
   resources:
     mem_mb = 4000
   log:
@@ -53,7 +53,7 @@ rule make_PoN:
   output:
     "results/PoN/PoN_median.rds"
   conda:
-    "envs_dir/ichorCNA_env.yaml"
+    "envs_dir/ichorCNA_env_pon.yaml"
   params:
     gcwig = config["ichorCNA_gcWig"],
     chrs = config["ichorCNA_chrs"],
@@ -97,7 +97,7 @@ rule ichorCNA:
     #rdata = "results/ichorCNA/{tumor}/{tumor}.RData",
     #outDir = "results/ichorCNA/{tumor}/",
   conda:
-    "envs_dir/ichorCNA_env.yaml"
+    "envs_dir/ichorCNA_env_pon.yaml"
   params:
     outDir = "results/ichorCNA/{tumor}/",
     rscript = config['bioinfo_workflows_path'] + '/new_ichorCNA/ichorCNA/scripts/runIchorCNA.R',
