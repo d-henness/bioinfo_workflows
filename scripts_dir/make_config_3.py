@@ -24,7 +24,7 @@ def main():
         if path == "":
             path = working_directory
         for item in sorted(os.listdir(path)):
-            if os.path.isdir(f"{path}/{item}") and item.startswith(dir_string):
+            if os.path.isdir(f"{path}/{item}") and item.startswith(basename):
                 reads_list = []
                 for filenm in sorted(os.listdir(f"{path}/{item}")):
                     if file_is_fq(filenm) and ('cut_u' not in filenm):

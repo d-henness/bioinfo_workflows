@@ -168,7 +168,7 @@ rule ApplyBQSR:
     known_indels = config["known_indels"],
     a1000G_index = config["a1000G_index"],
     known_indels_index = config["known_indels_index"],
-    interval = f"-t {config['alt_bed']}" if config['alt_bed'] is not None else "",
+    interval = f"-t {config['alt_bed']}" if config['alt_bed'] != None else "--reference config[\"ref_fasta\"]",
     java_opts = config["ApplyBQSR.java_opt"],
     temp_dir = "/tmp/$SLURM_JOB_ID/{merge}/ApplyBQSR/tmp",
     exclude_list = ''

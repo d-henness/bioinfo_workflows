@@ -76,7 +76,7 @@ rule optitype:
   output:
     hlas = "mupexi_runs/{lib}/optitype/{lib}_result.tsv",
   conda:
-    "./envs_dir/mupexi.yaml"
+    "./envs_dir/optitype.yaml"
   log:
     optitype_log = "mupexi_runs/log/{lib}_optitype.log",
   benchmark: "mupexi_runs/benchmark/{lib}_optitype.benchmark"
@@ -91,11 +91,11 @@ rule optitype:
       if [[ !(-d mupexi_runs/{wildcards.lib}/optitype) ]]; then
         mkdir -p mupexi_runs/{wildcards.lib}/optitype
       fi
-      cp $CONDA_PREFIX/share/optitype*/config.ini.example mupexi_runs/{wildcards.lib}/optitype/config.ini
+      cp $CONDA_PREFIX/bin/config.ini mupexi_runs/{wildcards.lib}/optitype/config.ini
       sed -i 's/razers3.*/razers3=razers3/' mupexi_runs/{wildcards.lib}/optitype/config.ini
       sed -i 's/threads.*/threads={threads}/' mupexi_runs/{wildcards.lib}/optitype/config.ini
 
-      python $CONDA_PREFIX/share/optitype*/OptiTypePipeline.py -i {input.fq1_in} {input.fq2_in} --dna -v -o {params.out_dir} -p {wildcards.lib} -c mupexi_runs/{wildcards.lib}/optitype/config.ini 2> {log.optitype_log}
+      OptiTypePipeline.py -i {input.fq1_in} {input.fq2_in} --dna -v -o {params.out_dir} -p {wildcards.lib} -c mupexi_runs/{wildcards.lib}/optitype/config.ini 2> {log.optitype_log}
     """
 
 rule split_vcf_files:
@@ -175,7 +175,7 @@ rule mupexi_chr1:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr2:
@@ -216,7 +216,7 @@ rule mupexi_chr2:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr3:
@@ -253,7 +253,7 @@ rule mupexi_chr3:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr4:
@@ -290,7 +290,7 @@ rule mupexi_chr4:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr5:
@@ -327,7 +327,7 @@ rule mupexi_chr5:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr6:
@@ -364,7 +364,7 @@ rule mupexi_chr6:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr7:
@@ -401,7 +401,7 @@ rule mupexi_chr7:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr8:
@@ -438,7 +438,7 @@ rule mupexi_chr8:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr9:
@@ -475,7 +475,7 @@ rule mupexi_chr9:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr10:
@@ -512,7 +512,7 @@ rule mupexi_chr10:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr11:
@@ -549,7 +549,7 @@ rule mupexi_chr11:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr12:
@@ -586,7 +586,7 @@ rule mupexi_chr12:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr13:
@@ -623,7 +623,7 @@ rule mupexi_chr13:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr14:
@@ -660,7 +660,7 @@ rule mupexi_chr14:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr15:
@@ -697,7 +697,7 @@ rule mupexi_chr15:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr16:
@@ -734,7 +734,7 @@ rule mupexi_chr16:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr17:
@@ -771,7 +771,7 @@ rule mupexi_chr17:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr18:
@@ -808,7 +808,7 @@ rule mupexi_chr18:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr19:
@@ -845,7 +845,7 @@ rule mupexi_chr19:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr20:
@@ -882,7 +882,7 @@ rule mupexi_chr20:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr21:
@@ -919,7 +919,7 @@ rule mupexi_chr21:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chr22:
@@ -956,7 +956,7 @@ rule mupexi_chr22:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chrX:
@@ -993,7 +993,7 @@ rule mupexi_chrX:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule mupexi_chrY:
@@ -1030,7 +1030,7 @@ rule mupexi_chrY:
         rna_var="-e {input.rna} "
       fi
 
-      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}_$(date | sed 's/ \+/_/g')
+      {params.mupexi_path} -v {input.vcf} -a $hla_string -c {params.mupexi_config} $rna_var -t -d {params.out_dir} -p {wildcards.tumor} -l 8-11 -f &> {log.mupexi_log}
     """
 
 rule merge_mupexi:

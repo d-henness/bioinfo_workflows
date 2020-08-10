@@ -3,7 +3,7 @@ configfile: "{}/ichorCNA/config_hg38.yaml".format(workflow.basedir)
 include: "./pre_pro_af_merge_alt_bed.snakefile"
 
 rule ichor_all:
-  input: 
+  input:
     expand("results/ichorCNA/{tumor}/{tumor}.cna.seg", tumor=config["pairs"]),
 #   expand("results/ichorCNA/{tumor}/{tumor}.cna.seg", tumor=config["samples"]),
     expand("results/readDepth/{samples}.bin{binSize}.wig", samples=config["merge_libs"], binSize=str(config["binSize"]))
@@ -12,8 +12,8 @@ rule read_counter:
   input:
     "GATK_runs/{samples}/ApplyBQSR/{samples}_recal.bam"
   output:
-    "results/readDepth/{samples}.bin{binSize}.wig"		
-  conda:    
+    "results/readDepth/{samples}.bin{binSize}.wig"
+  conda:
     "envs_dir/ichorCNA_env.yaml"
 	params:
 		readCounter=config["readCounterScript"],
@@ -39,7 +39,7 @@ rule ichorCNA:
     #seg="results/ichorCNA/{tumor}/{tumor}.seg",
     #rdata="results/ichorCNA/{tumor}/{tumor}.RData",
     #outDir="results/ichorCNA/{tumor}/",
-  conda:    
+  conda:
     "envs_dir/ichorCNA_env.yaml"
   params:
     outDir="results/ichorCNA/{tumor}/",
@@ -70,7 +70,7 @@ rule ichorCNA:
   resources:
     mem_mb=4000
   log:
-    "logs/ichorCNA/{tumor}.log"	
+    "logs/ichorCNA/{tumor}.log"
   shell:
     "Rscript {params.rscript} \
             --id {params.id}  \

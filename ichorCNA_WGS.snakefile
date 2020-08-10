@@ -1,6 +1,6 @@
 configfile: "{}/ichorCNA/config_hg38.yaml".format(workflow.basedir)
 
-include: "pre_pro_af_merge.snakefile"
+include: "./pre_pro_af_merge_alt_bed.snakefile"
 
 rule all:
   input:
