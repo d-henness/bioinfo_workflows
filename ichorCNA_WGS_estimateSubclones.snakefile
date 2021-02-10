@@ -2,18 +2,18 @@ configfile: "{}/ichorCNA/config_hg38.yaml".format(workflow.basedir)
 
 include: "./pre_pro_af_merge_alt_bed.snakefile"
 
-rule ichor_all:
+rule all:
   input:
-    expand("results/ichorCNA/{tumor}/{tumor}.cna.seg", tumor=config["pairs"]),
+    expand("results_estimateSubclones/ichorCNA/{tumor}/{tumor}.cna.seg", tumor=config["pairs"]),
 #   expand("results/ichorCNA/{tumor}/{tumor}.cna.seg", tumor=config["samples"]),
-    expand("results/readDepth/{samples}.bin{binSize}.wig", samples=config["merge_libs"], binSize=str(config["binSize"]))
+    expand("results_estimateSubclones/readDepth/{samples}.bin{binSize}.wig", samples=config["merge_libs"], binSize=str(config["binSize"]))
 
 rule read_counter:
   input:
     "GATK_runs/{samples}/ApplyBQSR/{samples}_recal.bam"
   output:
-    "results/readDepth/{samples}.bin{binSize}.wig"
-  conda:
+    "results_estimateSubclones/readDepth/{samples}.bin{binSize}.wig"		
+  conda:    
     "envs_dir/ichorCNA_env.yaml"
 	params:
 		readCounter=config["readCounterScript"],
@@ -29,20 +29,20 @@ rule read_counter:
 
 rule ichorCNA:
   input:
-    tum="results/readDepth/{tumor}.bin" + str(config["binSize"]) + ".wig",
-    norm=lambda wildcards: "results/readDepth/" + config["pairs"][wildcards.tumor] + ".bin" + str(config["binSize"]) + ".wig"
+    tum="results_estimateSubclones/readDepth/{tumor}.bin" + str(config["binSize"]) + ".wig",
+    norm=lambda wildcards: "results_estimateSubclones/readDepth/" + config["pairs"][wildcards.tumor] + ".bin" + str(config["binSize"]) + ".wig"
   output:
-    corrDepth="results/ichorCNA/{tumor}/{tumor}.correctedDepth.txt",
+    corrDepth="results_estimateSubclones/ichorCNA/{tumor}/{tumor}.correctedDepth.txt",
     #param="results/ichorCNA/{tumor}/{tumor}.params.txt",
-    cna="results/ichorCNA/{tumor}/{tumor}.cna.seg",
+    cna="results_estimateSubclones/ichorCNA/{tumor}/{tumor}.cna.seg",
     #segTxt="results/ichorCNA/{tumor}/{tumor}.seg.txt",
     #seg="results/ichorCNA/{tumor}/{tumor}.seg",
     #rdata="results/ichorCNA/{tumor}/{tumor}.RData",
     #outDir="results/ichorCNA/{tumor}/",
-  conda:
+  conda:    
     "envs_dir/ichorCNA_env.yaml"
   params:
-    outDir="results/ichorCNA/{tumor}/",
+    outDir="results_estimateSubclones/ichorCNA/{tumor}/",
     rscript=config["ichorCNA_rscript"],
     id="{tumor}",
     ploidy=config["ichorCNA_ploidy"],
@@ -60,7 +60,7 @@ rule ichorCNA:
     chrTrain=config["ichorCNA_chrTrain"],
     genomeStyle=config["ichorCNA_genomeStyle"],
     centromere=config["ichorCNA_centromere"],
-    exons=config["alt_bed"],
+    exons=config["ichorCNA_exons"],
     txnE=config["ichorCNA_txnE"],
     txnStrength=config["ichorCNA_txnStrength"],
     fracReadsChrYMale="0.001",
@@ -70,19 +70,17 @@ rule ichorCNA:
   resources:
     mem_mb=4000
   log:
-    "logs/ichorCNA/{tumor}.log"
-  benchmark:
-    "results/benchmarks/ichorCNA_{tumor}.log"
+    "logs/ichorCNA/{tumor}.log"	
   shell:
     "Rscript {params.rscript} \
             --id {params.id}  \
             --libdir {params.libdir} \
             --WIG {input.tum} \
-            --NORMWIG {input.norm}  \
             --gcWig {params.gcwig} \
+            --NORMWIG {input.norm} \
             --mapWig {params.mapwig} \
             --ploidy \"{params.ploidy}\" \
-            --exons.bed {params.exons}  \
+            --normal \"{params.normal}\" \
             --maxCN {params.maxCN} \
             --includeHOMD {params.includeHOMD} \
             --chrs \"{params.chrs}\" \
@@ -93,7 +91,6 @@ rule ichorCNA:
             --estimateScPrevalence {params.estimateClonality} \
             --scStates \"{params.scStates}\" \
             --centromere {params.centromere} \
-            --exons.bed {params.exons} \
             --txnE {params.txnE} \
             --txnStrength {params.txnStrength} \
             --fracReadsInChrYForMale {params.fracReadsChrYMale} \

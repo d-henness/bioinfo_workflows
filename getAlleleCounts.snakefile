@@ -28,6 +28,8 @@ rule getHETsites:
     mem_mb = 4096
   log:
     "logs/titan/hetPosns/{tumor}/{tumor}.chr{chr}.log"
+  benchmark:
+    "results/benchmarks/getHETsites_{tumor}_{chr}.log"
   shell:
     "{params.samtoolsCmd} mpileup -uv -I -f {params.refFasta} -r {wildcards.chr} -l {params.snpDB} {input} | bcftools call -v -c - | grep -e '0/1' -e '#' > {output} 2> {log}"
 
@@ -52,6 +54,8 @@ rule getAlleleCountsByChr:
     mem_mb = 4096
   log:
     "logs/titan/tumCounts/{tumor}/{tumor}.chr{chr}.log"
+  benchmark:
+    "results/benchmarks/getAlleleCountsByChr_{tumor}_{chr}.log"
   shell:
     "python {params.countScript} {wildcards.chr} {input.hetSites} {input.tumBam} {params.baseQ} {params.mapQ} {params.vcfQ} > {output} 2> {log}"
 
@@ -64,6 +68,8 @@ rule catAlleleCountFiles:
     mem_mb = 4096
   log:
     "logs/titan/tumCounts/{tumor}/{tumor}.cat.log"
+  benchmark:
+    "results/benchmarks/catAlleleCountFiles_{tumor}.log"
   shell:
     "cat {input} | grep -v Chr > {output} 2> {log}"
 

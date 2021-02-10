@@ -159,7 +159,7 @@ rule ApplyBQSR:
   conda:
     "envs_dir/pre_proc.yaml"
   log:
-    "GATK_runs/{merge}/ApplyBQSR/recal.log",
+    "GATK_runs/{merge}/ApplyBQSR/recal.log"
   params:
     dbSNP_vcf = config["dbSNP_vcf"],
     dbSNP_vcf_index = config["dbSNP_vcf_index"],
@@ -168,7 +168,7 @@ rule ApplyBQSR:
     known_indels = config["known_indels"],
     a1000G_index = config["a1000G_index"],
     known_indels_index = config["known_indels_index"],
-    interval = f"-t {config['alt_bed']}" if config['alt_bed'] != None else "--reference config[\"ref_fasta\"]",
+    interval = f"-t {config['alt_bed']}" if config['alt_bed'] != None else "--reference {config[\"ref_fasta\"]}",
     java_opts = config["ApplyBQSR.java_opt"],
     temp_dir = "/tmp/$SLURM_JOB_ID/{merge}/ApplyBQSR/tmp",
     exclude_list = ''
