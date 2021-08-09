@@ -15,6 +15,7 @@ parser$add_argument('-p', '--min_proportion', type = 'double', default = 0.47, h
 parser$add_argument('-o', '--out_pre', default = "", help = 'prefix of output files')
 parser$add_argument('-O', '--out_dir', default = ".", help = 'directory to write files to')
 parser$add_argument('-R', '--rsem', action = 'store_true', help = 'run in rsem mode')
+parser$add_argument('--ref', default = 'control', help = 'which condition is the control')
 
 args = parser$parse_args()
 print(args)
@@ -70,21 +71,29 @@ dds = estimateSizeFactors(dds)
 kept_idx = rowSums(counts(dds, normalized = TRUE) >= args$min_reads) >= (num_samples * args$min_proportion)
 
 dds = DESeq(dds[kept_idx, ])
-condition_index = 0
-for (condition1 in conditions[seq(1, length(conditions) - 1)]){
-    condition_index = condition_index + 1
-    for (condition2 in conditions[seq(condition_index + 1, length(conditions))]){
-        res = as.data.frame(results(dds, contrast = c('condition', condition1, condition2)))
-        res = res[order(res$padj),]
-    #    rownames(res) = make.names(tx2gene[match(rownames(res), tx2gene$ensembl_gene_id),3], unique = TRUE)
-        write.csv(res, paste(args$out_dir, "/", args$out_pre, "deseq2_", condition1, "_vs_", condition2, ".csv", sep = ""), row.names = TRUE)
-        # make volcano plot
-        plot = EnhancedVolcano(res,
-          lab = rownames(res),
-          x = 'log2FoldChange',
-          y = 'padj',
-          pCutoff = 0.05,
-          FCcutoff = 1)
-        ggsave(paste(args$out_dir, "/", args$out_pre, "deseq2_", condition1, "_vs_", condition2, "_volcano", ".pdf", sep = ""), )
-    }
-}
+
+# make the condition in args$ref the reference
+dds$condition = relevel(dds$condition, ref = args$ref)
+
+res = results(dds)
+print(res)
+res = as.data.frame(res)
+res = res[order(res$padj),]
+write.csv(res, paste(args$out_dir, "/", args$out_pre, "_deseq2.csv", sep = ""), row.names = TRUE)
+
+plot = EnhancedVolcano(res,
+  lab = rownames(res),
+  x = 'log2FoldChange',
+  y = 'padj',
+  pCutoff = 0.05,
+  FCcutoff = 1)
+ggsave(paste(args$out_dir, "/", args$out_pre, "_deseq2_volcano.pdf", sep = ""), )
+
+plot = EnhancedVolcano(res,
+  lab = rownames(res),
+  x = 'log2FoldChange',
+  y = 'padj',
+  ylim = c(0, -log10(10e-20)),
+  pCutoff = 0.05,
+  FCcutoff = 1)
+ggsave(paste(args$out_dir, "/", args$out_pre, "_deseq2_volcano_max20.pdf", sep = ""), )

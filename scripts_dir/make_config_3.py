@@ -12,6 +12,7 @@ def main():
     parser.add_argument('dir_strings', nargs = '+', help = """One or more strings that match the directories containing .fq.gz files. Example: \'python3 /path/to/make_config_2.py RG MF\' will match the directories RG7_1, RG7_PBMC, and MF5_PBMC, but not the directory RG7_1_tmp""")
     parser.add_argument('-b', '--bed_file', help = "bed_file for this run", required = True)
     parser.add_argument('-r', '--rna', action = 'store_true', help = "rna mode")
+    parser.add_argument('-d', '--dir', action = 'store_true', help = "run in absolute dir mode")
     args = parser.parse_args()
 
     libs = {}
@@ -24,7 +25,7 @@ def main():
         if path == "":
             path = working_directory
         for item in sorted(os.listdir(path)):
-            if os.path.isdir(f"{path}/{item}") and item.startswith(basename):
+            if os.path.isdir(f"{path}/{item}") and ((item.startswith(basename) and not args.dir) or (args.dir and item == basename)):
                 reads_list = []
                 for filenm in sorted(os.listdir(f"{path}/{item}")):
                     if file_is_fq(filenm) and ('cut_u' not in filenm):

@@ -7,6 +7,7 @@ normals = [config["pairs"][tumor] for tumor in tumors]
 
 rule mutect_all:
   input:
+    expand("easy_transfer/{tumor}_VEP_parsed.tsv", tumor = tumors),
     expand("GATK_runs/{tumor}/VEP/{tumor}.vcf", tumor = tumors)
 
 
@@ -320,7 +321,8 @@ rule VEP:
     vcf_out = "GATK_runs/{tumor}/VEP/{tumor}.vcf",
     vcf_out_zip = "vep/{tumor}/VEP/{tumor}_VEP.vcf.gz",
     summary = "GATK_runs/{tumor}/VEP/{tumor}.vcf_summary.html",
-    parsed_output = "GATK_runs/{tumor}/VEP/{tumor}_VEP_parsed.csv",
+    parsed_output = "GATK_runs/{tumor}/VEP/{tumor}_VEP_parsed.tsv",
+    easy_transfer = "easy_transfer/{tumor}_VEP_parsed.tsv",
   conda: "envs_dir/phylowgs.yaml"
   log: "GATK_runs/log/{tumor}_VEP.log"
   benchmark: "GATK_runs/benchmark/{tumor}_snp_VEP.benchmark"
@@ -364,7 +366,7 @@ rule VEP:
 
       python3 {params.bioinfo_workflows_path}/scripts_dir/vep_vcf_parser.py \
         -f SYMBOL Gene Consequence SIFT PolyPhen Condel LoFtool BLOSUM62 \
-        -v {output.vcf_out} > {output.parsed_output}
+        -v {output.vcf_out} -p > {output.parsed_output}
 
       if [[ !(-d easy_transfer) ]]; then
         mkdir easy_transfer
