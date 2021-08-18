@@ -1,11 +1,5 @@
 # Load libraries
 library(argparse)
-library(DESeq2)
-library(tximportData)
-library(tximport)
-library(readr)
-library(biomaRt)
-library(EnhancedVolcano)
 
 parser = ArgumentParser()
 parser$add_argument('-m', '--sample_mapping', required = TRUE, help = 'csv file containing sample to condition to path mapping')
@@ -20,6 +14,12 @@ parser$add_argument('--ref', default = 'control', help = 'which condition is the
 args = parser$parse_args()
 print(args)
 
+library(DESeq2)
+library(tximportData)
+library(tximport)
+library(readr)
+library(biomaRt)
+library(EnhancedVolcano)
 
 test_version = biomaRt::listEnsemblArchives()
 print(test_version)
@@ -64,13 +64,22 @@ if (args$rsem){
 dds = DESeqDataSetFromTximport(txi.tsv, colData = coldata, design = ~condition)
 # filter out lowly expressed genes
 dds = estimateSizeFactors(dds)
-#count_data = counts(dds)
-#colnames(count_data) = coldata$sample
-#write.csv(count_data, file = "counts_cohort.csv")
-#stop()
 kept_idx = rowSums(counts(dds, normalized = TRUE) >= args$min_reads) >= (num_samples * args$min_proportion)
 
+count_data = counts(dds[kept_idx, ])
+colnames(count_data) = coldata$sample
+write.table(count_data, file = paste(args$out_dir, "/", args$out_pre, "_deseq2_counts.tsv", sep = ""), sep = "\t")
+
 dds = DESeq(dds[kept_idx, ])
+
+# Horrible ugly way to get R to write a gsea phenotype table
+phenotype_filenm = paste(args$out_dir, "/", args$out_pre, "_deseq2_phenotype.cls", sep = "")
+cat(num_samples, 2, 1, file = phenotype_filenm, sep = " ")
+cat("\n", file = phenotype_filenm, append = TRUE)
+cat("#", colnames(count_data), file = phenotype_filenm, append = TRUE)
+cat("\n", file = phenotype_filenm, append = TRUE)
+matching = ifelse(coldata$condition == coldata$condition[1], 0, 1)
+cat(matching, file = phenotype_filenm, append = TRUE, sep = " ")
 
 # make the condition in args$ref the reference
 dds$condition = relevel(dds$condition, ref = args$ref)
