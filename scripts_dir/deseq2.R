@@ -68,7 +68,10 @@ kept_idx = rowSums(counts(dds, normalized = TRUE) >= args$min_reads) >= (num_sam
 
 count_data = counts(dds[kept_idx, ])
 colnames(count_data) = coldata$sample
-write.table(count_data, file = paste(args$out_dir, "/", args$out_pre, "_deseq2_counts.tsv", sep = ""), sep = "\t")
+write.table(count_data, file = paste(args$out_dir, "/", args$out_pre, "_deseq2_counts.txt", sep = ""), sep = "\t")
+
+# make the condition in args$ref the reference
+dds$condition = relevel(dds$condition, ref = args$ref)
 
 dds = DESeq(dds[kept_idx, ])
 
@@ -76,13 +79,10 @@ dds = DESeq(dds[kept_idx, ])
 phenotype_filenm = paste(args$out_dir, "/", args$out_pre, "_deseq2_phenotype.cls", sep = "")
 cat(num_samples, 2, 1, file = phenotype_filenm, sep = " ")
 cat("\n", file = phenotype_filenm, append = TRUE)
-cat("#", colnames(count_data), file = phenotype_filenm, append = TRUE)
+cat("#", coldata$condition, file = phenotype_filenm, append = TRUE)
 cat("\n", file = phenotype_filenm, append = TRUE)
 matching = ifelse(coldata$condition == coldata$condition[1], 0, 1)
 cat(matching, file = phenotype_filenm, append = TRUE, sep = " ")
-
-# make the condition in args$ref the reference
-dds$condition = relevel(dds$condition, ref = args$ref)
 
 res = results(dds)
 print(res)
