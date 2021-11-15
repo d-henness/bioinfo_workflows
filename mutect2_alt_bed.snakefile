@@ -365,7 +365,7 @@ rule VEP:
       bcftools index -f {output.vcf_out_zip}
 
       python3 {params.bioinfo_workflows_path}/scripts_dir/vep_vcf_parser.py \
-        -f SYMBOL Gene Consequence SIFT PolyPhen Condel LoFtool BLOSUM62 \
+        -f SYMBOL Gene Consequence SIFT PolyPhen Condel LoFtool BLOSUM62 Protein_position Amino_acids Codons \
         -v {output.vcf_out} -p > {output.parsed_output}
 
       if [[ !(-d easy_transfer) ]]; then
