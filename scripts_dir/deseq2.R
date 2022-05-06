@@ -15,7 +15,6 @@ args = parser$parse_args()
 print(args)
 
 library(DESeq2)
-library(tximportData)
 library(tximport)
 library(readr)
 library(biomaRt)
@@ -52,6 +51,8 @@ num_samples = length(coldata[, 1])
 conditions = sort(unique(coldata$condition))
 conditions
 
+head(coldata)
+
 # Import data
 if (args$rsem){
     coldata$path = paste(coldata$path, ".isoforms.results", sep = "")
@@ -61,34 +62,59 @@ if (args$rsem){
     txi.tsv = tximport(coldata$path, type = "kallisto", tx2gene = tx2gene, ignoreTxVersion = TRUE)
 }
 
+
 dds = DESeqDataSetFromTximport(txi.tsv, colData = coldata, design = ~condition)
 # filter out lowly expressed genes
 dds = estimateSizeFactors(dds)
 kept_idx = rowSums(counts(dds, normalized = TRUE) >= args$min_reads) >= (num_samples * args$min_proportion)
 
-count_data = counts(dds[kept_idx, ])
+dds = dds[kept_idx, ]
+count_data = counts(dds)
 colnames(count_data) = coldata$sample
 write.table(count_data, file = paste(args$out_dir, "/", args$out_pre, "_deseq2_counts.txt", sep = ""), sep = "\t")
+
+
+# make a PCA plot
+transformed = vst(dds, blind = TRUE)
+# TODO make intgroup a command line arg
+# pcaData = plotPCA(transformed, intgroup = c("condition", "sample", "stage"), returnData = TRUE)
+pcaData = plotPCA(transformed, intgroup = c("condition", "sample"), returnData = TRUE)
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+
+plot = ggplot(pcaData, aes(PC1, PC2, label = sample)) +
+  geom_point() +
+  geom_text(aes(label = sample), hjust = 0, vjust = 0) +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+  coord_fixed()
+ggsave(paste(args$out_dir, "/", args$out_pre, "_deseq2_pca_sample.pdf", sep = ""), )
+
+plot = ggplot(pcaData, aes(PC1, PC2, color = condition)) +
+  geom_point() +
+  xlab(paste0("PC1: ", percentVar[1], "% variance")) +
+  ylab(paste0("PC2: ", percentVar[2], "% variance")) +
+  coord_fixed()
+ggsave(paste(args$out_dir, "/", args$out_pre, "_deseq2_pca.pdf", sep = ""), )
 
 # make the condition in args$ref the reference
 dds$condition = relevel(dds$condition, ref = args$ref)
 
-dds = DESeq(dds[kept_idx, ])
+dds = DESeq(dds)
 
 # Horrible ugly way to get R to write a gsea phenotype table
-phenotype_filenm = paste(args$out_dir, "/", args$out_pre, "_deseq2_phenotype.cls", sep = "")
-cat(num_samples, 2, 1, file = phenotype_filenm, sep = " ")
-cat("\n", file = phenotype_filenm, append = TRUE)
-cat("#", coldata$condition, file = phenotype_filenm, append = TRUE)
-cat("\n", file = phenotype_filenm, append = TRUE)
-matching = ifelse(coldata$condition == coldata$condition[1], 0, 1)
-cat(matching, file = phenotype_filenm, append = TRUE, sep = " ")
+#phenotype_filenm = paste(args$out_dir, "/", args$out_pre, "_deseq2_phenotype.cls", sep = "")
+#cat(num_samples, 2, 1, file = phenotype_filenm, sep = " ")
+#cat("\n", file = phenotype_filenm, append = TRUE)
+#cat("#", coldata$condition, file = phenotype_filenm, append = TRUE)
+#cat("\n", file = phenotype_filenm, append = TRUE)
+#matching = ifelse(coldata$condition == coldata$condition[1], 0, 1)
+#cat(matching, file = phenotype_filenm, append = TRUE, sep = " ")
 
 res = results(dds)
 print(res)
 res = as.data.frame(res)
 res = res[order(res$padj),]
-write.csv(res, paste(args$out_dir, "/", args$out_pre, "_deseq2.csv", sep = ""), row.names = TRUE)
+write.csv(res, paste(args$out_dir, "/", args$out_pre, "_referece_", args$ref, "_deseq2.csv", sep = ""), row.names = TRUE)
 
 plot = EnhancedVolcano(res,
   lab = rownames(res),
@@ -96,7 +122,7 @@ plot = EnhancedVolcano(res,
   y = 'padj',
   pCutoff = 0.05,
   FCcutoff = 1)
-ggsave(paste(args$out_dir, "/", args$out_pre, "_deseq2_volcano.pdf", sep = ""), )
+ggsave(paste(args$out_dir, "/", args$out_pre, "_referece_", args$ref, "_deseq2_volcano.pdf", sep = ""), )
 
 plot = EnhancedVolcano(res,
   lab = rownames(res),
@@ -105,4 +131,4 @@ plot = EnhancedVolcano(res,
   ylim = c(0, -log10(10e-20)),
   pCutoff = 0.05,
   FCcutoff = 1)
-ggsave(paste(args$out_dir, "/", args$out_pre, "_deseq2_volcano_max20.pdf", sep = ""), )
+ggsave(paste(args$out_dir, "/", args$out_pre, "_referece_", args$ref, "_deseq2_volcano_max20.pdf", sep = ""), )

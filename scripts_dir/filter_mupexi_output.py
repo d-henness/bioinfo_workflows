@@ -33,7 +33,7 @@ with open(args.mupexi_file, 'r') as data:
                 print(args.mupexi_file, line)
                 quit()
             # Filter for neoantigens with Mut_MHC_rank_EL =< 0.5 AND Mut_peptide with exactly 9 letters AND Allele_frequency > 0.25
-            if (parsed_line['Mut_MHCrank_EL'] <= 0.5) and (len(parsed_line['Mut_peptide']) == 9) and (parsed_line['Allele_Frequency'] > 0.25):
+            if (parsed_line['Mut_MHCrank_EL'] <= 0.5) and (len(parsed_line['Mut_peptide']) < 99) and (parsed_line['Allele_Frequency'] > 0.25):
                 if args.rna:
                     try:
                         if (antigens[parsed_line['Mut_peptide']] > parsed_line['Mut_MHCrank_EL']) and (parsed_line['Expression_Level'] > 0.1):

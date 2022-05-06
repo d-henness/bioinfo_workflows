@@ -17,7 +17,7 @@ def kallisto_runs(tumor):
     return f"mupexi_runs/{config['pairs'][tumor]}/optitype/{config['pairs'][tumor]}_result.tsv"
 
 
-noramls = make_normal_set(config['pairs'])
+#noramls = make_normal_set(config['pairs'])
 rule run_mupexi:
   input:
 #   expand("mupexi_runs/{lib}/optitype/{lib}_result.tsv", lib = noramls),
@@ -40,7 +40,7 @@ rule razers3_1:
     time_min = lambda wildcards, attempt: attempt * (24 * 60),	# time in minutes
   shell:
     """
-      gzip -dc {input.fq1_in} | parallel -j {threads} --pipe -L4 -N1000000 "cat > mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_1_{{#}}.fastq; razers3 -i 95 -m 1 -dr 0 -o mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_1_{{#}}.bam $CONDA_PREFIX/share/optitype-1.3.2-1/data/hla_reference_dna.fasta mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_1_{{#}}.fastq; rm mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_1_{{#}}.fastq"
+      gzip -dc {input.fq1_in} | parallel -j {threads} --pipe -L4 -N1000000 "cat > mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_1_{{#}}.fastq; razers3 -i 95 -m 1 -dr 0 -o mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_1_{{#}}.bam $CONDA_PREFIX/bin/data/hla_reference_dna.fasta mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_1_{{#}}.fastq; rm mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_1_{{#}}.fastq"
       ls mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_1_*.bam > mupexi_runs/{wildcards.lib}/razers3/all_bam.txt
       samtools cat -b mupexi_runs/{wildcards.lib}/razers3/all_bam.txt > {output.bam1_out}
       samtools bam2fq {output.bam1_out} > {output.fq1_out}
@@ -63,7 +63,7 @@ rule razers3_2:
     time_min = lambda wildcards, attempt: attempt * (24 * 60),	# time in minutes
   shell:
     """
-      gzip -dc {input.fq2_in} | parallel -j {threads} --pipe -L4 -N1000000 "cat > mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_2_{{#}}.fastq; razers3 -i 95 -m 1 -dr 0 -o mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_2_{{#}}.bam $CONDA_PREFIX/share/optitype-1.3.2-1/data/hla_reference_dna.fasta mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_2_{{#}}.fastq; rm mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_2_{{#}}.fastq"
+      gzip -dc {input.fq2_in} | parallel -j {threads} --pipe -L4 -N1000000 "cat > mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_2_{{#}}.fastq; razers3 -i 95 -m 1 -dr 0 -o mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_2_{{#}}.bam $CONDA_PREFIX/bin/data/hla_reference_dna.fasta mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_2_{{#}}.fastq; rm mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_2_{{#}}.fastq"
       ls mupexi_runs/{wildcards.lib}/razers3/{wildcards.lib}_2_*.bam > mupexi_runs/{wildcards.lib}/razers3/all_bam.txt
       samtools cat -b mupexi_runs/{wildcards.lib}/razers3/all_bam.txt > {output.bam2_out}
       samtools bam2fq {output.bam2_out} > {output.fq2_out}

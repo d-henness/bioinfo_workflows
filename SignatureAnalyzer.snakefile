@@ -8,7 +8,7 @@ normals = [config["pairs"][tumor] for tumor in tumors]
 rule signatureanalyzer_all:
   input:
     expand("signatureanalyzer/cosmic3_exome/{tumor}/signature_contributions.pdf", tumor = tumors),
-    expand("signatureanalyzer/cosmic3_DBS/{tumor}/signature_contributions.pdf", tumor = tumors),
+#    expand("signatureanalyzer/cosmic3_DBS/{tumor}/signature_contributions.pdf", tumor = tumors),
     expand("signatureanalyzer/pcawg_SBS/{tumor}/signature_contributions.pdf", tumor = tumors),
     expand("signatureanalyzer/cosmic3_ID/{tumor}/signature_contributions.pdf", tumor = tumors),
 
