@@ -19,6 +19,7 @@ def parse_line(line, rna):
 parser = argparse.ArgumentParser(description = 'Filter MuPeXI output files for most relavent neoantigens')
 parser.add_argument('mupexi_file', type = str, help = 'MuPeXI file to filter')
 parser.add_argument('--rna', action = 'store_true', help = 'Toggle RNA expression filter')
+parser.add_argument('-a', '--allele_frequency', type = float, default = 0.25)
 args = parser.parse_args()
 
 header = []
@@ -33,7 +34,7 @@ with open(args.mupexi_file, 'r') as data:
                 print(args.mupexi_file, line)
                 quit()
             # Filter for neoantigens with Mut_MHC_rank_EL =< 0.5 AND Mut_peptide with exactly 9 letters AND Allele_frequency > 0.25
-            if (parsed_line['Mut_MHCrank_EL'] <= 0.5) and (len(parsed_line['Mut_peptide']) < 99) and (parsed_line['Allele_Frequency'] > 0.25):
+            if (parsed_line['Mut_MHCrank_EL'] <= 0.5) and (len(parsed_line['Mut_peptide']) < 99) and (parsed_line['Allele_Frequency'] > args.allele_frequency):
                 if args.rna:
                     try:
                         if (antigens[parsed_line['Mut_peptide']] > parsed_line['Mut_MHCrank_EL']) and (parsed_line['Expression_Level'] > 0.1):

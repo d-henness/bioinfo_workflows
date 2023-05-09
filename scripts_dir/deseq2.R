@@ -77,8 +77,8 @@ write.table(count_data, file = paste(args$out_dir, "/", args$out_pre, "_deseq2_c
 # make a PCA plot
 transformed = vst(dds, blind = TRUE)
 # TODO make intgroup a command line arg
-# pcaData = plotPCA(transformed, intgroup = c("condition", "sample", "stage"), returnData = TRUE)
-pcaData = plotPCA(transformed, intgroup = c("condition", "sample"), returnData = TRUE)
+pcaData = plotPCA(transformed, intgroup = c("condition", "sample", "stage"), returnData = TRUE)
+#pcaData = plotPCA(transformed, intgroup = c("condition", "sample"), returnData = TRUE)
 percentVar <- round(100 * attr(pcaData, "percentVar"))
 
 plot = ggplot(pcaData, aes(PC1, PC2, label = sample)) +
@@ -89,7 +89,7 @@ plot = ggplot(pcaData, aes(PC1, PC2, label = sample)) +
   coord_fixed()
 ggsave(paste(args$out_dir, "/", args$out_pre, "_deseq2_pca_sample.pdf", sep = ""), )
 
-plot = ggplot(pcaData, aes(PC1, PC2, color = condition)) +
+plot = ggplot(pcaData, aes(PC1, PC2, color = condition, shape = stage)) +
   geom_point() +
   xlab(paste0("PC1: ", percentVar[1], "% variance")) +
   ylab(paste0("PC2: ", percentVar[2], "% variance")) +

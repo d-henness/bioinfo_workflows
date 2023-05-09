@@ -1,15 +1,14 @@
 configfile: "{}/ref.yaml".format(workflow.basedir)
-include: "fastp_rna_single.snakefile"
 
 rule rsem_all:
   input:
     expand("rsem/{rna_lib}/{rna_lib}.genes.results", rna_lib = config["rna_merge_libs"]),
-    expand("rsem/{rna_lib}/{rna_lib}.transcript-sorted.bam", rna_lib = config["rna_merge_libs"]),
-    expand("rsem/{rna_lib}/{rna_lib}.transcript-sorted.bam.bai", rna_lib = config["rna_merge_libs"]),
+#    expand("rsem/{rna_lib}/{rna_lib}.transcript-sorted.bam", rna_lib = config["rna_merge_libs"]),
+#    expand("rsem/{rna_lib}/{rna_lib}.transcript-sorted.bam.bai", rna_lib = config["rna_merge_libs"]),
 
 rule rsem:
   input:
-    fq1 = lambda wildcards: f"fastp/{config['rna_merge_libs'][wildcards.rna_lib][0]}/fastp/{config['rna_merge_libs'][wildcards.rna_lib][0]}_1.fq.gz",
+    fq1 = lambda wildcards: f"{config['rna_libraries'][config['rna_merge_libs'][wildcards.rna_lib][0]]}"
   output:
     genes = "rsem/{rna_lib}/{rna_lib}.genes.results",
     isoforms = "rsem/{rna_lib}/{rna_lib}.isoforms.results",

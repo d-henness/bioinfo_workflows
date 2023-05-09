@@ -45,7 +45,7 @@ all_data = all_data[:, sort_order]
 samples = [samples[i] for i in sort_order]
 print(samples)
 
-fig, ax = plt.subplots(figsize = (len(samples) / 4, len(samples) / 4))
+fig, ax = plt.subplots()
 
 norm = colors.Normalize(vmin = 0, vmax = len(cell_types) - 1)
 mapper = cm.ScalarMappable(norm = norm, cmap = "PuOr")
@@ -58,7 +58,7 @@ plt.ylim([-args.height / 2, len(samples) - (args.height / 2)])
 plt.savefig(args.output)
 
 plt.clf()
-fig, ax = plt.subplots(figsize = (len(samples) / 4, len(samples) / 4))
+fig, ax = plt.subplots()
 left = np.array([0.0 for i in samples])
 for i, cell_type in enumerate(cell_types):
     if i != 0:

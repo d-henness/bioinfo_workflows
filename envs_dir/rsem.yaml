@@ -1,3 +1,4 @@
+name: rsem
 channels:
  - conda-forge
  - bioconda
