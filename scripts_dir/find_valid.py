@@ -5,7 +5,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('filenms', nargs = '+')
     parser.add_argument('--max_stragglers', type = int, default = 30) # largest amount of cancer stragglers to be considered dormant
-    parser.add_argument('--min_for_early_cuttoff', type = int, default = 40000) # smallest amount of cancer cells to be considered an early loss
+    parser.add_argument('--min_cells_for_early_cuttoff', type = int, default = 40000) # smallest amount of cancer cells to be considered an early loss
     parser.add_argument('--max_timesteps', type = int, default = 14391) # if a file has fewer than this many timesteps it exited early
     parser.add_argument('--min_timesteps_for_domancy', type = int, default = 30) # if cancer population goes lower than max_stragglers for this many timesteps the tumor is dormant
     args = parser.parse_args()
@@ -22,8 +22,10 @@ def main():
                     cancer_cells_per_timestep.append(int(line.split('\t')[1]))
                 elif line.startswith("Immune cells"):
                     immune_cells_per_timestep.append(int(line.split('\t')[1]))
+            if (len(cancer_cells_per_timestep) == 0):
+                invalid_files.append(filenm)
             # if there was an early cutoff that was not caused by going over max cancer cells and we can not resonablely assume the remaining cancer cells are stragglers the file is invalid
-            if (len(cancer_cells_per_timestep) < args.max_timesteps) and (cancer_cells_per_timestep[-1] > args.max_stragglers) and (cancer_cells_per_timestep[-1] < args.min_for_early_cuttoff):
+            elif (len(cancer_cells_per_timestep) < args.max_timesteps) and (cancer_cells_per_timestep[-1] > args.max_stragglers) and (cancer_cells_per_timestep[-1] < args.min_cells_for_early_cuttoff):
                 invalid_files.append(filenm)
             else:
                 valid_files.append(filenm)
