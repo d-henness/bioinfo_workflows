@@ -3,12 +3,12 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 
-def make_onco_hist(args, fig, ax):
+def make_onco_hist(filenms, ax, stats_filenm):
     oncoprotien_all_timesteps = []
     oncoprotien_this_timestep = []
     copying_data = False
 
-    for i, filenm in enumerate(args.filenms):
+    for i, filenm in enumerate(filenms):
         print(filenm)
         timestep = 0
         with open(filenm, 'r') as data:
@@ -68,7 +68,6 @@ def make_onco_hist(args, fig, ax):
 
 
     #get the get the start, min, and max after min for each set of oncoprotien bins
-    stats_filenm = os.path.splitext(args.outfile)[0] + ".tsv"
     with open(stats_filenm, 'w') as data:
         data.write('onco\tstart\tmin\tmax_after_min\n')
         for i, onco_data in enumerate(hist.T):
@@ -86,13 +85,25 @@ def main():
     parser.add_argument('-o', '--outfile', default = 'out.pdf')
     args = parser.parse_args()
 
-    fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
-    ax.view_init(elev = args.elevation, azim = args.azimuth)
-
-    make_onco_hist(args, fig, ax)
+    nrows = 6
+    ncols = 6
+    adj = 6
+    fig = plt.figure(figsize = (ncols * adj, nrows * adj))
+    starting_immunes = ["100", "200", "300"]
+    starting_oncos = ["0.50", "0.60", "0.70", "0.80", "0.90", "1.00", "1.10", "1.20", "1.30", "1.40", "1.50"]
+    for i, starting_immune in enumerate(starting_immunes):
+        filenms1 = [filenm for filenm in args.filenms if f'/{starting_immune}/' in filenm]
+        for j, starting_onco in enumerate(starting_oncos):
+            filenms2 = [filenm for filenm in filenms1 if f'/{starting_onco}/' in filenm]
+            idx = (12 * i) + j + 1
+            ax = fig.add_subplot(6, 6, idx, projection='3d')
+            plt.title(f'Mean Starting Oncoprotien {starting_onco}')
+            ax.view_init(elev = args.elevation, azim = args.azimuth)
+            stats_filenm = f'{os.path.splitext(args.outfile)[0]}_{idx}.tsv'
+            make_onco_hist(filenms2, ax, stats_filenm)
     fig.tight_layout()
     plt.savefig(args.outfile)
+    plt.savefig(os.path.splitext(args.outfile)[0] + '.png')
 
 if __name__ == '__main__':
     main()

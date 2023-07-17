@@ -323,7 +323,7 @@ rule VEP:
     summary = "GATK_runs/{tumor}/VEP/{tumor}.vcf_summary.html",
     parsed_output = "GATK_runs/{tumor}/VEP/{tumor}_VEP_parsed.tsv",
     easy_transfer = "easy_transfer/{tumor}_VEP_parsed.tsv",
-  conda: "envs_dir/phylowgs.yaml"
+  conda: "envs_dir/vep.yaml"
   log: "GATK_runs/log/{tumor}_VEP.log"
   benchmark: "GATK_runs/benchmark/{tumor}_snp_VEP.benchmark"
   params:

@@ -3,5 +3,5 @@ channels:
  - bioconda
  - defaults
 dependencies:
- - ensembl-vep=94
+ - ensembl-vep
  - bcftools
