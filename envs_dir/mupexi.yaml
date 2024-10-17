@@ -12,3 +12,4 @@ dependencies:
  - samtools
  - psutil
  - tcsh
+ - optitype=1.3.4

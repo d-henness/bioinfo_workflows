@@ -1,0 +1,28 @@
+import argparse
+import os
+
+parser = argparse.ArgumentParser(description = 'Split up vcf file into equally sized chunks')
+parser.add_argument('vcf_file', type = str, nargs = 1, help = 'vcf file to split up')
+parser.add_argument('prefix', type = str, nargs = 1, help = 'file prefix for each new vcf file')
+parser.add_argument('nlines', type = int, nargs = 1, help = 'number of lines per file')
+parser.add_argument('--dry_run', action = 'store_true', help = 'only say how many files get created')
+args = parser.parse_args()
+
+with open(args.vcf_file[0], 'r') as data:
+    all_file = data.readlines()
+    lines_of_header = 0
+    for line in all_file:
+        lines_of_header += 1
+        if line[0:len('#CHROM')] == '#CHROM':
+            break
+    num_varients = (len(all_file) - lines_of_header)
+    num_files = int((num_varients - 1) / args.nlines[0] + 1)
+
+print(f"Writing {num_files} files with {args.nlines[0]} lines per file for file {args.vcf_file[0]}")
+
+if not args.dry_run:
+    for i in range(num_files):
+        with open(args.prefix[0] + '_' + str(i) + '.vcf', 'w') as data:
+            data.writelines(all_file[0:lines_of_header])
+            for j in range((i * args.nlines[0]), (min((i + 1) * args.nlines[0], num_varients))):
+                data.write(all_file[j + lines_of_header])

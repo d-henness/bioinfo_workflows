@@ -1,4 +1,5 @@
 import argparse
+import os
 import sys
 
 parser = argparse.ArgumentParser(description = "Parse the output from VEP vcf files into a more tractable format. All vcf files must have the same VEP fields present")
@@ -23,11 +24,18 @@ for i, filenm in enumerate(args.vcf):
                 else:
                     print(f"chr\tpos\tref\talt\tvaf\t{'	'.join([field for field in vep_fields_global])}")
 
+            elif line.startswith("##tumor_sample="):
+                tumor_sample = line.strip().split("=")[-1]
+
+            elif line.startswith("#CHROM"):
+                split_line = line.strip().split()
+                vaf_field = split_line.index(tumor_sample)
+
             elif (line[0:len("chr")] == "chr"):
                 split_line = line.strip().split()
                 if (((split_line[6] == 'PASS') and args.PASS) or (not args.PASS)):
                     vep_fields_line = split_line[7].split(";")[-1].split("|")
-                    vaf = split_line[9].split(":")[2]
+                    vaf = split_line[vaf_field].split(":")[2]
                     if (args.fields[0] != "all"):
                         print(f"{split_line[0]}\t{split_line[1]}\t{split_line[3]}\t{split_line[4]}\t{vaf}\t{'	'.join([vep_fields_line[vep_field_map[field]] for field in args.fields])}")
                     else:

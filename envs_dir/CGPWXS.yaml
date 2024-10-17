@@ -3,5 +3,4 @@ channels:
  - bioconda
  - defaults
 dependencies:
- - ensembl-vep=94
- - bcftools
+ - samtools=1.9
