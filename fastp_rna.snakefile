@@ -42,14 +42,9 @@ rule fastp_paired:
     html = "fastp/{rna_lib}/fastp/{rna_lib}_log.html",
   shell:
     """
-      mkdir -p {params.temp_dir}
-      cp {input[0]} {params.temp_dir}/{params.fq1}
-      cp {input[1]} {params.temp_dir}/{params.fq2}
 
-      echo copy complete
-
-      fastp -i {params.temp_dir}/{params.fq1} \
-        -I {params.temp_dir}/{params.fq2} \
+      fastp -i {input[0]} \
+        -I {input[1]} \
         -o {output.fq1_out} \
         -O {output.fq2_out} \
         -w 1 \
