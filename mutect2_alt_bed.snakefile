@@ -84,8 +84,10 @@ rule M2:
   conda:
     "envs_dir/pre_proc.yaml"
   input:
-    normal_bam = lambda wildcards: f"GATK_runs/{config['pairs'][wildcards.tumor]}/ApplyBQSR/{config['pairs'][wildcards.tumor]}_recal.bam",
-    normal_bai = lambda wildcards: f"GATK_runs/{config['pairs'][wildcards.tumor]}/ApplyBQSR/{config['pairs'][wildcards.tumor]}_recal.bam.bai",
+#    normal_bam = lambda wildcards: f"GATK_runs/{config['pairs'][wildcards.tumor]}/ApplyBQSR/{config['pairs'][wildcards.tumor]}_recal.bam",
+#    normal_bai = lambda wildcards: f"GATK_runs/{config['pairs'][wildcards.tumor]}/ApplyBQSR/{config['pairs'][wildcards.tumor]}_recal.bam.bai",
+    normal_bam = lambda wildcards: "".join(["GATK_runs/",config['pairs'][wildcards.tumor],"/ApplyBQSR/",config['pairs'][wildcards.tumor],"_recal.bam"]),
+    normal_bai = lambda wildcards: "".join(["GATK_runs/",config['pairs'][wildcards.tumor],"/ApplyBQSR/",config['pairs'][wildcards.tumor],"_recal.bam.bai"]),
     tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam",
     tumor_bai = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam.bai",
     art_tab = rules.LearnReadOrientationModel.output
@@ -177,8 +179,12 @@ rule CalculateContamination:
   input:
     tumor_bam = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam",
     tumor_bai = "GATK_runs/{tumor}/ApplyBQSR/{tumor}_recal.bam.bai",
-    normal_bam = lambda wildcards: f"GATK_runs/{config['pairs'][wildcards.tumor]}/ApplyBQSR/{config['pairs'][wildcards.tumor]}_recal.bam",
-    normal_bai = lambda wildcards: f"GATK_runs/{config['pairs'][wildcards.tumor]}/ApplyBQSR/{config['pairs'][wildcards.tumor]}_recal.bam.bai",
+    normal_bam = lambda wildcards: "".join(["GATK_runs/",config['pairs'][wildcards.tumor],"/ApplyBQSR/",config['pairs'][wildcards.tumor],"_recal.bam"]),
+    normal_bai = lambda wildcards: "".join(["GATK_runs/",config['pairs'][wildcards.tumor],"/ApplyBQSR/",config['pairs'][wildcards.tumor],"_recal.bam.bai"]),
+#    normal_bam = lambda wildcards: f"GATK_runs/{config['pairs'][wildcards.tumor]}/ApplyBQSR/{config['pairs'][wildcards.tumor]}_recal.bam",
+#    normal_bai = lambda wildcards: f"GATK_runs/{config['pairs'][wildcards.tumor]}/ApplyBQSR/{config['pairs'][wildcards.tumor]}_recal.bam.bai",
+#    normal_bam = lambda wildcards: f"GATK_runs/{config['pairs'][wildcards.tumor]}/ApplyBQSR/{config['pairs'][wildcards.tumor]}_recal.bam",
+#    normal_bai = lambda wildcards: f"GATK_runs/{config['pairs'][wildcards.tumor]}/ApplyBQSR/{config['pairs'][wildcards.tumor]}_recal.bam.bai",
 #    normal_bam = "GATK_runs/{normal}/ApplyBQSR/{normal}_recal.bam",
 #    normal_bia = "GATK_runs/{normal}/ApplyBQSR/{normal}_recal.bam.bai",
   output:
