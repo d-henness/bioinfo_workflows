@@ -19,7 +19,9 @@ def MarkDuplicates_input(wildcards):
 def MarkDuplicates_input_string(wildcards):
   bam_files = []
   for library in config["merge_libs"][wildcards.merge]:
-    bam_files.append(f"--INPUT GATK_runs/{library}/MergeBamAlignment/merge.bam")
+    bam_files.append("".join(["--INPUT GATK_runs/",library,"/MergeBamAlignment/merge.bam"]))
+# f strings stopped working here for some reason
+#    bam_files.append(f"--INPUT GATK_runs/{library}/MergeBamAlignment/merge.bam")
   return ' '.join(bam_files)
 
 rule MarkDuplicates:
