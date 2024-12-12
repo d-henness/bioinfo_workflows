@@ -2,8 +2,8 @@ configfile: "{}/ref.yaml".format(workflow.basedir)
 
 rule run_pre_pro_bf:
   input:
-#    expand("GATK_runs/{library}/MergeBamAlignment/merge.bam", library = config["libraries"])
-    expand("GATK_runs/{library}/ubam/unprocessed.bam", library = config["libraries"])
+    expand("GATK_runs/{library}/MergeBamAlignment/merge.bam", library = config["libraries"])
+#    expand("GATK_runs/{library}/ubam/unprocessed.bam", library = config["libraries"])
 
 def get_sample_name(wildcards):
   for sample_name in config["merge_libs"]:
@@ -22,7 +22,7 @@ rule ubam:
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    mem_mb = lambda wildcards, attempt: attempt * 10000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
     io = 1, # used to indicate that this is an io heavy job and should not have many running at once
   params:
