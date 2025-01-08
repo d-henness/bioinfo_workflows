@@ -80,7 +80,7 @@ rule SortAndFixTags:
     exclude_list = '',
     temp_dir = "/tmp/$SLURM_JOB_ID/{merge}/SortAndFixTags/tmp",
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * (int(config["SortAndFixTags.java_opt_sort"].strip("-Xmx")) + int(config["SortAndFixTags.java_opt_fix"].strip("-Xmx")) + 1000),
+    mem_mb = lambda wildcards, attempt: attempt * (int(config["SortAndFixTags.java_opt_sort"].strip("-Xmx")) + int(config["SortAndFixTags.java_opt_fix"].strip("-Xmx"))),
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   benchmark:
     "benchmarks/{merge}.SortAndFixTags.benchmark.txt"
@@ -131,7 +131,7 @@ rule BaseRecalibrator:
     exclude_list = '',
     temp_dir = "/tmp/$SLURM_JOB_ID/{merge}/BaseRecalibrator/tmp",
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * (int(config["BaseRecalibrator.java_opt"].strip("-Xmx")) + 1000),
+    mem_mb = lambda wildcards, attempt: attempt * (int(config["BaseRecalibrator.java_opt"].strip("-Xmx"))),
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   benchmark:
     "benchmarks/{merge}.BaseRecalibrator.benchmark.txt"
@@ -177,7 +177,7 @@ rule ApplyBQSR:
     temp_dir = "/tmp/$SLURM_JOB_ID/{merge}/ApplyBQSR/tmp",
     exclude_list = ''
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * (int(config["ApplyBQSR.java_opt"].strip("-Xmx")) + 1000),
+    mem_mb = lambda wildcards, attempt: attempt * (int(config["ApplyBQSR.java_opt"].strip("-Xmx"))),
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   benchmark:
     "benchmarks/{merge}.ApplyBQSR.benchmark.txt"

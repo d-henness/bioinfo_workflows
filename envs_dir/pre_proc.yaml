@@ -6,6 +6,6 @@ dependencies:
  - bwa=0.7.17
  - xopen
  - picard=2.18.14
- - gatk4=4.0.10.0
+ - gatk4=4.6.1.0
  - samtools=1.9
 prefix: ~/snakemake_conda_pref/pre_proc

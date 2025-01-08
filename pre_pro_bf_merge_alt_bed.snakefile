@@ -22,7 +22,7 @@ rule ubam:
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    mem_mb = lambda wildcards, attempt: attempt * 700,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
     io = 1, # used to indicate that this is an io heavy job and should not have many running at once
   params:
@@ -75,7 +75,7 @@ rule MergeBamAlignment:
     java_opts = config["MergeBamAlignment.java_opt"],
     exclude_list = ''
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * (int(config["MergeBamAlignment.java_opt"].strip("-Xmx")) + 1000),
+    mem_mb = lambda wildcards, attempt: attempt * int(config["MergeBamAlignment.java_opt"].strip("-Xmx")),
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   benchmark:
     "benchmarks/{library}.MergeBamAlignment.benchmark.txt"

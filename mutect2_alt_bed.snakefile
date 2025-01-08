@@ -28,7 +28,7 @@ rule CollectF1R2Counts:
     interval = config["alt_bed"],
     exclude_list = ''
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    mem_mb = lambda wildcards, attempt: attempt * 4000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
     "GATK_runs/{tumor}/CollectF1R2Counts/out.log",
@@ -65,7 +65,7 @@ rule LearnReadOrientationModel:
     gnomad = config["gnomad"],
     exclude_list = ''
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    mem_mb = lambda wildcards, attempt: attempt * 4000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
     "GATK_runs/{tumor}/LearnReadOrientationModel/log.log",
@@ -117,7 +117,7 @@ rule M2:
     interval = config["alt_bed"],
     exclude_list = 'neuron,biolx95'
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    mem_mb = lambda wildcards, attempt: attempt * 4000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60 * 30,	# time in minutes
   threads: 4 # default for mutect asks for 4 threads
   log:
@@ -154,7 +154,7 @@ rule CollectSequencingArtifactMetrics:
     ada_det_met = temp("GATK_runs/{tumor}/CollectSequencingArtifactMetrics/gatk.pre_adapter_detail_metrics"),
     ada_sum_met = temp("GATK_runs/{tumor}/CollectSequencingArtifactMetrics/gatk.pre_adapter_summary_metrics"),
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    mem_mb = lambda wildcards, attempt: attempt * 4000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
     "GATK_runs/{tumor}/CollectSequencingArtifactMetrics/gatk.log"
@@ -193,7 +193,7 @@ rule CalculateContamination:
     con_tab = temp("GATK_runs/{tumor}/CalculateContamination/con_tab.table"),
     seg_tab = temp("GATK_runs/{tumor}/CalculateContamination/seg_tab.table"),
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    mem_mb = lambda wildcards, attempt: attempt * 4000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
     "GATK_runs/{tumor}/CalculateContamination/out.log"
@@ -231,7 +231,7 @@ rule MergeVCFs:
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    mem_mb = lambda wildcards, attempt: attempt * 4000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
     "GATK_runs/{tumor}/MergeVCFs/out.log",
@@ -263,7 +263,7 @@ rule Filter:
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    mem_mb = lambda wildcards, attempt: attempt * 4000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
     "GATK_runs/{tumor}/Filter/out.log"
@@ -297,7 +297,7 @@ rule FilterByOrientationBias:
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 5000,
+    mem_mb = lambda wildcards, attempt: attempt * 4000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
     "GATK_runs/{tumor}/FilterByOrientationBias/out.log"
@@ -342,7 +342,7 @@ rule VEP:
     bioinfo_workflows_path = config["bioinfo_workflows_path"],
   threads: 1
   resources:
-    mem_mb = 4000
+    mem_mb = lambda wildcards, attempt: attempt * 2000,
   shell:
     """
       vep \
