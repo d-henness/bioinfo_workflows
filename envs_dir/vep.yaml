@@ -5,3 +5,4 @@ channels:
 dependencies:
  - ensembl-vep
  - bcftools
+prefix: ~/snakemake_conda_pref/vep

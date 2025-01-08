@@ -41,7 +41,7 @@ rule VEP:
         --hgvs \
         --hgvsg \
         --fasta {params.ref_fasta} \
-        --offline --cache --dir_cache {params.vep_cache} \
+#        --offline --cache --dir_cache {params.vep_cache} \
         --dir_plugins {params.vep_plugins} \
         --plugin Downstream \
         --plugin dbNSFP,{params.dbNSFP_config},ALL \

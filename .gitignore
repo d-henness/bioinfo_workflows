@@ -1,3 +1,5 @@
 *test*
 ref.yaml
 scripts_dir/valid_split_sites/
+vep_plugins/
+VEP_plugins/
