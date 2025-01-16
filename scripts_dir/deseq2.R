@@ -22,12 +22,12 @@ library(EnhancedVolcano)
 
 test_version = biomaRt::listEnsemblArchives()
 print(test_version)
-v98 = test_version[test_version$version == 98,]
-print(v98$url)
-if (v98$version != 98){
-  stop("Biomart no longer using Ensembl Genes 98.  Make sure to update kallisto results to newest version of Ensembl Genes and this script.")
+v113 = test_version[test_version$version == 113,]
+print(v113$url)
+if (v113$version != 113){
+  stop("Biomart no longer using Ensembl Genes 113.  Make sure to update kallisto results to newest version of Ensembl Genes and this script.")
 }
-mart = biomaRt::useMart(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl", host = v98$url)
+mart = biomaRt::useMart(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl", host = v113$url)
 if (args$gene){
   t2g = biomaRt::getBM(attributes = c("ensembl_transcript_id", "external_gene_name"), mart = mart)
   tx2gene = dplyr::rename(t2g, target_id = ensembl_transcript_id, ens_gene = external_gene_name)

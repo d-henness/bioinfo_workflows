@@ -3,9 +3,9 @@ channels:
  - bioconda
  - defaults
 dependencies:
- - bwa=0.7.17
+ - bwa
  - xopen
- - picard=2.18.14
- - gatk4=4.6.1.0
- - samtools=1.9
+ - picard
+ - gatk4
+ - samtools
 prefix: ~/snakemake_conda_pref/pre_proc

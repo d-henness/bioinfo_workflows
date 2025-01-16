@@ -3,8 +3,10 @@ channels:
  - bioconda
  - defaults
 dependencies:
- - bioconductor-hmmcopy=1.20.0
- - r-plyr=1.8.4
- - r-optparse=1.6.0
- - bioconductor-genomeinfodb=1.16.0
- - hmmcopy=0.1.1
+ - bioconductor-hmmcopy
+ - r-plyr
+ - r-optparse
+ - bioconductor-genomeinfodb
+ - hmmcopy
+ - bioconductor-genomicranges
+ - r-ichorcna=0.3.2

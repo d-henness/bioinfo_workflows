@@ -14,13 +14,13 @@ rule all_Titan:
 		#expand("results/titan/hmm/titanCNA_ploidy{ploidy}/", ploidy=PLOIDY[config["TitanCNA_maxPloidy"]]),
 		"results/titan/hmm/optimalClusterSolution.txt"
 
-rule makeOutDir:
-  output:
-    "results/titan/hmm/titanCNA_ploidy{ploidy}/"
-  resources:
-    mem_mb = 1
-  shell:
-    "mkdir -p {output}"
+#rule makeOutDir:
+#  output:
+#    "results/titan/hmm/titanCNA_ploidy{ploidy}/"
+#  resources:
+#    mem_mb = 1
+#  shell:
+#    "mkdir -p {output}"
 
 rule runTitanCNA:
   input:

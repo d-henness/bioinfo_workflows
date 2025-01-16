@@ -84,6 +84,7 @@ rule M2:
     ref_fai = config["ref_fasta_index"],
     ref_dict = config["ref_dict"],
     gnomad = config["gnomad"],
+    ref_pon = "/home/dylan/ref_data/hg38/1000g_pon.hg38.vcf.gz",
     interval = config["alt_bed"],
     exclude_list = 'neuron,biolx95'
   resources:
@@ -110,6 +111,7 @@ rule M2:
       -L {params.interval} \
       -O "{output.vcf}" \
       --bam-output {output.bam_out} \
+      -pon {params.ref_pon} \
       --f1r2-tar-gz {output.f1r2_tar_gz} &> {log}
     """
 

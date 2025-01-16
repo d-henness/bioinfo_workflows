@@ -15,17 +15,17 @@ rule read_counter:
     "results/readDepth/{samples}.bin{binSize}.wig"
   conda:
     "envs_dir/ichorCNA_env.yaml"
-	params:
-		readCounter=config["readCounterScript"],
-		binSize=config["binSize"],
-		qual="20",
-		chrs=config["chrs"]
-	resources:
-		mem_mb=4000
-	log:
-		"logs/readDepth/{samples}.bin{binSize}.log"
-	shell:
-		"{params.readCounter} {input} -c {params.chrs} -w {params.binSize} -q {params.qual} > {output} 2> {log}"
+  params:
+    readCounter=config["readCounterScript"],
+    binSize=config["binSize"],
+    qual="20",
+    chrs=config["chrs"]
+  resources:
+    mem_mb=4000
+  log:
+    "logs/readDepth/{samples}.bin{binSize}.log"
+  shell:
+    "{params.readCounter} {input} -c {params.chrs} -w {params.binSize} -q {params.qual} > {output} 2> {log}"
 
 rule ichorCNA:
   input:
