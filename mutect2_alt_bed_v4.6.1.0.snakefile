@@ -7,8 +7,8 @@ normals = [config["pairs"][tumor] for tumor in tumors]
 
 rule mutect_all:
   input:
-    expand("easy_transfer/{tumor}_VEP_parsed.tsv", tumor = tumors),
-    expand("GATK_runs/{tumor}/VEP/{tumor}.vcf", tumor = tumors)
+    expand("easy_transfer/{tumor}_{f_score_thresh}_VEP_parsed.tsv", tumor = tumors, f_score_thresh = [0.8]),
+    expand("GATK_runs/{tumor}_{f_score_thresh}/VEP/{tumor}_{f_score_thresh}.vcf", tumor = tumors, f_score_thresh = [0.8])
 
 
 #rule CollectF1R2Counts:
@@ -258,15 +258,15 @@ rule Filter:
     maf_seg = rules.CalculateContamination.output.seg_tab,
     art_tab = rules.LearnReadOrientationModel.output.art_tab,
   output:
-    filt_vcf = "GATK_runs/{tumor}/Filter/{tumor}.vcf",
-    filt_vcf_index = "GATK_runs/{tumor}/Filter/{tumor}.vcf.idx",
+    filt_vcf = "GATK_runs/{tumor}_{f_score_thresh}/Filter/{tumor}_{f_score_thresh}.vcf",
+    filt_vcf_index = "GATK_runs/{tumor}_{f_score_thresh}/Filter/{tumor}_{f_score_thresh}.vcf.idx",
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 4000,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
   log:
-    "GATK_runs/{tumor}/Filter/out.log"
+    "GATK_runs/{tumor}_{f_score_thresh}/Filter/out.log"
   params:
     ref_fasta = config["ref_fasta"],
     ref_fai = config["ref_fasta_index"],
@@ -277,7 +277,7 @@ rule Filter:
     variants_con_index = config["variants_for_contamination_index"],
     exclude_list = ''
   benchmark:
-    "benchmarks/{tumor}.Filter.benchmark.txt"
+    "benchmarks/{tumor}_{f_score_thresh}.Filter.benchmark.txt"
   shell:
     """
       gatk --java-options -Xmx4000m FilterMutectCalls -V {input.vcf} \
@@ -285,6 +285,7 @@ rule Filter:
 	-R {params.ref_fasta} \
       	--contamination-table {input.con_tab} \
 	--ob-priors {input.art_tab} \
+	-f-score-beta {wildcards.f_score_thresh} \
       	--tumor-segmentation {input.maf_seg} &> {log} \
     """
 
@@ -326,14 +327,14 @@ rule VEP:
   input:
     vcf = rules.Filter.output.filt_vcf,
   output:
-    vcf_out = "GATK_runs/{tumor}/VEP/{tumor}.vcf",
-    vcf_out_zip = "vep/{tumor}/VEP/{tumor}_VEP.vcf.gz",
-    summary = "GATK_runs/{tumor}/VEP/{tumor}.vcf_summary.html",
-    parsed_output = "GATK_runs/{tumor}/VEP/{tumor}_VEP_parsed.tsv",
-    easy_transfer = "easy_transfer/{tumor}_VEP_parsed.tsv",
+    vcf_out = "GATK_runs/{tumor}_{f_score_thresh}/VEP/{tumor}_{f_score_thresh}.vcf",
+    vcf_out_zip = "vep/{tumor}_{f_score_thresh}/VEP/{tumor}_{f_score_thresh}_VEP.vcf.gz",
+    summary = "GATK_runs/{tumor}_{f_score_thresh}/VEP/{tumor}_{f_score_thresh}.vcf_summary.html",
+    parsed_output = "GATK_runs/{tumor}_{f_score_thresh}/VEP/{tumor}_{f_score_thresh}_VEP_parsed.tsv",
+    easy_transfer = "easy_transfer/{tumor}_{f_score_thresh}_VEP_parsed.tsv",
   conda: "envs_dir/vep.yaml"
-  log: "GATK_runs/log/{tumor}_VEP.log"
-  benchmark: "GATK_runs/benchmark/{tumor}_snp_VEP.benchmark"
+  log: "GATK_runs/log/{tumor}_{f_score_thresh}_VEP.log"
+  benchmark: "GATK_runs/benchmark/{tumor}_{f_score_thresh}_snp_VEP.benchmark"
   params:
     ref_fasta = config["ref_fasta"],
     vep_cache = config["vep_cache"],
@@ -344,7 +345,7 @@ rule VEP:
     bioinfo_workflows_path = config["bioinfo_workflows_path"],
   threads: 1
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 2000,
+    mem_mb = lambda wildcards, attempt: attempt * 3000,
   shell:
     """
       vep \
