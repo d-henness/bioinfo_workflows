@@ -9,8 +9,8 @@ rule rsem_all:
 
 rule rsem:
   input:
-    fq1 = lambda wildcards: f"fastp/{config['rna_merge_libs'][wildcards.rna_lib][0]}/fastp/{config['rna_merge_libs'][wildcards.rna_lib][0]}_1.fq.gz",
-    fq2 = lambda wildcards: f"fastp/{config['rna_merge_libs'][wildcards.rna_lib][0]}/fastp/{config['rna_merge_libs'][wildcards.rna_lib][0]}_2.fq.gz",
+    fq1 = lambda wildcards: "fastp/" + config['rna_merge_libs'][wildcards.rna_lib][0] + "/fastp/" + config['rna_merge_libs'][wildcards.rna_lib][0] + "_1.fq.gz",
+    fq2 = lambda wildcards: "fastp/" + config['rna_merge_libs'][wildcards.rna_lib][0] + "/fastp/" + config['rna_merge_libs'][wildcards.rna_lib][0] + "_2.fq.gz",
   output:
     genes = "rsem/{rna_lib}/{rna_lib}.genes.results",
     isoforms = "rsem/{rna_lib}/{rna_lib}.isoforms.results",
@@ -23,7 +23,7 @@ rule rsem:
   threads: 4
   params:
     index = config["rsem_index"],
-    out_pre = lambda wildcards: f"rsem/{wildcards.rna_lib}/{wildcards.rna_lib}"
+    out_pre = lambda wildcards: "rsem/"+ wildcards.rna_lib + "/" + wildcards.rna_lib
   benchmark:
     "rsem/benchmark/{rna_lib}_rsem.benchmark"
   log:
