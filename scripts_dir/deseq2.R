@@ -77,8 +77,8 @@ write.table(count_data, file = paste(args$out_dir, "/", args$out_pre, "_deseq2_c
 # make a PCA plot
 transformed = vst(dds, blind = TRUE)
 # TODO make intgroup a command line arg
-pcaData = plotPCA(transformed, intgroup = c("condition", "sample", "stage"), returnData = TRUE)
-#pcaData = plotPCA(transformed, intgroup = c("condition", "sample"), returnData = TRUE)
+#pcaData = plotPCA(transformed, intgroup = c("condition", "sample", "stage"), returnData = TRUE)
+pcaData = plotPCA(transformed, intgroup = c("condition", "sample"), returnData = TRUE)
 percentVar <- round(100 * attr(pcaData, "percentVar"))
 
 plot = ggplot(pcaData, aes(PC1, PC2, label = sample)) +
@@ -89,7 +89,7 @@ plot = ggplot(pcaData, aes(PC1, PC2, label = sample)) +
   coord_fixed()
 ggsave(paste(args$out_dir, "/", args$out_pre, "_deseq2_pca_sample.pdf", sep = ""), )
 
-plot = ggplot(pcaData, aes(PC1, PC2, color = condition, shape = stage)) +
+plot = ggplot(pcaData, aes(PC1, PC2, color = condition)) +
   geom_point() +
   xlab(paste0("PC1: ", percentVar[1], "% variance")) +
   ylab(paste0("PC2: ", percentVar[2], "% variance")) +
@@ -110,25 +110,29 @@ dds = DESeq(dds)
 #matching = ifelse(coldata$condition == coldata$condition[1], 0, 1)
 #cat(matching, file = phenotype_filenm, append = TRUE, sep = " ")
 
-res = results(dds)
-print(res)
-res = as.data.frame(res)
-res = res[order(res$padj),]
-write.csv(res, paste(args$out_dir, "/", args$out_pre, "_referece_", args$ref, "_deseq2.csv", sep = ""), row.names = TRUE)
+for (condition in conditions){
+    if (condition != args$ref){
+        res = results(dds, contrast=c("condition", condition,args$ref))
+        print(res)
+        res = as.data.frame(res)
+        res = res[order(res$padj),]
+        write.csv(res, paste(args$out_dir, "/", args$out_pre, "_", condition, "_referece_", args$ref, "_deseq2.csv", sep = ""), row.names = TRUE)
 
-plot = EnhancedVolcano(res,
-  lab = rownames(res),
-  x = 'log2FoldChange',
-  y = 'padj',
-  pCutoff = 0.05,
-  FCcutoff = 1)
-ggsave(paste(args$out_dir, "/", args$out_pre, "_referece_", args$ref, "_deseq2_volcano.pdf", sep = ""), )
+        plot = EnhancedVolcano(res,
+          lab = rownames(res),
+          x = 'log2FoldChange',
+          y = 'padj',
+          pCutoff = 0.05,
+          FCcutoff = 1)
+        ggsave(paste(args$out_dir, "/", args$out_pre, "_", condition, "_referece_", args$ref, "_deseq2_volcano.pdf", sep = ""), )
 
-plot = EnhancedVolcano(res,
-  lab = rownames(res),
-  x = 'log2FoldChange',
-  y = 'padj',
-  ylim = c(0, -log10(10e-20)),
-  pCutoff = 0.05,
-  FCcutoff = 1)
-ggsave(paste(args$out_dir, "/", args$out_pre, "_referece_", args$ref, "_deseq2_volcano_max20.pdf", sep = ""), )
+        plot = EnhancedVolcano(res,
+          lab = rownames(res),
+          x = 'log2FoldChange',
+          y = 'padj',
+          ylim = c(0, -log10(10e-20)),
+          pCutoff = 0.05,
+          FCcutoff = 1)
+        ggsave(paste(args$out_dir, "/", args$out_pre, "_", condition, "_referece_", args$ref, "_deseq2_volcano_max20.pdf", sep = ""), )
+    }
+}

@@ -50,8 +50,14 @@ rule fastp_paired:
         -w 1 \
         -j {log.json} \
         -h {log.html} \
+        --trim_poly_g \
+        --length_required 30 \
+        --qualified_quality_phred 20 \
+        --cut_right --cut_right_mean_quality 20 \
         --detect_adapter_for_pe &> {log.overall}
       echo "finished" > {output.signal}
+
+      fastqc {output.fq1_out} {output.fq2_out} -o fastp/{wildcards.rna_lib}/fastp/
     """
 
 # will need to be changed to deal with io issues
