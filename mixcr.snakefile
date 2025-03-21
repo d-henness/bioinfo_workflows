@@ -90,60 +90,60 @@ rule fastp_paired:
 #      echo "finished" > {output.signal}
 #    """
 
-alignment_threads = 4
-rule mixcr_align:
-  input:
-    signal = "mixcr/{sample}/fastp/{sample}_signal.txt",
-  output:
-    alignments = "mixcr/{sample}/mixcr/alignments.vdjca",
-  conda: "envs_dir/mixcr.yaml",
-  resources:
-    mem_mb = lambda wildcards, attempt: attempt * 7 * 1024,
-    time_min = lambda wildcards, attempt: attempt * 24 * 60,  # time in minutes
-  params:
-    input_cmd = mixcr_input,
-  threads: 1 + alignment_threads
-  benchmark: "mixcr/benchmark/{sample}_mixcr_align.benchmark"
-  log: "mixcr/log/{sample}_mixcr_align.log",
-  shell:
-    """
-      mixcr align --species hsa -t {alignment_threads} -r {log} {params.input_cmd} {output.alignments}
-    """
-
-rule mixcr_assemble:
-  input:
-    alignments = rules.mixcr_align.output.alignments
-  output:
-    clones = "mixcr/{sample}/mixcr/clones.clna",
-  threads: 4
-  log: "mixcr/log/{sample}_mixcr_assemble.log",
-  benchmark: "mixcr/benchmark/{sample}_mixcr_assemble.benchmark"
-  resources:
-    mem_mb = lambda wildcards, attempt: attempt * 1 * 1024,
-    time_min = lambda wildcards, attempt: attempt * 24 * 60,  # time in minutes
-  conda: "envs_dir/mixcr.yaml"
-  shell:
-    "mixcr assemble -t {threads} -r {log} -a {input.alignments} {output.clones}"
-
-rule mixcr_exportclones:
-  input:
-    clones = rules.mixcr_assemble.output.clones,
-  output:
-    tra_summary = "mixcr/{sample}/mixcr/{sample}_tra_clones.txt",
-    trb_summary = "mixcr/{sample}/mixcr/{sample}_trb_clones.txt",
-    trg_summary = "mixcr/{sample}/mixcr/{sample}_trg_clones.txt",
-    all_summary = "mixcr/{sample}/mixcr/{sample}_clones.txt",
-  conda: "envs_dir/mixcr.yaml"
-  log: "mixcr/log/{sample}_mixcr_exportclones.log",
-  benchmark: "mixcr/benchmark/{sample}_mixcr_exportclones.benchmark"
-  threads: 1
-  resources:
-    mem_mb = lambda wildcards, attempt: attempt * 1 * 1024,
-    time_min = lambda wildcards, attempt: attempt * 24 * 60,  # time in minutes
-  shell:
-    """
-      mixcr exportClones -c TRA {input.clones} {output.tra_summary}
-      mixcr exportClones -c TRB {input.clones} {output.trb_summary}
-      mixcr exportClones -c TRG {input.clones} {output.trg_summary}
-      mixcr exportClones {input.clones} {output.all_summary}
-    """
+#alignment_threads = 4
+#rule mixcr_align:
+#  input:
+#    signal = "mixcr/{sample}/fastp/{sample}_signal.txt",
+#  output:
+#    alignments = "mixcr/{sample}/mixcr/alignments.vdjca",
+#  conda: "envs_dir/mixcr.yaml",
+#  resources:
+#    mem_mb = lambda wildcards, attempt: attempt * 7 * 1024,
+#    time_min = lambda wildcards, attempt: attempt * 24 * 60,  # time in minutes
+#  params:
+#    input_cmd = mixcr_input,
+#  threads: 1 + alignment_threads
+#  benchmark: "mixcr/benchmark/{sample}_mixcr_align.benchmark"
+#  log: "mixcr/log/{sample}_mixcr_align.log",
+#  shell:
+#    """
+#      mixcr align --species hsa -t {alignment_threads} -r {log} {params.input_cmd} {output.alignments}
+#    """
+#
+#rule mixcr_assemble:
+#  input:
+#    alignments = rules.mixcr_align.output.alignments
+#  output:
+#    clones = "mixcr/{sample}/mixcr/clones.clna",
+#  threads: 4
+#  log: "mixcr/log/{sample}_mixcr_assemble.log",
+#  benchmark: "mixcr/benchmark/{sample}_mixcr_assemble.benchmark"
+#  resources:
+#    mem_mb = lambda wildcards, attempt: attempt * 1 * 1024,
+#    time_min = lambda wildcards, attempt: attempt * 24 * 60,  # time in minutes
+#  conda: "envs_dir/mixcr.yaml"
+#  shell:
+#    "mixcr assemble -t {threads} -r {log} -a {input.alignments} {output.clones}"
+#
+#rule mixcr_exportclones:
+#  input:
+#    clones = rules.mixcr_assemble.output.clones,
+#  output:
+#    tra_summary = "mixcr/{sample}/mixcr/{sample}_tra_clones.txt",
+#    trb_summary = "mixcr/{sample}/mixcr/{sample}_trb_clones.txt",
+#    trg_summary = "mixcr/{sample}/mixcr/{sample}_trg_clones.txt",
+#    all_summary = "mixcr/{sample}/mixcr/{sample}_clones.txt",
+#  conda: "envs_dir/mixcr.yaml"
+#  log: "mixcr/log/{sample}_mixcr_exportclones.log",
+#  benchmark: "mixcr/benchmark/{sample}_mixcr_exportclones.benchmark"
+#  threads: 1
+#  resources:
+#    mem_mb = lambda wildcards, attempt: attempt * 1 * 1024,
+#    time_min = lambda wildcards, attempt: attempt * 24 * 60,  # time in minutes
+#  shell:
+#    """
+#      mixcr exportClones -c TRA {input.clones} {output.tra_summary}
+#      mixcr exportClones -c TRB {input.clones} {output.trb_summary}
+#      mixcr exportClones -c TRG {input.clones} {output.trg_summary}
+#      mixcr exportClones {input.clones} {output.all_summary}
+#    """
