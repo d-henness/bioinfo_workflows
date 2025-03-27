@@ -7,7 +7,7 @@ tumors = config["pairs"]
 
 rule overlap_all:
     input:
-        expand("easy_transfer/overlap/{tumor}_{f_score_thresh}_overlap_parsed.vcf", tumor = tumors, f_score_thresh = [0.8]),
+        expand("easy_transfer/overlap/{tumor}_{f_score_thresh}_overlap_parsed.tsv", tumor = tumors, f_score_thresh = [0.8]),
 
 rule compute_overlap:
     input:
@@ -20,7 +20,7 @@ rule compute_overlap:
         concat_strelka = "overlap/normed/{tumor}/strelka_concat_{f_score_thresh}.vcf.gz",
         sorted_strelka = "overlap/normed/{tumor}/strelka_sorted_{f_score_thresh}.vcf.gz",
         final_out_vcf = "easy_transfer/overlap/{tumor}_{f_score_thresh}_overlap.vcf",
-        final_out_parsed = "easy_transfer/overlap/{tumor}_{f_score_thresh}_overlap_parsed.vcf",
+        final_out_parsed = "easy_transfer/overlap/{tumor}_{f_score_thresh}_overlap_parsed.tsv",
     conda: "envs_dir/mutect2_strelka_overlap.yaml"
     params:
         ref_fasta = config["ref_fasta"],

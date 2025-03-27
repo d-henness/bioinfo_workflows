@@ -3,7 +3,7 @@ configfile: "{}/ref.yaml".format(workflow.basedir)
 
 rule mixcr_all:
     input:
-      expand("mixcr/{sample}/mixcr/clones.clna", sample = config["libraries"])
+      expand("mixcr/{sample}/clones.clna", sample = config["libraries"])
 
 def mixcr_input(wildcards):
   if len(config['libraries'][wildcards.sample]) == 1:
@@ -93,7 +93,7 @@ rule mixcr_analyze:
   input:
     signal = "mixcr/{sample}/fastp/{sample}_signal.txt",
   output:
-    clones = "mixcr/{sample}/mixcr/clones.clna",
+    clones = "mixcr/{sample}/clones.clna",
   conda: "envs_dir/mixcr.yaml",
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 7 * 1024,
@@ -101,16 +101,16 @@ rule mixcr_analyze:
   params:
     input_cmd = mixcr_input,
   threads: 1 + alignment_threads
-  benchmark: "mixcr/benchmark/{sample}_mixcr_align.benchmark"
-  log: "mixcr/log/{sample}_mixcr_align.log",
+  benchmark: "mixcr/benchmark/{sample}_mixcr_analyze.benchmark"
+  log: "mixcr/log/{sample}_mixcr_analyze.log",
   shell:
     """
     mixcr analyze exome-seq\
-        --threads {threads}
+        --threads {threads}\
         --species hsa\
         --assemble-longest-contigs\
         {params.input_cmd}\
-        mixcr/{wildcards.sample}/
+        mixcr/{wildcards.sample}/ &> {log}
 
     """
 
