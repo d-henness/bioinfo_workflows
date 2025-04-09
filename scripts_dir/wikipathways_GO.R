@@ -72,9 +72,13 @@ egobp_down <- clusterProfiler::enrichGO(
 
 head(egobp_down,10)
 
-barplot(egobp_down, showCategory = 20)
-ggsave(paste0(args$output_pref, "_down_genes_barplot.png"))
-dotplot(egobp_down, showCategory = 20)
-ggsave(paste0(args$output_pref, "_down_genes_dotplot.png"))
-goplot(egobp_down)
-ggsave(paste0(args$output_pref, "_down_genes_GOplot.png"))
+if (length(egobp_down) == 0) {
+    print("Could not enrich down regged genes. Check amount of down regged genes")
+} else{
+    barplot(egobp_down, showCategory = 20)
+    ggsave(paste0(args$output_pref, "_down_genes_barplot.png"))
+    dotplot(egobp_down, showCategory = 20)
+    ggsave(paste0(args$output_pref, "_down_genes_dotplot.png"))
+    goplot(egobp_down)
+    ggsave(paste0(args$output_pref, "_down_genes_GOplot.png"))
+}
