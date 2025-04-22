@@ -52,13 +52,18 @@ egobp_up <- clusterProfiler::enrichGO(
 
 head(egobp_up,10)
 
-
-barplot(egobp_up, showCategory = 20)
-ggsave(paste0(args$output_pref, "_up_genes_barplot.png"))
-dotplot(egobp_up, showCategory = 20)
-ggsave(paste0(args$output_pref, "_up_genes_dotplot.png"))
-goplot(egobp_up)
-ggsave(paste0(args$output_pref, "_up_genes_GOplot.png"))
+if (nrow(egobp_up) == 0) {
+    print("could not enrich up regged genes. check amount of down regged genes")
+} else{
+    barplot(egobp_up, showCategory = 20)
+    ggsave(paste0(args$output_pref, "_up_genes_barplot.png"))
+    dotplot(egobp_up, showCategory = 20)
+    ggsave(paste0(args$output_pref, "_up_genes_dotplot.png"))
+    if (nrow(egobp_up) > 1){
+        goplot(egobp_up)
+        ggsave(paste0(args$output_pref, "_up_genes_GOplot.png"))
+    }
+}
 
 
 egobp_down <- clusterProfiler::enrichGO(
@@ -71,14 +76,54 @@ egobp_down <- clusterProfiler::enrichGO(
         readable = TRUE)
 
 head(egobp_down,10)
+print(nrow(egobp_down))
 
-if (length(egobp_down) == 0) {
-    print("Could not enrich down regged genes. Check amount of down regged genes")
+if (nrow(egobp_down) == 0) {
+    print("could not enrich down regged genes. check amount of down regged genes")
 } else{
     barplot(egobp_down, showCategory = 20)
     ggsave(paste0(args$output_pref, "_down_genes_barplot.png"))
     dotplot(egobp_down, showCategory = 20)
     ggsave(paste0(args$output_pref, "_down_genes_dotplot.png"))
-    goplot(egobp_down)
-    ggsave(paste0(args$output_pref, "_down_genes_GOplot.png"))
+    if (nrow(egobp_down) > 1){
+        goplot(egobp_down)
+        ggsave(paste0(args$output_pref, "_down_genes_GOplot.png"))
+    }
 }
+
+print("here")
+
+ewp.up <- clusterProfiler::enrichWP(
+    up.genes.entrez[[2]],
+    universe = bkgd.genes.entrez[[2]],
+    organism = "Homo sapiens",
+    pAdjustMethod = "fdr",
+    pvalueCutoff = 0.05, #p.adjust cutoff; relaxed for demo purposes
+)
+
+print("here2")
+head(ewp.up)
+
+ewp.up <- DOSE::setReadable(ewp.up, org.Hs.eg.db, keyType = "ENTREZID")
+print("here3")
+head(ewp.up)
+
+barplot(ewp.up, showCategory = 20)
+dotplot(ewp.up, showCategory = 20)
+
+print("here4")
+ewp.dn <- enrichWP(
+    down.genes.entrez[[2]],
+    universe = bkgd.genes.entrez[[2]],  #hint: comment out to get any results for demo
+    organism = "Homo sapiens",
+    pAdjustMethod = "fdr",
+    pvalueCutoff = 0.05, #p.adjust cutoff; relaxed for demo purposes
+)
+
+ewp.dn <- setReadable(ewp.dn, org.Hs.eg.db, keyType = "ENTREZID")
+head(ewp.dn)
+barplot(ewp.dn, showCategory = 20)
+dotplot(ewp.dn, showCategory = 20)
+
+ewp.up.wpids <- ewp.up$ID
+ewp.up.wpids
