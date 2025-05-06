@@ -14,15 +14,15 @@ def fastp_unpaired_input(wildcards):
 
 rule fastp_all:
   input:
-    expand("fastp/{lib}/fastp/{lib}_signal.txt", lib = config["libraries"]),
+    expand("fastp_dna/{lib}/fastp/{lib}_signal.txt", lib = config["libraries"]),
 
 rule fastp_paired:
   input:
     fastp_paired_input
   output:
-    fq1_out = "fastp/{lib}/fastp/{lib}_1.fq.gz",
-    fq2_out = "fastp/{lib}/fastp/{lib}_2.fq.gz",
-    signal = "fastp/{lib}/fastp/{lib}_signal.txt",
+    fq1_out = "fastp_dna/{lib}/fastp/{lib}_1.fq.gz",
+    fq2_out = "fastp_dna/{lib}/fastp/{lib}_2.fq.gz",
+    signal = "fastp_dna/{lib}/fastp/{lib}_signal.txt",
   conda:
     "envs_dir/kallisto.yaml"
   resources:
@@ -35,11 +35,11 @@ rule fastp_paired:
     fq1 = "{lib}_1.fq.gz",
     fq2 = "{lib}_2.fq.gz",
   benchmark:
-    "fastp/benchmark/{lib}_fastp.benchmark"
+    "fastp_dna/benchmark/{lib}_fastp.benchmark"
   log:
-    overall = "fastp/log/{lib}_fastp.log",
-    json = "fastp/{lib}/fastp/{lib}_log.json",
-    html = "fastp/{lib}/fastp/{lib}_log.html",
+    overall = "fastp_dna/log/{lib}_fastp.log",
+    json = "fastp_dna/{lib}/fastp/{lib}_log.json",
+    html = "fastp_dna/{lib}/fastp/{lib}_log.html",
   shell:
     """
 
@@ -57,7 +57,7 @@ rule fastp_paired:
         --detect_adapter_for_pe &> {log.overall}
       echo "finished" > {output.signal}
 
-      fastqc {output.fq1_out} {output.fq2_out} -o fastp/{wildcards.lib}/fastp/
+      fastqc {output.fq1_out} {output.fq2_out} -o fastp_dna/{wildcards.lib}/fastp/
     """
 
 # will need to be changed to deal with io issues
