@@ -1,6 +1,6 @@
 configfile: "{}/ref.yaml".format(workflow.basedir)
 
-include: "./fastp_rna.snakefile"
+include: "./fastp.snakefile"
 
 def make_normal_set(tumors):
   normals = []
