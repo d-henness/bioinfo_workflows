@@ -3,4 +3,5 @@ channels:
  - bioconda
  - defaults
 dependencies:
- - optitype=1.3.4
+ - optitype=1.3.5
+ - razers3=3.5.8
