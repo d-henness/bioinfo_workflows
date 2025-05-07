@@ -37,7 +37,7 @@ rule razers3_1:
     razers3_log_1 = "optitype/log/{tumor}_razers3_1.log",
   benchmark: "optitype/benchmark/{tumor}_razers3_1.benchmark"
   params:
-    out_dir = "optitype/{tumor}/razer3",
+    out_dir = "optitype/{tumor}/razers3",
   threads: 2
   resources:
     mem_mb = lambda wildcards, attempt: attempt * (16 * 1024),
@@ -63,7 +63,7 @@ rule razers3_2:
     razers3_log_2 = "optitype/log/{tumor}_razers3_2.log",
   benchmark: "optitype/benchmark/{tumor}_razers3_2.benchmark"
   params:
-    out_dir = "optitype/{tumor}/razer3",
+    out_dir = "optitype/{tumor}/razers3",
   threads: 2
   resources:
     mem_mb = lambda wildcards, attempt: attempt * (16 * 1024),
