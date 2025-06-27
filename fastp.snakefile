@@ -26,7 +26,7 @@ rule fastp_paired:
   conda:
     "envs_dir/kallisto.yaml"
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * (6 * 1024),
+    mem_mb = lambda wildcards, attempt: attempt * (12 * 1024),
     time_min = lambda wildcards, attempt: attempt * (1 * 60),	# time in minutes
   threads: 4 # master, writer, worker, reader
   params:
@@ -50,6 +50,8 @@ rule fastp_paired:
         -w 1 \
         -j {log.json} \
         -h {log.html} \
+        -D \
+        --dup_calc_accuracy 5 \
         --trim_poly_g \
         --length_required 30 \
         --qualified_quality_phred 20 \

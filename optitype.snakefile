@@ -102,5 +102,5 @@ rule optitype:
       sed -i 's/razers3.*/razers3=razers3/' {params.out_dir}/config.ini
       sed -i 's/threads.*/threads={threads}/' {params.out_dir}/config.ini
 
-      OptiTypePipeline.py -i {input.fq1_in} {input.fq2_in} --dna -v -o {params.out_dir} -p {wildcards.tumor} -c {params.out_dir}/config.ini 2> {log.optitype_log}
+      OptiTypePipeline.py -i {input.fq1_in} {input.fq2_in} --dna --enumerate 10 -v -o {params.out_dir} -p {wildcards.tumor} -c {params.out_dir}/config.ini 2> {log.optitype_log}
     """
