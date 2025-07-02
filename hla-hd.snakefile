@@ -41,7 +41,7 @@ rule hla_hd:
     sample_name = "{lib}",
     output_dir = "hla-hd",
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * (2 * 1024),
+    mem_mb = lambda wildcards, attempt: attempt * (4 * 1024),
     time_min = lambda wildcards, attempt: attempt * (24 * 60),	# time in minutes
   shell:
     """
