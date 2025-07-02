@@ -25,8 +25,8 @@ rule run_hla_hd:
 
 rule hla_hd:
   input:
-    fq1 = rules.fastp_paired.output.fq1,
-    fq2 = rules.fastp_paired.output.fq2,
+    fq1_out = rules.fastp_paired.output.fq1,
+    fq2_out = rules.fastp_paired.output.fq2,
   output:
     results = "hla-hd{lib}/result/{lib}_final.result.txt"
   conda:
