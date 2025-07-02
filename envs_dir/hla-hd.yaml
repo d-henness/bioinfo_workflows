@@ -1,0 +1,7 @@
+name: hla-hd
+channels:
+ - conda-forge
+ - bioconda
+ - defaults
+dependencies:
+ - bowtie2
