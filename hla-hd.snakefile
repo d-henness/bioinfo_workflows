@@ -21,14 +21,14 @@ def make_razers3_input(wildcards, read):
 
 rule run_hla_hd:
   input:
-    expand("hla-hd{lib}/result/{lib}_final.result.txt", lib = config["libraries"]),
+    expand("hla-hd/{lib}/result/{lib}_final.result.txt", lib = config["libraries"]),
 
 rule hla_hd:
   input:
     fq1 = rules.fastp_paired.output.fq1_out,
     fq2 = rules.fastp_paired.output.fq2_out,
   output:
-    results = "hla-hd{lib}/result/{lib}_final.result.txt"
+    results = "hla-hd/{lib}/result/{lib}_final.result.txt"
   conda:
     "./envs_dir/hla-hd.yaml"
   log:
