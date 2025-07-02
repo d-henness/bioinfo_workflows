@@ -45,11 +45,11 @@ rule hla_hd:
     time_min = lambda wildcards, attempt: attempt * (24 * 60),	# time in minutes
   shell:
     """
-        mkdir -p {output_dir}
+        mkdir -p {params.output_dir}
 
         hlahd.sh -t {threads} \
             -m {params.min_read_len} \
             -f {params.freq_data_path} \
             {input.fq1} {input.fq2} \
-            /home/dylan/HLA-HD/hlahd.1.7.1/HLA_gene.split.txt /home/dylan/HLA-HD/hlahd.1.7.1/dictionary/ {params.sample} {params.output_dir} &> {log}
+            /home/dylan/HLA-HD/hlahd.1.7.1/HLA_gene.split.txt /home/dylan/HLA-HD/hlahd.1.7.1/dictionary/ {params.sample_name} {params.output_dir} &> {log}
     """
