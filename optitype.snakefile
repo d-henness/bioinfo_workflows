@@ -22,7 +22,7 @@ def make_razers3_input(wildcards, read):
 rule run_optitype:
   input:
 #   expand("mupexi_runs/{lib}/optitype/{lib}_result.tsv", lib = noramls),
-    expand("optitype/{tumor}/optitype/{tumor}_result.tsv", tumor = config['pairs']),
+    expand("optitype/{tumor}/optitype/{tumor}_result.tsv", tumor = config['libraries']),
 
 rule razers3_1:
   input:
