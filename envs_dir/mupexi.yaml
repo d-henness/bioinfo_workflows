@@ -4,7 +4,7 @@ channels:
  - defaults
 dependencies:
  - python=2.7
- - ensembl-vep=94
+ - ensembl-vep=113
  - biopython=1.73
  - numpy
  - pandas

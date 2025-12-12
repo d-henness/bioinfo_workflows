@@ -21,24 +21,24 @@ def make_razers3_input(wildcards, read):
 
 rule run_hla_hd:
   input:
-    expand("hla-hd/{lib}/result/{lib}_final.result.txt", lib = config["libraries"]),
+    expand("hla-hd/{library}/result/{library}_final.result.txt", library = config["libraries"]),
 
 rule hla_hd:
   input:
     fq1 = rules.fastp_paired.output.fq1_out,
     fq2 = rules.fastp_paired.output.fq2_out,
   output:
-    results = "hla-hd/{lib}/result/{lib}_final.result.txt"
+    results = "hla-hd/{library}/result/{library}_final.result.txt"
   conda:
     "./envs_dir/hla-hd.yaml"
   log:
-    "hla-hd/log/{lib}.log",
-  benchmark: "hla-hd/benchmark/{lib}.benchmark"
+    "hla-hd/log/{library}.log",
+  benchmark: "hla-hd/benchmark/{library}.benchmark"
   threads: 4
   params:
     min_read_len = 75,
     freq_data_path = "/home/dylan/HLA-HD/hlahd.1.7.1/freq_data",
-    sample_name = "{lib}",
+    sample_name = "{library}",
     output_dir = "hla-hd",
   resources:
     mem_mb = lambda wildcards, attempt: attempt * (4 * 1024),

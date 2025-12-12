@@ -1,28 +1,28 @@
 configfile: "{}/ref.yaml".format(workflow.basedir)
 
 def fastp_paired_input(wildcards):
-  if len(config['libraries'][wildcards.lib]) == 2:
-    return [config['libraries'][wildcards.lib][0], config['libraries'][wildcards.lib][1]]
+  if len(config['libraries'][wildcards.library]) == 2:
+    return [config['libraries'][wildcards.library][0], config['libraries'][wildcards.library][1]]
   else:
     return ""
 
 def fastp_unpaired_input(wildcards):
-  if len(config['libraries'][wildcards.lib]) == 1:
-    return f"{config['libraries'][wildcards.lib][0]}"
+  if len(config['libraries'][wildcards.library]) == 1:
+    return f"{config['libraries'][wildcards.library][0]}"
   else:
     return ""
 
 rule fastp_all:
   input:
-    expand("fastp_dna/{lib}/fastp/{lib}_signal.txt", lib = config["libraries"]),
+    expand("fastp_dna/{library}/fastp/{library}_signal.txt", library = config["libraries"]),
 
 rule fastp_paired:
   input:
     fastp_paired_input
   output:
-    fq1_out = "fastp_dna/{lib}/fastp/{lib}_1.fq.gz",
-    fq2_out = "fastp_dna/{lib}/fastp/{lib}_2.fq.gz",
-    signal = "fastp_dna/{lib}/fastp/{lib}_signal.txt",
+    fq1_out = "fastp_dna/{library}/fastp/{library}_1.fq.gz",
+    fq2_out = "fastp_dna/{library}/fastp/{library}_2.fq.gz",
+    signal = "fastp_dna/{library}/fastp/{library}_signal.txt",
   conda:
     "envs_dir/kallisto.yaml"
   resources:
@@ -31,15 +31,15 @@ rule fastp_paired:
   threads: 4 # master, writer, worker, reader
   params:
     adapter_sequence = config["illumina_adapter"],
-    temp_dir = "/tmp/$SLURM_JOB_ID/{lib}/fastp_paired/tmp",
-    fq1 = "{lib}_1.fq.gz",
-    fq2 = "{lib}_2.fq.gz",
+    temp_dir = "/tmp/$SLURM_JOB_ID/{library}/fastp_paired/tmp",
+    fq1 = "{library}_1.fq.gz",
+    fq2 = "{library}_2.fq.gz",
   benchmark:
-    "fastp_dna/benchmark/{lib}_fastp.benchmark"
+    "fastp_dna/benchmark/{library}_fastp.benchmark"
   log:
-    overall = "fastp_dna/log/{lib}_fastp.log",
-    json = "fastp_dna/{lib}/fastp/{lib}_log.json",
-    html = "fastp_dna/{lib}/fastp/{lib}_log.html",
+    overall = "fastp_dna/log/{library}_fastp.log",
+    json = "fastp_dna/{library}/fastp/{library}_log.json",
+    html = "fastp_dna/{library}/fastp/{library}_log.html",
   shell:
     """
 

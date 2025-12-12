@@ -27,6 +27,7 @@ rule ubam:
   params:
     exclude_list = '',
     sample_name = get_sample_name
+  threads: 1
   log:
     ubam = "GATK_runs/{library}/ubam/ubam.log"
   benchmark:
