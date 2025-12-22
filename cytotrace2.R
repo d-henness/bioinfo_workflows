@@ -3,6 +3,8 @@ library(argparse)
 library(Seurat)
 library(ggplot2)
 library(patchwork)
+library(readr)
+library(tibble)
 
 parser <- ArgumentParser(description = 'Integrate multiple scRNA-seq datasets into one Seurat object')
 parser$add_argument("--rds", type="character", help="File path to joined_integrated_seurat_object.rds")
@@ -29,9 +31,15 @@ for (batch in batches) {
     # Run CytoTRACE2
     cytotrace2_result <- cytotrace2(expression_data, species = "human")
     
+    
     # Prepare annotation
     annotation <- data.frame(Phenotype = batch_data$singleR.labels)
     
+    # Write stats
+    cytotrace2_result_with_rownames <- merge(cytotrace2_result, annotation, by = 0, all = TRUE)
+    names(cytotrace2_result_with_rownames)[1] <- "barcode"
+    write_csv(cytotrace2_result_with_rownames, paste0("cytotrace_stats_", batch, ".csv"))
+
     # Generate plots
     plots <- plotData(
         cytotrace2_result = cytotrace2_result,

@@ -98,3 +98,40 @@ plot <- plotDeltaDistribution(pred)
 ggsave("delta_distribution.pdf", plot, width = 16, height = 8, dpi = 300)
 
 saveRDS(joined_integrated_data, file = "joined_integrated_seurat_object.rds")
+
+############################################################################################
+# comment this out if not expecting fibroblasts
+
+fibroblast_barcodes <- rownames(joined_integrated_data@meta.data)[
+    joined_integrated_data$singleR.labels == "Fibroblasts"
+]
+
+fibroblast_subset <- subset(joined_integrated_data, cells = fibroblast_barcodes)
+
+print(paste("Number of fibroblast cells:", length(fibroblast_barcodes)))
+
+counts_fibroblasts <- GetAssayData(fibroblast_subset, assay = "RNA", layer = "data")
+
+pred_fibroblasts_fine <- SingleR(
+    test = counts_fibroblasts,
+    ref = ref,
+    labels = ref$label.fine  # More fine-grained labels
+)
+
+# Add the fine-grained labels to the subset
+fibroblast_subset$singleR.labels.fine <- pred_fibroblasts_fine$labels[
+    match(rownames(fibroblast_subset@meta.data), rownames(pred_fibroblasts_fine))
+]
+
+# Visualize
+plot <- DimPlot(fibroblast_subset, reduction = 'umap', 
+                group.by = c('seurat_clusters', 'singleR.labels.fine'))
+ggsave("fibroblast_subset_fine_labels.pdf", plot, width = 16, height = 8, dpi = 300)
+
+# Score heatmap for fibroblast subtypes
+plot <- plotScoreHeatmap(pred_fibroblasts_fine)
+ggsave("fibroblast_score_heatmap_fine.pdf", plot, width = 16, height = 8, dpi = 300)
+
+plot <- plotDeltaDistribution(pred_fibroblasts_fine)
+ggsave("fibroblast_delta_distribution.pdf", plot, width = 16, height = 8, dpi = 300)
+############################################################################################
