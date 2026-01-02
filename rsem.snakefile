@@ -18,7 +18,7 @@ rule rsem:
   conda:
     "envs_dir/rsem.yaml"
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * (4 * 1024),
+    mem_mb = lambda wildcards, attempt: attempt * (8 * 1024),
     time_min = lambda wildcards, attempt: attempt * (24 * 60),	# time in minutes
   threads: 4
   params:
