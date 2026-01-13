@@ -198,6 +198,3 @@ for (label in unique(joined_integrated_data$singleR.labels_fine)){
     }
 }
 
-markers <- FindMarkers(joined_integrated_data, ident.1 = "Fibroblasts", ident.2 = "Chondrocytes")
-write.csv(markers, "Fibroblasts_vs_Chondrocyte _diffexpress_fine.csv")
-

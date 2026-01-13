@@ -1,10 +1,36 @@
-library(CytoTRACE2) 
+library(CytoTRACE2)
 library(argparse)
 library(Seurat)
 library(ggplot2)
 library(patchwork)
 library(readr)
 library(tibble)
+
+plot_data <- function(cytotrace2_result, annotation, expression_data, batch){
+    # Generate plots
+    plots <- plotData(
+        cytotrace2_result = cytotrace2_result,
+        annotation = annotation,
+        expression_data = expression_data
+    )
+
+    # Calculate dimensions
+    n_plots <- length(plots)
+    ncol <- 2
+    nrow <- ceiling(n_plots / ncol)
+    plot_width <- 8
+    plot_height <- 6
+    total_width <- plot_width * ncol
+    total_height <- plot_height * nrow
+
+    # Combine and save
+    combined_plot <- wrap_plots(plots, ncol = ncol)
+    ggsave(paste0("cytotrace_plots_", batch, ".pdf"), 
+           combined_plot, 
+           width = total_width, 
+           height = total_height, 
+           dpi = 300)
+}
 
 parser <- ArgumentParser(description = 'Integrate multiple scRNA-seq datasets into one Seurat object')
 parser$add_argument("--rds", type="character", help="File path to joined_integrated_seurat_object.rds")
@@ -33,36 +59,24 @@ for (batch in batches) {
     
     
     # Prepare annotation
-    annotation <- data.frame(Phenotype = batch_data$singleR.labels)
+    annotation <- data.frame(Phenotype = batch_data$singleR.labels_main)
     
     # Write stats
     cytotrace2_result_with_rownames <- merge(cytotrace2_result, annotation, by = 0, all = TRUE)
     names(cytotrace2_result_with_rownames)[1] <- "barcode"
-    write_csv(cytotrace2_result_with_rownames, paste0("cytotrace_stats_", batch, ".csv"))
+    write_csv(cytotrace2_result_with_rownames, paste0("cytotrace_stats_", batch, "_main.csv"))
 
-    # Generate plots
-    plots <- plotData(
-        cytotrace2_result = cytotrace2_result,
-        annotation = annotation,
-        expression_data = expression_data
-    )
+    plot_data(cytotrace2_result, annotation, expression_data, paste0(batch, "_main"))
+
+    # Prepare annotation
+    annotation <- data.frame(Phenotype = batch_data$singleR.labels_fine)
     
-    # Calculate dimensions
-    n_plots <- length(plots)
-    ncol <- 2
-    nrow <- ceiling(n_plots / ncol)
-    plot_width <- 8
-    plot_height <- 6
-    total_width <- plot_width * ncol
-    total_height <- plot_height * nrow
-    
-    # Combine and save
-    combined_plot <- wrap_plots(plots, ncol = ncol)
-    ggsave(paste0("cytotrace_plots_", batch, ".pdf"), 
-           combined_plot, 
-           width = total_width, 
-           height = total_height, 
-           dpi = 300)
+    # Write stats
+    cytotrace2_result_with_rownames <- merge(cytotrace2_result, annotation, by = 0, all = TRUE)
+    names(cytotrace2_result_with_rownames)[1] <- "barcode"
+    write_csv(cytotrace2_result_with_rownames, paste0("cytotrace_stats_", batch, "_fine.csv"))
+
+    plot_data(cytotrace2_result, annotation, expression_data, paste0(batch, "_fine"))
     
     cat("Saved: cytotrace_plots_", batch, ".pdf\n")
 }

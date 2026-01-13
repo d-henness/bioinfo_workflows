@@ -12,6 +12,7 @@ rule cellranger:
         transcriptome = "$HOME/cellranger/refdata-gex-GRCh38-2020-A",
         cellranger_path = "$HOME/cellranger/cellranger-10.0.0/bin/cellranger",
         outdir = "{sample}_cellranger"
+        sample = config['sample_strings']["{sample}"]
     threads: 8
     resources:
         mem_mb = 64 * 1024,
@@ -23,7 +24,7 @@ rule cellranger:
             {params.cellranger_path} count --id={wildcards.sample} \
                 --transcriptome={params.transcriptome} \
                 --fastqs={input.fq_dir} \
-                --sample=bamtofastq \
+                --sample={params.sample} \
                 --create-bam=true \
                 --localcores={threads} \
                 --localmem={resources.mem_gb} \
