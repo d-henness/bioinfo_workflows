@@ -11,8 +11,8 @@ rule cellranger:
     params:
         transcriptome = "$HOME/cellranger/refdata-gex-GRCh38-2020-A",
         cellranger_path = "$HOME/cellranger/cellranger-10.0.0/bin/cellranger",
-        outdir = "{sample}_cellranger"
-        sample = config['sample_strings']["{sample}"]
+        outdir = "{sample}_cellranger",
+        sample = lambda wildcards: config['samples'][wildcards.sample]
     threads: 8
     resources:
         mem_mb = 64 * 1024,
