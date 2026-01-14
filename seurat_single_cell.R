@@ -237,6 +237,7 @@ for (cell_type in fibroblast_celltypes){
         order = cell_type  # Plot highlighted cells on top
     )
 
+    cell_type_label <- sanitize_label_for_filename(cell_type)
     umap_plot_path <- file.path(umap_plot_dir, paste0(cell_type_label, "_vs_all_umap.pdf"))
     tsne_plot_path <- file.path(tsne_plot_dir, paste0(cell_type_label, "_vs_all_tsne.pdf"))
     ggsave(umap_plot_path, umap_plot, width = 16, height = 8, dpi = 300)
