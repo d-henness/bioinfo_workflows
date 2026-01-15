@@ -96,8 +96,14 @@ ggsave("integrated_data.pdf", plot, width = 16, height = 8, dpi = 300)
 
 ref <- celldex::HumanPrimaryCellAtlasData()
 
+print(integrated_data[["RNA"]])
+
 joined_integrated_data <- JoinLayers(integrated_data, assay = "RNA", layers = "data")
 print(head(joined_integrated_data))
+
+print(DefaultAssay(joined_integrated_data))
+DefaultAssay(joined_integrated_data) <- "RNA"
+print(DefaultAssay(joined_integrated_data))
 
 counts <- GetAssayData(joined_integrated_data, assay = "RNA", layer = "data")
 
