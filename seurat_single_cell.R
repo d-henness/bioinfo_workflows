@@ -115,18 +115,18 @@ if (file.exists(saved_integrated_data)){
     plot <- DimPlot(object, reduction = "umap.unintegrated", group.by = c("sample_id", "diagnosis"))
     ggsave("unintegrated_data.pdf", plot, width = 16, height = 8, dpi = 300)
 
-    object <- IntegrateLayers(
+    integrated_data <- IntegrateLayers(
       object = object, method = CCAIntegration,
       orig.reduction = "pca", new.reduction = "integrated.cca",
       verbose = FALSE
     )
 
-    object <- FindNeighbors(object, reduction = "integrated.cca", dims = 1:30)
-    object <- FindClusters(object, cluster.name = "cca_clusters")
+    integrated_data <- FindNeighbors(integrated_data, reduction = "integrated.cca", dims = 1:30)
+    integrated_data <- FindClusters(integrated_data, cluster.name = "cca_clusters")
 
-    object <- RunUMAP(object, reduction = "integrated.cca", dims = 1:30, reduction.name = "umap.cca")
+    integrated_data <- RunUMAP(integrated_data, reduction = "integrated.cca", dims = 1:30, reduction.name = "umap.cca")
     plot <- DimPlot(
-      object,
+      integrated_data,
       reduction = "umap.cca",
       group.by = c("sample_id", "diagnosis", "cca_clusters"),
       combine = FALSE, label.size = 2
@@ -134,9 +134,9 @@ if (file.exists(saved_integrated_data)){
 
     ggsave("umap_cca.pdf", plot, width = 16, height = 8, dpi = 300)
 
-    object <- RunTSNE(object, reduction = "integrated.cca", dims = 1:30, reduction.name = "tsne.cca")
+    integrated_data <- RunTSNE(integrated_data, reduction = "integrated.cca", dims = 1:30, reduction.name = "tsne.cca")
     plot <- DimPlot(
-      object,
+      integrated_data,
       reduction = "tsne.cca",
       group.by = c("sample_id", "diagnosis", "cca_clusters"),
       combine = FALSE, label.size = 2
@@ -144,7 +144,7 @@ if (file.exists(saved_integrated_data)){
 
     ggsave("tsne_cca.pdf", plot, width = 16, height = 8, dpi = 300)
 
-    saveRDS(object, file = saved_integrated_data)
+    saveRDS(integrated_data, file = saved_integrated_data)
 }
 print("here")
 
