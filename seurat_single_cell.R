@@ -21,8 +21,38 @@ fibroblast_celltypes <- c(
     "Tissue_stem_cells:BM_MSC:TGFb3"
 )
 
+# hard code for now, do properly later
+diagnosis = c(
+    "SC1_cellranger" = "control",
+    "SC4_cellranger" = "control",
+    "SC18_cellranger" = "control",
+    "SC32_cellranger" = "control",
+    "SC33_cellranger" = "control",
+    "SC34_cellranger" = "control",
+    "SC50_cellranger" = "control",
+    "SC68_cellranger" = "control",
+    "SC124_cellranger" = "control",
+    "SC125_cellranger" = "control",
+    "SC2_cellranger" = "SSC",
+    "SC5_cellranger" = "SSC",
+    "SC19_cellranger" = "SSC",
+    "SC49_cellranger" = "SSC",
+    "SC60_cellranger" = "SSC",
+    "SC69_cellranger" = "SSC",
+    "SC70_cellranger" = "SSC",
+    "SC86_cellranger" = "SSC",
+    "SC119_cellranger" = "SSC",
+    "SC185_cellranger" = "SSC",
+    "SC188_cellranger" = "SSC",
+    "SC189_cellranger" = "SSC"
+)
+
 sanitize_label_for_filename <- function(label) {
     gsub("[/\\:*?\"<>|]", "_", label)
+}
+
+sanitize_label_for_AggregateExpression <- function(label) {
+    gsub("[/\\:*?\"<>|_]", "-", label)
 }
 
 # Create an ArgumentParser object
@@ -43,102 +73,112 @@ if (file.exists(saved_objects_filename)) {
         print(dataset_path)
         data <- Read10X(data.dir = dataset_path)
 
-        # Create Seurat object and filter
-        print(basename(dataset_path))
-        seurat_object <- CreateSeuratObject(counts = data, project = basename(dataset_path))
+        seurat_object <- CreateSeuratObject(counts = data)
+        seurat_object <- AddMetaData(seurat_object, metadata = dataset_path, col.name = "sample_id")
+        seurat_object <- AddMetaData(seurat_object, metadata = diagnosis[[dataset_path]], col.name = "diagnosis")
+        print(head(seurat_object@meta.data))
+
         seurat_object$mitoPercent <- PercentageFeatureSet(seurat_object, pattern = '^MT-')
         seurat_object.filtered <- subset(seurat_object, subset = nCount_RNA > 800 &
             nFeature_RNA > 500 &
             mitoPercent < 10)
-
-        # Pre-processing: Normalization, variable features, scaling
-        seurat_object.filtered <- NormalizeData(seurat_object.filtered) %>% FindVariableFeatures() %>% ScaleData()
 
         return(seurat_object.filtered)
     })
   saveRDS(seurat_objects, saved_objects_filename)
 }
 
+
 # Integration steps
 # Find integration anchors
-saved_integration_anchors_filename <- "scrna_integration_anchors.rds"
-if (file.exists(saved_integration_anchors_filename)) {
-    integration_anchors <- readRDS(saved_integration_anchors_filename)
-}else{
-    integration_anchors <- FindIntegrationAnchors(object.list = seurat_objects, dims = 1:30)
-    saveRDS(integration_anchors, saved_integration_anchors_filename)
-}
-print("here")
-# Integrate data
-
 saved_integrated_data <- "integrated_seurat_object.rds"
 if (file.exists(saved_integrated_data)){
     integrated_data <- readRDS(saved_integrated_data)
 }else{
-    integrated_data <- IntegrateData(anchorset = integration_anchors, dims = 1:30)
+    object <- merge(seurat_objects[[1]], seurat_objects[-1])
+    print(object)
+    object <- JoinLayers(object, assay = "RNA")
+    object[["RNA"]] <- split(object[["RNA"]], f = object$sample_id)
+    print(object)
 
-    # Post-integration steps (scaling, PCA, UMAP, clustering)
-    integrated_data <- ScaleData(integrated_data) %>%
-        RunPCA() %>%
-        FindNeighbors(reduction = "pca", dims = 1:30) %>%
-        FindClusters(resolution = 0.5) %>%
-        RunUMAP(reduction = "pca", dims = 1:30) %>%
-        RunTSNE(reduction = "pca", dims = 1:30)
-    saveRDS(integrated_data, file = saved_integrated_data)
+    object <- NormalizeData(object)
+    object <- FindVariableFeatures(object)
+    object <- ScaleData(object)
+    object <- RunPCA(object)
+
+    object <- FindNeighbors(object, dims = 1:30, reduction = "pca")
+    object <- FindClusters(object, cluster.name = "unintegrated_clusters")
+
+    object <- RunUMAP(object, dims = 1:30, reduction = "pca", reduction.name = "umap.unintegrated")
+    # visualize by batch and cell type annotation
+    # cell type annotations were previously added by Azimuth
+    plot <- DimPlot(object, reduction = "umap.unintegrated", group.by = c("sample_id", "diagnosis"))
+    ggsave("unintegrated_data.pdf", plot, width = 16, height = 8, dpi = 300)
+
+    object <- IntegrateLayers(
+      object = object, method = CCAIntegration,
+      orig.reduction = "pca", new.reduction = "integrated.cca",
+      verbose = FALSE
+    )
+
+    object <- FindNeighbors(object, reduction = "integrated.cca", dims = 1:30)
+    object <- FindClusters(object, cluster.name = "cca_clusters")
+
+    object <- RunUMAP(object, reduction = "integrated.cca", dims = 1:30, reduction.name = "umap.cca")
+    plot <- DimPlot(
+      object,
+      reduction = "umap.cca",
+      group.by = c("sample_id", "diagnosis", "cca_clusters"),
+      combine = FALSE, label.size = 2
+    )
+
+    ggsave("umap_cca.pdf", plot, width = 16, height = 8, dpi = 300)
+
+    object <- RunTSNE(object, reduction = "integrated.cca", dims = 1:30, reduction.name = "tsne.cca")
+    plot <- DimPlot(
+      object,
+      reduction = "tsne.cca",
+      group.by = c("sample_id", "diagnosis", "cca_clusters"),
+      combine = FALSE, label.size = 2
+    )
+
+    ggsave("tsne_cca.pdf", plot, width = 16, height = 8, dpi = 300)
+
+    saveRDS(object, file = saved_integrated_data)
 }
+print("here")
 
-print(length(unique(integrated_data$seurat_clusters)))
-print(unique(integrated_data$seurat_clusters))
-
-# Visualization
-plot <- DimPlot(integrated_data, reduction = "umap", label = TRUE, group.by = c("orig.ident", "seurat_clusters"))
-ggsave("integrated_data.pdf", plot, width = 16, height = 8, dpi = 300)
 
 ref <- celldex::HumanPrimaryCellAtlasData()
 
 print(integrated_data[["RNA"]])
 
-joined_integrated_data <- JoinLayers(integrated_data, assay = "RNA", layers = "data")
-print(head(joined_integrated_data))
+singleR_rds <- "singleR.rds"
+if (file.exists(singleR_rds)){
+    joined_integrated_data <- readRDS(singleR_rds)
+}else{
+    joined_integrated_data <- JoinLayers(integrated_data, assay = "RNA")
+    print(head(joined_integrated_data))
 
-print(DefaultAssay(joined_integrated_data))
-DefaultAssay(joined_integrated_data) <- "RNA"
-print(DefaultAssay(joined_integrated_data))
+    print(DefaultAssay(joined_integrated_data))
+    DefaultAssay(joined_integrated_data) <- "RNA"
+    print(DefaultAssay(joined_integrated_data))
+    print(Layers(joined_integrated_data))
 
-counts <- GetAssayData(joined_integrated_data, assay = "RNA", layer = "data")
+    counts <- GetAssayData(joined_integrated_data, assay = "RNA", layer = "data")
 
-#pred <- SingleR(
-#    test = counts,
-#    ref = ref,
-#    labels = ref$label.main
-#)
-#
-#
-#joined_integrated_data$singleR.labels_main <- pred$labels[match(rownames(joined_integrated_data@meta.data), rownames(pred))]
-#print(paste0("Number of main labels:  ", length(unique(joined_integrated_data$singleR.labels_main))))
-#write.csv(table(joined_integrated_data$singleR.labels_main), "cell_type_counts_main.csv")
-#
-#plot <- DimPlot(joined_integrated_data, reduction = 'umap', group.by = c('seurat_clusters', 'singleR.labels_main'))
-#ggsave("joined_integrated_data_tissue_labels_main.pdf", plot, width = 16, height = 8, dpi = 300)
-#
-#plot <- plotScoreHeatmap(pred)
-#ggsave("score_heatmap_main.pdf", plot, width = 16, height = 8, dpi = 300)
-#
-#plot <- plotDeltaDistribution(pred)
-#ggsave("delta_distribution_main.pdf", plot, width = 16, height = 8, dpi = 300)
-
-pred <- SingleR(
+    pred <- SingleR(
     test = counts,
     ref = ref,
     labels = ref$label.fine,
-)
+    )
 
-joined_integrated_data$singleR.labels_fine <- pred$labels[match(rownames(joined_integrated_data@meta.data), rownames(pred))]
-print(paste0("Number of fine labels:  ", length(unique(joined_integrated_data$singleR.labels_fine))))
-write.csv(table(joined_integrated_data$singleR.labels_fine), "cell_type_counts_fine.csv")
+    joined_integrated_data$singleR.labels_fine <- pred$labels[match(rownames(joined_integrated_data@meta.data), rownames(pred))]
+    print(paste0("Number of fine labels:  ", length(unique(joined_integrated_data$singleR.labels_fine))))
+    write.csv(table(joined_integrated_data$singleR.labels_fine), "cell_type_counts_fine.csv")
+    saveRDS(joined_integrated_data, file = singleR_rds)
+}
 
-plot <- DimPlot(joined_integrated_data, reduction = 'umap', group.by = c('seurat_clusters', 'singleR.labels_fine'))
-ggsave("joined_integrated_data_tissue_labels_fine.pdf", plot, width = 16, height = 8, dpi = 300)
 
 # Make plots for each cell type
 
@@ -149,34 +189,45 @@ dir.create(umap_plot_dir, showWarnings = FALSE)
 dir.create(tsne_plot_dir, showWarnings = FALSE)
 
 for (cell_type in cell_types){
+    print(paste0("ploting ", cell_type))
     # Create a new column that highlights only this cell type
     joined_integrated_data$highlight <- ifelse(
         joined_integrated_data$singleR.labels_fine == cell_type,
-        cell_type,
+        paste0(cell_type, "_", joined_integrated_data$diagnosis),
         "Other"
     )
+
+    highlight_levels <- unique(joined_integrated_data$highlight)
+    highlight_levels <- highlight_levels[highlight_levels != "Other"]
     
     # Reorder so "Other" cells are plotted first (behind highlighted cells)
     joined_integrated_data$highlight <- factor(
         joined_integrated_data$highlight,
-        levels = c("Other", cell_type)
+        levels = c("Other", highlight_levels)
     )
+
+    highlight_colors <- c("Other" = "lightgrey")
+    # Add colors for each cell_type_diagnosis combination
+    palette <- c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")  # extend if needed
+    for (i in seq_along(highlight_levels)) {
+        highlight_colors[highlight_levels[i]] <- palette[i]
+    }
     
     # Create the plot
     umap_plot <- DimPlot(
         joined_integrated_data,
-        reduction = 'umap',
+        reduction = 'umap.cca',
         group.by = 'highlight',
-        cols = c("Other" = "lightgrey", setNames("#E41A1C", cell_type)),
-        order = cell_type  # Plot highlighted cells on top
+        cols = highlight_colors,
+        order = highlight_levels  # Plot highlighted cells on top
     )
 
     tsne_plot <- DimPlot(
         joined_integrated_data,
-        reduction = 'tsne',
+        reduction = 'tsne.cca',
         group.by = 'highlight',
-        cols = c("Other" = "lightgrey", setNames("#E41A1C", cell_type)),
-        order = cell_type  # Plot highlighted cells on top
+        cols = highlight_colors,
+        order = highlight_levels  # Plot highlighted cells on top
     )
 
     cell_type_label <- sanitize_label_for_filename(cell_type)
@@ -199,13 +250,13 @@ fibroblast_cells <- subset(
 
 umap_plot <- DimPlot(
     fibroblast_cells,
-    reduction = 'umap',
+    reduction = 'umap.cca',
     group.by = 'singleR.labels_fine'
 )
 
 tsne_plot <- DimPlot(
     fibroblast_cells,
-    reduction = 'tsne',
+    reduction = 'tsne.cca',
     group.by = 'singleR.labels_fine'
 )
 
@@ -216,31 +267,41 @@ ggsave(tsne_plot_path, tsne_plot, width = 16, height = 8, dpi = 300)
 
 
 for (cell_type in fibroblast_celltypes){
+    print(paste0("ploting fibro only ", cell_type))
+    # Create a new column that highlights only this cell type
     fibroblast_cells$highlight <- ifelse(
         fibroblast_cells$singleR.labels_fine == cell_type,
-        cell_type,
+        paste0(cell_type, "_", fibroblast_cells$diagnosis),
         "Other"
     )
 
+    highlight_levels <- unique(fibroblast_cells$highlight)
+    highlight_levels <- highlight_levels[highlight_levels != "Other"]
+    
+    # Reorder so "Other" cells are plotted first (behind highlighted cells)
     fibroblast_cells$highlight <- factor(
         fibroblast_cells$highlight,
-        levels = c("Other", cell_type)
+        levels = c("Other", highlight_levels)
     )
+
+    highlight_colors <- c("Other" = "lightgrey")
+    # Add colors for each cell_type_diagnosis combination
+    palette <- c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")  # extend if needed
 
     umap_plot <- DimPlot(
         fibroblast_cells,
-        reduction = 'umap',
+        reduction = 'umap.cca',
         group.by = 'highlight',
-        cols = c("Other" = "lightgrey", setNames("#E41A1C", cell_type)),
-        order = cell_type  # Plot highlighted cells on top
+        cols = highlight_colors,
+        order = highlight_levels  # Plot highlighted cells on top
     )
 
     tsne_plot <- DimPlot(
         fibroblast_cells,
-        reduction = 'tsne',
+        reduction = 'tsne.cca',
         group.by = 'highlight',
-        cols = c("Other" = "lightgrey", setNames("#E41A1C", cell_type)),
-        order = cell_type  # Plot highlighted cells on top
+        cols = highlight_colors,
+        order = highlight_levels  # Plot highlighted cells on top
     )
 
     cell_type_label <- sanitize_label_for_filename(cell_type)
@@ -262,76 +323,44 @@ ggsave("delta_distribution_fine.pdf", plot, width = 16, height = 8, dpi = 300)
 saveRDS(joined_integrated_data, file = "joined_integrated_seurat_object.rds")
 
 
-#############################################################################################
-## comment this out if not expecting fibroblasts
-#
-#fibroblast_barcodes <- rownames(joined_integrated_data@meta.data)[
-#    joined_integrated_data$singleR.labels == "Fibroblasts"
-#]
-#
-#fibroblast_subset <- subset(joined_integrated_data, cells = fibroblast_barcodes)
-#
-#print(paste("Number of fibroblast cells:", length(fibroblast_barcodes)))
-#
-#counts_fibroblasts <- GetAssayData(fibroblast_subset, assay = "RNA", layer = "data")
-#
-#pred_fibroblasts_fine <- SingleR(
-#    test = counts_fibroblasts,
-#    ref = ref,
-#    labels = ref$label.fine  # More fine-grained labels
-#)
-#
-## Add the fine-grained labels to the subset
-#fibroblast_subset$singleR.labels.fine <- pred_fibroblasts_fine$labels[
-#    match(rownames(fibroblast_subset@meta.data), rownames(pred_fibroblasts_fine))
-#]
-#
-## Visualize
-#plot <- DimPlot(fibroblast_subset, reduction = 'umap', 
-#                group.by = c('seurat_clusters', 'singleR.labels.fine'))
-#ggsave("fibroblast_subset_fine_labels.pdf", plot, width = 16, height = 8, dpi = 300)
-#
-## Score heatmap for fibroblast subtypes
-#plot <- plotScoreHeatmap(pred_fibroblasts_fine)
-#ggsave("fibroblast_score_heatmap_fine.pdf", plot, width = 16, height = 8, dpi = 300)
-#
-#plot <- plotDeltaDistribution(pred_fibroblasts_fine)
-#ggsave("fibroblast_delta_distribution.pdf", plot, width = 16, height = 8, dpi = 300)
-#############################################################################################
-#
-
-
-## Diff express between cell types
-#Idents(joined_integrated_data) <- "singleR.labels_main"
-#print(length(unique(joined_integrated_data$singleR.labels_main)))
-#print(unique(joined_integrated_data$singleR.labels_main))
-#for (label in unique(joined_integrated_data$singleR.labels_main)){
-#    n_cells <- sum(joined_integrated_data$singleR.labels_main == label)
-#    if (n_cells < args$min_cells){
-#        print(paste0(label, " had less than ", args$min_cells," cells"))
-#    }else{
-#        print(label)
-#        markers <- FindMarkers(joined_integrated_data, ident.1 = label, ident.2 = NULL)
-#        write.csv(markers, paste0(sanitize_label_for_filename(label), "_vs_all_diffexpress_main.csv"))
-#    }
-#}
-#
-#markers <- FindMarkers(joined_integrated_data, ident.1 = "Fibroblasts", ident.2 = "Chondrocytes")
-#write.csv(markers, "Fibroblasts_vs_Chondrocyte _diffexpress.csv")
 
 outdir <- "diffexpress_one_vs_all"
 dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
 
-Idents(joined_integrated_data) <- "singleR.labels_fine"
-print(length(unique(joined_integrated_data$singleR.labels_fine)))
+joined_integrated_data$singleR.labels_fine <- sanitize_label_for_AggregateExpression(joined_integrated_data$singleR.labels_fine)
 print(unique(joined_integrated_data$singleR.labels_fine))
-for (label in unique(joined_integrated_data$singleR.labels_fine)){
-    n_cells <- sum(joined_integrated_data$singleR.labels_fine == label)
+
+bulk <- AggregateExpression(
+    joined_integrated_data,
+    return.seurat = TRUE,
+    slot = "counts",
+    assays = "RNA",
+    group.by = c("singleR.labels_fine", "sample_id", "diagnosis")
+)
+
+Idents(bulk) <- "singleR.labels_fine"
+print(unique(Idents(bulk)))
+print(length(Idents(bulk)))
+print(table(bulk$singleR.labels_fine))
+
+
+# add a pseudocount of 1 to every gene as per https://www.biostars.org/p/440379/
+counts_matrix <- GetAssayData(bulk, layer = "counts")
+bulk <- SetAssayData(bulk, layer = "counts", new.data = counts_matrix + 1)
+
+for (label in unique(bulk$singleR.labels_fine)){
+    n_cells <- sum(bulk$singleR.labels_fine == label)
     if (n_cells < args$min_cells){
         print(paste0(label, " had less than ", args$min_cells," cells"))
     }else{
         print(label)
-        markers <- FindMarkers(joined_integrated_data, ident.1 = label, ident.2 = NULL)
+        markers <- FindMarkers(
+            bulk,
+            ident.1 = label,
+            ident.2 = NULL,
+            slot = "counts",
+            test.use = "DESeq2"
+        )
         file_path <- file.path(outdir, paste0(sanitize_label_for_filename(label), "_vs_all_diffexpress.csv"))
         write.csv(markers, file_path)
     }
@@ -340,17 +369,41 @@ for (label in unique(joined_integrated_data$singleR.labels_fine)){
 outdir <- "diffexpress_fibroblasts_only_one_vs_all"
 dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
 
-Idents(fibroblast_cells) <- "singleR.labels_fine"
-print(length(unique(fibroblast_cells$singleR.labels_fine)))
+fibroblast_cells$singleR.labels_fine <- sanitize_label_for_AggregateExpression(fibroblast_cells$singleR.labels_fine)
 print(unique(fibroblast_cells$singleR.labels_fine))
-for (label in unique(fibroblast_cells$singleR.labels_fine)){
-    n_cells <- sum(fibroblast_cells$singleR.labels_fine == label)
+
+bulk <- AggregateExpression(
+    fibroblast_cells,
+    return.seurat = TRUE,
+    slot = "counts",
+    assays = "RNA",
+    group.by = c("singleR.labels_fine", "sample_id", "diagnosis")
+)
+
+Idents(bulk) <- "singleR.labels_fine"
+print(unique(Idents(bulk)))
+print(length(Idents(bulk)))
+print(table(bulk$singleR.labels_fine))
+
+
+# add a pseudocount of 1 to every gene as per https://www.biostars.org/p/440379/
+counts_matrix <- GetAssayData(bulk, layer = "counts")
+bulk <- SetAssayData(bulk, layer = "counts", new.data = counts_matrix + 1)
+
+for (label in unique(bulk$singleR.labels_fine)){
+    n_cells <- sum(bulk$singleR.labels_fine == label)
     if (n_cells < args$min_cells){
         print(paste0(label, " had less than ", args$min_cells," cells"))
     }else{
         print(label)
-        markers <- FindMarkers(fibroblast_cells, ident.1 = label, ident.2 = NULL)
-        file_path <- file.path(outdir, paste0(sanitize_label_for_filename(label), "_vs_all_diffexpress_fibroblasts_only.csv"))
+        markers <- FindMarkers(
+            bulk,
+            ident.1 = label,
+            ident.2 = NULL,
+            slot = "counts",
+            test.use = "DESeq2"
+        )
+        file_path <- file.path(outdir, paste0(sanitize_label_for_filename(label), "vs_all_diffexpress_fibroblasts_only.csv"))
         write.csv(markers, file_path)
     }
 }
