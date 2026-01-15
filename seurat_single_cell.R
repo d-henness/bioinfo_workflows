@@ -107,7 +107,7 @@ if (file.exists(saved_integrated_data)){
     object <- RunPCA(object)
 
     object <- FindNeighbors(object, dims = 1:30, reduction = "pca")
-    object <- FindClusters(object, cluster.name = "unintegrated_clusters")
+    object <- FindClusters(object, resolution = 0.5, cluster.name = "unintegrated_clusters")
 
     object <- RunUMAP(object, dims = 1:30, reduction = "pca", reduction.name = "umap.unintegrated")
     # visualize by batch and cell type annotation
@@ -383,7 +383,7 @@ bulk <- AggregateExpression(
 Idents(bulk) <- "singleR.labels_fine"
 print(unique(Idents(bulk)))
 print(length(Idents(bulk)))
-print(table(bulk$singleR.labels_fine))
+write.csv(table(bulk$singleR.labels_fine), "aggregate_cell_counts.csv")
 
 
 # add a pseudocount of 1 to every gene as per https://www.biostars.org/p/440379/
