@@ -11,30 +11,24 @@ library(argparse)
 # More details on scPipe found here: https://github.com/LuyiTian/scPipe
 
 parser <- ArgumentParser()
-parser$add_argument('filtered_feature_bc_matrix')
-parser$add_argument('sample_id')
+parser$add_argument('joined_integrated_data')
 args <- parser$parse_args()
 
-umi_raw <- Read10X(args$filtered_feature_bc_matrix)
 
-# Create a Seurat object
-UMI_mix <- CreateSeuratObject(counts = umi_raw, project = args$sample_id)
-UMI_mix <- subset(UMI_mix, subset = nCount_RNA > 200) # filter out very low transcript cells
-
+UMI_mix <- readRDS(args$joined_integrated_data)
 print(UMI_mix @assays$RNA)
 
 # UMI Absolute Scaling
 # To perform absolute scaling, we use the raw reads by only applying the log scaling step
-print(sum(LayerData(UMI_mix, assay = "RNA", layer = "counts")[, "AAACCTGAGCTAGCCC-1"]))
-UMI_mix@assays$RNA@layers$data <- as.matrix(log2(LayerData(UMI_mix, assay = "RNA", layer = "counts") + 1))
-print(head(UMI_mix@assays$RNA@layers$data))
-UMI_mix@meta.data$scaledcounts <- colSums(UMI_mix@assays$RNA@layers$data)
+UMI_mix@assays$RNA@layers$abs_scale <- as.matrix(log2(LayerData(UMI_mix, assay = "RNA", layer = "counts") + 1))
+print(head(UMI_mix@assays$RNA@layers$abs_scale))
+UMI_mix@meta.data$scaledcounts <- colSums(UMI_mix@assays$RNA@layers$abs_scale)
 
 UMI_mix@meta.data <- rownames_to_column(UMI_mix@meta.data, var = "cell_barcode")
 
 
 write.table(UMI_mix@meta.data,
-            file = paste0(args$sample_id, "_absolute_counts.tsv"),
+            file = paste0("absolute_counts.tsv"),
             sep = "\t",
             quote = FALSE,
             row.names = FALSE,

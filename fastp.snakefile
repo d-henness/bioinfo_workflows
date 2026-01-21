@@ -59,7 +59,7 @@ rule fastp_paired:
         --detect_adapter_for_pe &> {log.overall}
       echo "finished" > {output.signal}
 
-      fastqc {output.fq1_out} {output.fq2_out} -o fastp_dna/{wildcards.lib}/fastp/
+      fastqc {output.fq1_out} {output.fq2_out} -o fastp_dna/{wildcards.library}/fastp/
     """
 
 # will need to be changed to deal with io issues
