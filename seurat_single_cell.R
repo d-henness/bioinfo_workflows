@@ -84,12 +84,14 @@ if (file.exists(saved_objects_filename)) {
         seurat_object <- AddMetaData(seurat_object, metadata = diagnosis, col.name = "diagnosis")
         print(head(seurat_object@meta.data))
 
+        print(paste0("Number of barcodes before filtering ", length(seurat_object$orig.ident)))
         seurat_object$mitoPercent <- PercentageFeatureSet(seurat_object, pattern = '^MT-')
-        seurat_object.filtered <- subset(seurat_object, subset = nCount_RNA > 800 &
+        seurat_object_filtered <- subset(seurat_object, subset = nCount_RNA > 800 &
             nFeature_RNA > 500 &
             mitoPercent < 10)
+        print(paste0("Number of barcodes after filtering ", length(seurat_object_filtered$orig.ident)))
 
-        return(seurat_object.filtered)
+        return(seurat_object_filtered)
     })
   saveRDS(seurat_objects, saved_objects_filename)
 }

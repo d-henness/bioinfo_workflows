@@ -269,12 +269,21 @@ run_fgsea <- function(markers, pathways, file_prefix, threads = 8, top_up = 20, 
     # following https://biostatsquid.com/fgsea-tutorial-gsea/
     markers <- na.omit(markers)
 
+    print(head(markers))
     rankings <- sign(markers$avg_log2FC) * (-log10(markers$p_val_adj))
     names(rankings) <- rownames(markers)
     rankings <- sort(rankings, decreasing = TRUE)
 
+    print(head(rankings))
+
     max_ranking <- max(rankings[is.finite(rankings)])
+    print(paste0("max rank is: ", max_ranking))
     min_ranking <- min(rankings[is.finite(rankings)])
+    print(paste0("min rank is: ", min_ranking))
+    if (max_ranking == 0){
+        message("No up regulated genes")
+        quit(status = 1)
+    }
     rankings <- replace(rankings, rankings > max_ranking, max_ranking * 10)
     rankings <- replace(rankings, rankings < min_ranking, min_ranking * 10)
     rankings <- sort(rankings, decreasing = TRUE) # sort genes by rankk
@@ -317,11 +326,13 @@ run_fgsea <- function(markers, pathways, file_prefix, threads = 8, top_up = 20, 
 # Create an ArgumentParser object
 parser <- ArgumentParser(description = 'Integrate multiple scRNA-seq datasets into one Seurat object')
 parser$add_argument("joined_integrated_seurat_object", help="File paths to joined_integrated_seurat_object.rds")
-#parser$add_argument("--cell_type", help="cell type to use")
+parser$add_argument("--cell_type", help="cell type to use")
 parser$add_argument("--min_cells", type="integer", help="Min cells per celltype for diff express", default = 8)
 
 # Parse the command-line arguments
 args <- parser$parse_args()
+
+print(args$cell_type)
 
 joined_integrated_data <- readRDS(args$joined_integrated_seurat_object)
 msig <- msigdbr(species = "Homo sapiens")
@@ -347,19 +358,13 @@ just_fibroblast_cells <- subset(
 )
 
 
-just_fibroblast_cells$singleR.labels_fine <- sanitize_label_for_AggregateExpression(just_fibroblast_cells$singleR.labels_fine)
-fib_markers <- run_DE(just_fibroblast_cells, "SSC", ".", args$min_cells)
-run_fgsea(fib_markers, pathways, "targetted_gsea_results_just_fibroblasts")
-
-
-joined_integrated_data$singleR.labels_fine <- sanitize_label_for_AggregateExpression(joined_integrated_data$singleR.labels_fine)
-all_markers <- run_DE(joined_integrated_data, "SSC", ".", args$min_cells)
-run_fgsea(all_markers, pathways, "targetted_gsea_results_all_cells")
-
-
 # run on all gene sets
-pathways <- msig %>%
+all_pathways <- msig %>%
   split(x = .$gene_symbol, f = .$gs_name)
 
-run_fgsea(fib_markers, pathways, "all_gsea_results_just_fibroblasts")
-run_fgsea(all_markers, pathways, "all_gsea_results_all_cells")
+just_fibroblast_cells$singleR.labels_fine <- sanitize_label_for_AggregateExpression(just_fibroblast_cells$singleR.labels_fine)
+
+just_cell_type <- subset(just_fibroblast_cells, singleR.labels_fine == args$cell_type)
+fib_markers <- run_DE(just_cell_type, "SSC", paste0(args$cell_type, "_DE"), args$min_cells)
+run_fgsea(fib_markers, pathways, paste0("targeted_gsea_results_just_", args$cell_type))
+run_fgsea(fib_markers, all_pathways, paste0("all_gsea_results_just_", args$cell_type))

@@ -5,6 +5,7 @@ library(SingleR)
 library(celldex)
 library(tidyverse)
 library(pheatmap)
+library(EnhancedVolcano)
 
 
 fibroblast_celltypes <- c(
@@ -55,7 +56,7 @@ sanitize_label_for_AggregateExpression <- function(label) {
     gsub("[/\\:*?\"<>|_]", "-", label)
 }
 
-run_DE <- function(seurat_object, cell_type, outdir, min_cells){
+run_DE <- function(seurat_object, cell_type, identity_of_interest, outdir, file_suff, min_cells){
     dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
 
     bulk <- AggregateExpression(
@@ -66,23 +67,20 @@ run_DE <- function(seurat_object, cell_type, outdir, min_cells){
         group.by = c("singleR.labels_fine", "sample_id", "diagnosis")
     )
 
-    Idents(bulk) <- "singleR.labels_fine"
-    print(unique(Idents(bulk)))
-    print(length(Idents(bulk)))
-    print(table(bulk$singleR.labels_fine))
+    Idents(bulk) <- identity_of_interest
 
-    file_name <- file.path(outdir, "aggregate_cell_counts.csv")
-    write.csv(table(bulk$singleR.labels_fine), file_name)
+    file_name <- file.path(outdir, paste0("aggregate_cell_counts_", file_suff, ".csv"))
+    write.csv(table(bulk[[identity_of_interest]]), file_name)
 
 
     # add a pseudocount of 1 to every gene as per https://www.biostars.org/p/440379/
     counts_matrix <- GetAssayData(bulk, layer = "counts")
     bulk <- SetAssayData(bulk, layer = "counts", new.data = counts_matrix + 1)
 
-    n_cells <- sum(bulk$singleR.labels_fine == cell_type)
+    n_cells <- sum(bulk[[identity_of_interest]] == cell_type)
     if (n_cells < min_cells){
         print(paste0(cell_type, " had less than ", min_cells," cells"))
-        print(unique(bulk$singleR.labels_fine))
+        print(unique(bulk[[identity_of_interest]]))
     }else{
         print(cell_type)
         markers <- FindMarkers(
@@ -92,56 +90,54 @@ run_DE <- function(seurat_object, cell_type, outdir, min_cells){
             slot = "counts",
             test.use = "DESeq2"
         )
-        file_path <- file.path(outdir, paste0(sanitize_label_for_filename(cell_type), "_vs_all_diffexpress.csv"))
+        file_path <- file.path(outdir, paste0(sanitize_label_for_filename(cell_type), "_", file_suff, ".csv"))
         write.csv(markers, file_path)
+
+        volcano_plot <- EnhancedVolcano(
+            markers,
+            lab = rownames(markers),
+            x = "avg_log2FC",
+            y = "p_val_adj",
+            title = cell_type,
+            pCutoff = 0.05,
+            FCcutoff = 1
+        )
+        plot_path <- file.path(outdir, paste0(sanitize_label_for_filename(cell_type), "_", file_suff, "_volcano.pdf"))
+        ggsave(plot_path, volcano_plot, width = 10, height = 8)
     }
 }
 
 # Create an ArgumentParser object
 parser <- ArgumentParser(description = 'Integrate multiple scRNA-seq datasets into one Seurat object')
 parser$add_argument("joined_integrated_seurat_object", help="File paths to joined_integrated_seurat_object.rds")
-parser$add_argument("--cell_type", help="cell type to use")
+parser$add_argument("--cell_type", help="cell type to use", required = TRUE)
+parser$add_argument("--cell_type_identity", help="identity to use", required = TRUE)
+parser$add_argument("--outdir", help="directory to write to", required = TRUE)
+parser$add_argument("--file_suff", help="file suffix", required = TRUE)
 parser$add_argument("--min_cells", type="integer", help="Min cells per celltype for diff express", default = 8)
+parser$add_argument("--subset", help="cell type to use, leaving this null subsets to all fibroblast cell types", default = NULL)
+parser$add_argument("--subset_identity", help="identity to use", default = NULL)
 
 # Parse the command-line arguments
 args <- parser$parse_args()
 
+print(args)
+
 joined_integrated_data <- readRDS(args$joined_integrated_seurat_object)
+joined_integrated_data$singleR.labels_fine <- sanitize_label_for_AggregateExpression(joined_integrated_data$singleR.labels_fine)
+print(unique(joined_integrated_data[[args$subset_identity]]))
+print(unique(joined_integrated_data$singleR.labels_fine))
 
-print(unique(sanitize_label_for_AggregateExpression(joined_integrated_data$singleR.labels_fine)))
+if (is.null(args$subset_identity)){
+    sanitized_fib_labels <- sanitize_label_for_AggregateExpression(fibroblast_celltypes)
+    cells <- subset(
+        joined_integrated_data,
+        singleR.labels_fine %in% sanitized_fib_labels
+    )
+}else{
+    cells <- joined_integrated_data[, joined_integrated_data[[args$subset_identity]] == args$subset]
+}
 
-just_fibroblast_cells <- subset(
-    joined_integrated_data,
-    singleR.labels_fine %in% fibroblast_celltypes
-)
+print(unique(cells$singleR.labels_fine))
 
-ssc_cells <- subset(
-    joined_integrated_data,
-    diagnosis == "SSC"
-)
-
-control_cells <- subset(
-    joined_integrated_data,
-    diagnosis == "control"
-)
-
-just_fibroblast_ssc_cells <- subset(
-    just_fibroblast_cells,
-    diagnosis == "SSC"
-)
-
-just_fibroblast_control_cells <- subset(
-    just_fibroblast_cells,
-    diagnosis == "control"
-)
-
-ssc_cells$singleR.labels_fine <- sanitize_label_for_AggregateExpression(ssc_cells$singleR.labels_fine)
-control_cells$singleR.labels_fine <- sanitize_label_for_AggregateExpression(control_cells$singleR.labels_fine)
-just_fibroblast_ssc_cells$singleR.labels_fine <- sanitize_label_for_AggregateExpression(just_fibroblast_ssc_cells$singleR.labels_fine)
-just_fibroblast_control_cells$singleR.labels_fine <- sanitize_label_for_AggregateExpression(just_fibroblast_control_cells$singleR.labels_fine)
-
-
-run_DE(ssc_cells, args$cell_type, "ssc_cells_single_type_vs_all_others", args$min_cells)
-run_DE(control_cells, args$cell_type, "control_cells_single_type_vs_all_others", args$min_cells)
-run_DE(just_fibroblast_ssc_cells, args$cell_type, "just_fibroblast_ssc_cells_single_type_vs_all_fibroblasts", args$min_cells)
-run_DE(just_fibroblast_control_cells, args$cell_type, "just_fibroblast_control_cells_single_type_vs_all_fibroblasts", args$min_cells)
+run_DE(cells, args$cell_type, args$cell_type_identity, args$outdir, args$file_suff, args$min_cells)
