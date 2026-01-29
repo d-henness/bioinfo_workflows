@@ -64,10 +64,11 @@ run_DE <- function(seurat_object, cell_type, identity_of_interest, outdir, file_
         return.seurat = TRUE,
         slot = "counts",
         assays = "RNA",
-        group.by = c("singleR.labels_fine", "sample_id", "diagnosis")
+        group.by = c("singleR.labels_fine", "sample_id", "diagnosis", "is_fib")
     )
 
     Idents(bulk) <- identity_of_interest
+    print(head(bulk))
 
     file_name <- file.path(outdir, paste0("aggregate_cell_counts_", file_suff, ".csv"))
     write.csv(table(bulk[[identity_of_interest]]), file_name)
@@ -77,10 +78,11 @@ run_DE <- function(seurat_object, cell_type, identity_of_interest, outdir, file_
     counts_matrix <- GetAssayData(bulk, layer = "counts")
     bulk <- SetAssayData(bulk, layer = "counts", new.data = counts_matrix + 1)
 
-    n_cells <- sum(bulk[[identity_of_interest]] == cell_type)
+    n_cells <- sum(bulk[[identity_of_interest, drop = TRUE]] == cell_type)
+    print(n_cells)
     if (n_cells < min_cells){
         print(paste0(cell_type, " had less than ", min_cells," cells"))
-        print(unique(bulk[[identity_of_interest]]))
+        print(table(bulk[[identity_of_interest]]))
     }else{
         print(cell_type)
         markers <- FindMarkers(
@@ -124,20 +126,28 @@ args <- parser$parse_args()
 print(args)
 
 joined_integrated_data <- readRDS(args$joined_integrated_seurat_object)
+joined_integrated_data$diagnosis <- trimws(joined_integrated_data$diagnosis)
 joined_integrated_data$singleR.labels_fine <- sanitize_label_for_AggregateExpression(joined_integrated_data$singleR.labels_fine)
-print(unique(joined_integrated_data[[args$subset_identity]]))
-print(unique(joined_integrated_data$singleR.labels_fine))
 
-if (is.null(args$subset_identity)){
-    sanitized_fib_labels <- sanitize_label_for_AggregateExpression(fibroblast_celltypes)
-    cells <- subset(
-        joined_integrated_data,
-        singleR.labels_fine %in% sanitized_fib_labels
-    )
-}else{
-    cells <- joined_integrated_data[, joined_integrated_data[[args$subset_identity]] == args$subset]
-}
+sanitized_fib_labels <- sanitize_label_for_AggregateExpression(fibroblast_celltypes)
+joined_integrated_data$is_fib <- ifelse(
+    joined_integrated_data$singleR.labels_fine %in% sanitized_fib_labels,
+    "fibroblast",
+    "other"
+)
 
+cells <- joined_integrated_data
+#if (is.null(args$subset_identity)){
+#    sanitized_fib_labels <- sanitize_label_for_AggregateExpression(fibroblast_celltypes)
+#    cells <- subset(
+#        joined_integrated_data,
+#        singleR.labels_fine %in% sanitized_fib_labels
+#    )
+#}else{
+#    cells <- joined_integrated_data[, joined_integrated_data[[args$subset_identity]] == args$subset]
+#}
+
+print(head(cells))
 print(unique(cells$singleR.labels_fine))
 
 run_DE(cells, args$cell_type, args$cell_type_identity, args$outdir, args$file_suff, args$min_cells)

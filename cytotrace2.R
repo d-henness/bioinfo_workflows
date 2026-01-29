@@ -104,105 +104,97 @@ parser <- ArgumentParser(description = 'Integrate multiple scRNA-seq datasets in
 parser$add_argument("--rds", type="character", help="File path to joined_integrated_seurat_object.rds")
 args <- parser$parse_args()
 
-#data <- readRDS(args$rds)
-#
-#if (length(Layers(data[["RNA"]], search = "counts")) > 1) {
-#    cat("Joining counts layers...\n")
-#    data <- JoinLayers(data, assay = "RNA", layers = "counts")
-#}
-#
+data <- readRDS(args$rds)
+
+if (length(Layers(data[["RNA"]], search = "counts")) > 1) {
+    cat("Joining counts layers...\n")
+    data <- JoinLayers(data, assay = "RNA", layers = "counts")
+}
+
 #fibroblast_cells <- subset(
 #    data,
 #    singleR.labels_fine %in% fibroblast_celltypes
 #)
-#
-#all_potency <- data.frame()
-#
-#batches <- unique(fibroblast_cells$sample_id)
-#for (batch in batches) {
-#    cat("Processing batch:", batch, "\n")
-#    
-#    # Subset to this batch
-#    batch_data <-  subset(
-#        fibroblast_cells,
-#        sample_id == batch
-#    )
-#
-#    # Extract expression data
-#    expression_data <- as.data.frame(GetAssayData(batch_data, assay = "RNA", layer = "counts"))
-#    
-#    # Run CytoTRACE2
-#    cytotrace2_result <- cytotrace2(expression_data, species = "human")
-#    
-#    potency_batch <- data.frame(
-#        CytoTRACE2_Potency = cytotrace2_result$CytoTRACE2_Potency,
-#        row.names = rownames(cytotrace2_result)
-#    )
-#    print("binding")
-#    all_potency <- rbind(all_potency, potency_batch)
-#    print("finished binding")
-#    
-##    # Prepare annotation
-##    annotation <- data.frame(Phenotype = batch_data$singleR.labels_main)
-##    
-##    # Write stats
-##    cytotrace2_result_with_rownames <- merge(cytotrace2_result, annotation, by = 0, all = TRUE)
-##    names(cytotrace2_result_with_rownames)[1] <- "barcode"
-##    write_csv(cytotrace2_result_with_rownames, paste0("cytotrace_stats_", batch, "_main.csv"))
-##
-##    plot_data(cytotrace2_result, annotation, expression_data, paste0(batch, "_main"))
-#
-#    # Prepare annotation
-#    annotation <- data.frame(Phenotype = batch_data$singleR.labels_fine)
-#    
-#    # Write stats
-#    cytotrace2_result_with_rownames <- merge(cytotrace2_result, annotation, by = 0, all = TRUE)
-#    names(cytotrace2_result_with_rownames)[1] <- "barcode"
-#    write_csv(cytotrace2_result_with_rownames, paste0("cytotrace_stats_", batch, "_fine.csv"))
-#
+
+all_potency <- data.frame()
+
+batches <- unique(data$sample_id)
+for (batch in batches) {
+    cat("Processing batch:", batch, "\n")
+    
+    # Subset to this batch
+    batch_data <-  subset(
+        data,
+        sample_id == batch
+    )
+
+    print(head(batch_data))
+
+    # Extract expression data
+    expression_data <- as.data.frame(GetAssayData(batch_data, assay = "RNA", layer = "counts"))
+    
+    # Run CytoTRACE2
+    cytotrace2_result <- cytotrace2(expression_data, species = "human")
+    
+    potency_batch <- data.frame(
+        CytoTRACE2_Potency = cytotrace2_result$CytoTRACE2_Potency,
+        row.names = rownames(cytotrace2_result)
+    )
+    print("binding")
+    all_potency <- rbind(all_potency, potency_batch)
+    print("finished binding")
+    
+    # Prepare annotation
+    annotation <- data.frame(Phenotype = batch_data$singleR.labels_fine)
+    
+    # Write stats
+    cytotrace2_result_with_rownames <- merge(cytotrace2_result, annotation, by = 0, all = TRUE)
+    names(cytotrace2_result_with_rownames)[1] <- "barcode"
+    write_csv(cytotrace2_result_with_rownames, paste0("cytotrace_stats_", batch, "_fine.csv"))
+
 #    plot_data(cytotrace2_result, annotation, expression_data, paste0(batch, "_fine"))
-#    
-#    cat("Saved: cytotrace_plots_", batch, ".pdf\n")
+    
+    cat("Saved: cytotrace_plots_", batch, ".pdf\n")
+}
+
+head(rownames(data@meta.data))
+head(rownames(all_potency))
+
+# Check for overlap
+print(sum(rownames(data@meta.data) %in% rownames(all_potency)))
+
+
+data$CytoTRACE2_Potency <- all_potency$CytoTRACE2_Potency[match(rownames(data@meta.data), rownames(all_potency))]
+
+saveRDS(fibroblast_cells, "cytotrace_seurat.rds")
+
+#fibroblast_cells <- readRDS("cytotrace_seurat.rds")
+#
+#
+#for (celltype in unique(fibroblast_cells$singleR.labels_fine)){
+#    cells <- subset(
+#        fibroblast_cells,
+#        singleR.labels_fine == celltype
+#    )
+#
+#    plot <- DimPlot(
+#      cells,
+#      reduction = "umap.cca",
+#      group.by = "CytoTRACE2_Potency",
+#      label.size = 2
+#    )
+#    ggsave(paste0("umap_CytoTRACE2_Potency_", celltype, ".pdf"), plot, width = 16, height = 8, dpi = 300)
+#
+#    plot <- DimPlot(
+#      cells,
+#      reduction = "tsne.cca",
+#      group.by = "CytoTRACE2_Potency",
+#      label.size = 2
+#    )
+#    ggsave(paste0("tsne_CytoTRACE2_Potency_", celltype, ".pdf"), plot, width = 16, height = 8, dpi = 300)
 #}
 #
-#head(rownames(fibroblast_cells@meta.data))
-#head(rownames(all_potency))
 #
-## Check for overlap
-#print(sum(rownames(fibroblast_cells@meta.data) %in% rownames(all_potency)))
-#
-#
-#fibroblast_cells$CytoTRACE2_Potency <- all_potency$CytoTRACE2_Potency[match(rownames(fibroblast_cells@meta.data), rownames(all_potency))]
-#
-#saveRDS(fibroblast_cells, "cytotrace_seurat.rds")
-
-fibroblast_cells <- readRDS("cytotrace_seurat.rds")
-
-
-for (celltype in unique(fibroblast_cells$singleR.labels_fine)){
-    cells <- subset(
-        fibroblast_cells,
-        singleR.labels_fine == celltype
-    )
-
-    plot <- DimPlot(
-      cells,
-      reduction = "umap.cca",
-      group.by = "CytoTRACE2_Potency",
-      label.size = 2
-    )
-    ggsave(paste0("umap_CytoTRACE2_Potency_", celltype, ".pdf"), plot, width = 16, height = 8, dpi = 300)
-
-    plot <- DimPlot(
-      cells,
-      reduction = "tsne.cca",
-      group.by = "CytoTRACE2_Potency",
-      label.size = 2
-    )
-    ggsave(paste0("tsne_CytoTRACE2_Potency_", celltype, ".pdf"), plot, width = 16, height = 8, dpi = 300)
-}
-
-
-for (potency in unique(fibroblast_cells$CytoTRACE2_Potency)){
-    run_DE(fibroblast_cells, potency, paste0(potency, "_vs_all_others_just_fibroblasts"), 8)
-}
+##for (potency in unique(fibroblast_cells$CytoTRACE2_Potency)){
+##    run_DE(fibroblast_cells, potency, paste0(potency, "_vs_all_others_just_fibroblasts"), 8)
+##}

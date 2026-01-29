@@ -7,6 +7,8 @@ library(tidyverse)
 library(pheatmap)
 library(msigdbr)
 library(fgsea)
+library(EnhancedVolcano)
+library(lubridate)
 
 
 fibroblast_celltypes <- c(
@@ -21,6 +23,32 @@ fibroblast_celltypes <- c(
     "Smooth_muscle_cells:bronchial:vit_D",
     "Tissue_stem_cells:BM_MSC:TGFb3",
     "Tissue_stem_cells:BM_MSC"
+)
+
+lymphocyte_celltypes <- c(
+    "B_cell",
+    "B_cell:CXCR4+_centroblast",
+    "B_cell:Germinal_center",
+    "B_cell:immature",
+    "B_cell:Memory",
+    "B_cell:Naive",
+    "B_cell:Plasma_cell",
+    "Pre-B_cell_CD34-",
+    "Pro-B_cell_CD34+",
+    "T_cell:CD4+",
+    "T_cell:CD4+_central_memory",
+    "T_cell:CD4+_effector_memory",
+    "T_cell:CD4+_Naive",
+    "T_cell:CD8+",
+    "T_cell:CD8+_Central_memory",
+    "T_cell:CD8+_effector_memory",
+    "T_cell:CD8+_effector_memory_RA",
+    "T_cell:CD8+_naive",
+    "T_cell:gamma-delta",
+    "T_cell:Treg:Naive",
+    "NK_cell",
+    "NK_cell:CD56hiCD62L+",
+    "NK_cell:IL2"
 )
 
 # hard code for now, do properly later
@@ -212,6 +240,12 @@ old_mitosis_list <- c(
     "ZWINT"
 )
 
+GOBP_POSITIVE_REGULATION_OF_EXIT_FROM_MITOSIS = c("BIRC5", "CDCA5", "NEUROG1", "TGFB1", "UBE2C")
+
+HERNANDEZ_ABERRANT_MITOSIS_BY_DOCETACEL_4NM_DN = c("GNAI1", "GPC3", "HIF1A", "SDHA", "TFRC", "TXNRD1")
+
+COURTOIS_SENESCENCE_TRIGGERS = c("E2F1", "E2F3", "NF1", "PTEN")
+
 sanitize_label_for_filename <- function(label) {
     gsub("[/\\:*?\"<>|]", "_", label)
 }
@@ -220,7 +254,7 @@ sanitize_label_for_AggregateExpression <- function(label) {
     gsub("[/\\:*?\"<>|_]", "-", label)
 }
 
-run_DE <- function(seurat_object, cell_type, outdir, min_cells){
+run_DE <- function(seurat_object, cell_type1, cell_type2 = NULL, identity_of_interest, outdir, min_cells){
     dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
 
     bulk <- AggregateExpression(
@@ -228,14 +262,14 @@ run_DE <- function(seurat_object, cell_type, outdir, min_cells){
         return.seurat = TRUE,
         slot = "counts",
         assays = "RNA",
-        group.by = c("singleR.labels_fine", "sample_id", "diagnosis")
+        group.by = c("singleR.labels_fine", "sample_id", "diagnosis", "CytoTRACE2_Potency", "broadcelltype")
     )
 
-    Idents(bulk) <- "diagnosis"
+    Idents(bulk) <- identity_of_interest
     print(unique(Idents(bulk)))
     print(length(Idents(bulk)))
     print(head(Idents(bulk)))
-    print(table(bulk$diagnosis))
+    print(table(bulk[[identity_of_interest]]))
 
     file_name <- file.path(outdir, "aggregate_cell_counts.csv")
     write.csv(table(bulk$diagnosis), file_name)
@@ -245,27 +279,41 @@ run_DE <- function(seurat_object, cell_type, outdir, min_cells){
     counts_matrix <- GetAssayData(bulk, layer = "counts")
     bulk <- SetAssayData(bulk, layer = "counts", new.data = counts_matrix + 1)
 
-    n_cells <- sum(bulk$diagnosis == cell_type)
+    n_cells <- sum(bulk[[identity_of_interest]] == cell_type1)
     if (n_cells < min_cells){
         print(n_cells)
-        print(paste0(cell_type, " had less than ", min_cells," cells"))
-        print(unique(bulk$diagnosis))
+        print(paste0(cell_type1, " had less than ", min_cells," cells"))
+        print(unique(bulk[[identity_of_interest]]))
     }else{
-        print(cell_type)
+        print(cell_type1)
         markers <- FindMarkers(
             bulk,
-            ident.1 = cell_type,
-            ident.2 = NULL,
+            ident.1 = cell_type1,
+            ident.2 = cell_type2,
             slot = "counts",
             test.use = "DESeq2"
         )
-        file_path <- file.path(outdir, paste0(sanitize_label_for_filename(cell_type), "_vs_control_diffexpress.csv"))
+        file_path <- file.path(outdir, paste0(cell_type1, "_vs_", cell_type2,"_diffexpress.csv"))
         write.csv(markers, file_path)
+
+        volcano_plot <- EnhancedVolcano(
+            markers,
+            lab = rownames(markers),
+            x = "avg_log2FC",
+            y = "p_val_adj",
+            title = cell_type1,
+            pCutoff = 0.05,
+            FCcutoff = 1
+        )
+        plot_path <- file.path(outdir, paste0(cell_type1, "_vs_", cell_type2,"_volcano.pdf"))
+        ggsave(plot_path, volcano_plot, width = 10, height = 8)
     }
     return(markers)
 }
 
 run_fgsea <- function(markers, pathways, file_prefix, threads = 8, top_up = 20, top_down = 20){
+    dir.create(file.path(file_prefix, "plots"), showWarnings = FALSE, recursive = TRUE)
+
     # following https://biostatsquid.com/fgsea-tutorial-gsea/
     markers <- na.omit(markers)
 
@@ -314,25 +362,80 @@ run_fgsea <- function(markers, pathways, file_prefix, threads = 8, top_up = 20, 
     print(topPathways)
 
     plot <- plotGseaTable(pathways[topPathways], stats = rankings, fgseaRes = GSEAres, gseaParam = 0.5)
-    ggsave(paste0(file_prefix, ".pdf"), plot, width = 16, height = 8, dpi = 300)
+    file_path <- file.path(file_prefix, paste0(file_prefix,".pdf"))
+    ggsave(file_path, plot, width = 16, height = 8, dpi = 300)
 
 
     GSEAres <- GSEAres[order(padj)]
     GSEAres$leadingEdge <- sapply(GSEAres$leadingEdge, paste, collapse = ";")
 
-    write.csv(GSEAres, paste0(file_prefix, ".csv"))
+    file_path <- file.path(file_prefix, paste0(file_prefix,".csv"))
+    write.csv(GSEAres, file_path)
+
+    sig_pathways <- GSEAres[padj < 0.05, pathway]
+
+    for (pathway_name in sig_pathways) {
+      plot <- plotEnrichment(pathways[[pathway_name]], rankings) +
+        ggtitle(pathway_name)
+      
+      file_path <- file.path(file_prefix, "plots", paste0(pathway_name, "_enrichment.pdf"))
+      ggsave(file_path, plot, width = 8, height = 6, dpi = 300)
+    }
+
 }
 
 # Create an ArgumentParser object
 parser <- ArgumentParser(description = 'Integrate multiple scRNA-seq datasets into one Seurat object')
 parser$add_argument("joined_integrated_seurat_object", help="File paths to joined_integrated_seurat_object.rds")
-parser$add_argument("--cell_type", help="cell type to use")
 parser$add_argument("--min_cells", type="integer", help="Min cells per celltype for diff express", default = 8)
+parser$add_argument("--e_dtype", help="diagnosis type for experiment group", required = TRUE)
+parser$add_argument("--e_ptype", help="cytotrace2 potency type for experiment group", required = TRUE)
+parser$add_argument("--e_lymph", action = 'store_true', help="use lymphocyte_celltypes for experiment group")
+parser$add_argument("--c_dtype", help="diagnosis type for control group", required = TRUE)
+parser$add_argument("--c_ptype", help="cytotrace2 potency type for control group", required = TRUE)
+parser$add_argument("--c_lymph", action = 'store_true', help="use lymphocyte_celltypes for control group", required = TRUE)
+parser$add_argument("--dataset_id", , help="id of the dataset", required = TRUE)
 
 # Parse the command-line arguments
 args <- parser$parse_args()
 
-print(args$cell_type)
+print(args)
+
+if (args$e_lymph){
+    e_cell_type <- "all_lymphocytes"
+    e_cell_names <- lymphocyte_celltypes
+}else{
+    e_cell_type <- "all_fibroblasts"
+    e_cell_names <- fibroblast_celltypes
+}
+
+if (args$c_lymph){
+    c_cell_type <- "all_lymphocytes"
+    c_cell_names <- lymphocyte_celltypes
+}else{
+    c_cell_type <- "all_fibroblasts"
+    c_cell_names <- fibroblast_celltypes
+}
+
+e_dtype_list = c(args$e_dtype)
+if (args$e_dtype == 'all'){
+    e_dtype_list = c('SSC', 'control')
+}
+
+c_dtype_list = c(args$c_dtype)
+if (args$e_dtype == 'all'){
+    c_dtype_list = c('SSC', 'control')
+}
+
+e_ptype_list = c(args$e_ptype)
+if (args$e_ptype == 'all'){
+    e_ptype_list = c("Differentiated", "Unipotent", "Oligopotent", "Multipotent", "Pluripotent", "Totipotent")
+}
+
+c_ptype_list = c(args$c_ptype)
+if (args$e_ptype == 'all'){
+    c_ptype_list = c("Differentiated", "Unipotent", "Oligopotent", "Multipotent", "Pluripotent", "Totipotent")
+}
 
 joined_integrated_data <- readRDS(args$joined_integrated_seurat_object)
 msig <- msigdbr(species = "Homo sapiens")
@@ -352,19 +455,30 @@ pathways[["CUSTOM_OLD_MITOSIS_LIST"]] <- old_mitosis_list
 cat("Found", length(pathways), "of", length(target_sets), "gene sets\n")
 setdiff(target_sets, names(pathways))  # Shows any missing sets
 
-just_fibroblast_cells <- subset(
-    joined_integrated_data,
-    singleR.labels_fine %in% fibroblast_celltypes
-)
-
-
-# run on all gene sets
 all_pathways <- msig %>%
   split(x = .$gene_symbol, f = .$gs_name)
+#all_pathways[["CUSTOM_FOXO1_LIST"]] <- FOXO1_gene_list
+#all_pathways[["CUSTOM_OLD_MITOSIS_LIST"]] <- old_mitosis_list
 
-just_fibroblast_cells$singleR.labels_fine <- sanitize_label_for_AggregateExpression(just_fibroblast_cells$singleR.labels_fine)
+joined_integrated_data$diagnosis <- trimws(joined_integrated_data$diagnosis)
 
-just_cell_type <- subset(just_fibroblast_cells, singleR.labels_fine == args$cell_type)
-fib_markers <- run_DE(just_cell_type, "SSC", paste0(args$cell_type, "_DE"), args$min_cells)
-run_fgsea(fib_markers, pathways, paste0("targeted_gsea_results_just_", args$cell_type))
-run_fgsea(fib_markers, all_pathways, paste0("all_gsea_results_just_", args$cell_type))
+if (!"CytoTRACE2_Potency" %in% colnames(joined_integrated_data@meta.data)) {               
+    joined_integrated_data$CytoTRACE2_Potency <- "Differentiated"    
+}                                                           
+
+
+joined_integrated_data$broadcelltype <- case_when(
+    (joined_integrated_data$singleR.labels_fine %in% e_cell_names) & (joined_integrated_data$diagnosis %in% e_dtype_list) & (joined_integrated_data$CytoTRACE2_Potency %in% e_ptype_list) ~ "set1",
+    (joined_integrated_data$singleR.labels_fine %in% c_cell_names) & (joined_integrated_data$diagnosis %in% c_dtype_list) & (joined_integrated_data$CytoTRACE2_Potency %in% c_ptype_list) ~ "set2",
+    TRUE ~ "other"
+)
+
+print(table(joined_integrated_data$broadcelltype))
+
+joined_integrated_data$singleR.labels_fine <- sanitize_label_for_AggregateExpression(joined_integrated_data$singleR.labels_fine)
+
+date_and_time <- format(now(), "%Y%m%d_%H%M%S")
+
+markers <- run_DE(joined_integrated_data, "set1", "set2", "broadcelltype", paste0("DE_", e_cell_type, "_", args$e_dtype, "_", args$e_ptype, "_vs_", c_cell_type, "_", args$c_dtype, "_", args$c_ptype, "_", args$dataset_id, "_", date_and_time), args$min_cells)
+run_fgsea(markers, pathways, paste0("targeted_gsea_results_all_", e_cell_type, "_", args$e_dtype, "_", args$e_ptype, "_vs_", c_cell_type, "_", args$c_dtype, "_", args$c_ptype, "_", args$dataset_id, "_", date_and_time))
+run_fgsea(markers, all_pathways, paste0("all_gsea_results_", e_cell_type, "_", args$e_dtype, "_", args$e_ptype, "_vs_", c_cell_type, "_", args$c_dtype, "_", args$c_ptype, "_", args$dataset_id, "_", date_and_time))

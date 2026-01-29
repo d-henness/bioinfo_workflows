@@ -1,4 +1,5 @@
 configfile: "{}/ref.yaml".format(workflow.basedir)
+include: "./fastp.snakefile"
 
 rule run_pre_pro_bf:
   input:
@@ -16,7 +17,8 @@ def ubam_input(wildcards):
 
 rule ubam:
   input:
-    ubam_input
+    fq1 = rules.fastp_paired.output.fq1_out,
+    fq2 = rules.fastp_paired.output.fq2_out
   output:
     temp("GATK_runs/{library}/ubam/unprocessed.bam")
   conda:
@@ -33,7 +35,7 @@ rule ubam:
   benchmark:
     "benchmarks/{library}.ubam.benchmark.txt"
   shell:
-    "python3 {workflow.basedir}/scripts_dir/ubam.py {input} {wildcards.library} {output} 2> {log.ubam} {params.sample_name}"
+    "python3 {workflow.basedir}/scripts_dir/ubam.py {input.fq1} {input.fq2} {wildcards.library} {output} 2> {log.ubam} {params.sample_name}"
 
 rule SamToFastqAndBwaMem:
   input:

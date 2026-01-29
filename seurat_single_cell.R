@@ -6,6 +6,7 @@ library(celldex)
 library(tidyverse)
 library(pheatmap)
 library(purrr)
+library(EnhancedVolcano)
 
 
 fibroblast_celltypes <- c(
@@ -378,11 +379,23 @@ for (label in unique(bulk$singleR.labels_fine)){
         )
         file_path <- file.path(outdir, paste0(sanitize_label_for_filename(label), "_vs_all_diffexpress.csv"))
         write.csv(markers, file_path)
+
+        volcano_plot <- EnhancedVolcano(
+            markers,
+            lab = rownames(markers),
+            x = "avg_log2FC",
+            y = "p_val_adj",
+            title = cell_type,
+            pCutoff = 0.05,
+            FCcutoff = 1
+        )
+        plot_path <- file.path(outdir, paste0(sanitize_label_for_filename(label), "_vs_all_diffexpress.pdf"))
+        ggsave(plot_path, volcano_plot, width = 10, height = 8)
     }
 }
 
-outdir <- "diffexpress_fibroblasts_only_one_vs_all"
-dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
+#outdir <- "diffexpress_fibroblasts_only_one_vs_all"
+#dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
 
 #fibroblast_cells$singleR.labels_fine <- sanitize_label_for_AggregateExpression(fibroblast_cells$singleR.labels_fine)
 #print(unique(fibroblast_cells$singleR.labels_fine))
