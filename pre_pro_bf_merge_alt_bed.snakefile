@@ -24,7 +24,7 @@ rule ubam:
   conda:
     "envs_dir/pre_proc.yaml"
   resources:
-    mem_mb = lambda wildcards, attempt: attempt * 700,
+    mem_mb = lambda wildcards, attempt: attempt * 4 * 1024,
     time_min = lambda wildcards, attempt: attempt * 24 * 60,	# time in minutes
     io = 1, # used to indicate that this is an io heavy job and should not have many running at once
   params:
