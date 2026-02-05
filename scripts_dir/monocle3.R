@@ -126,9 +126,9 @@ just_fibs <- subset(joined_integrated_data, singleR.labels_fine %in% fibroblast_
 just_control <- subset(just_fibs, diagnosis == 'control')
 just_SSC <- subset(just_fibs, diagnosis == 'SSC')
 
-run_monocle3(just_fibs, paste0("monocle3_subset_fibs_using_origional_clustering_", date_and_time))
-run_monocle3(just_SSC, paste0("monocle3_subset_fibs_subset_SSC_using_origional_clustering_", date_and_time))
-run_monocle3(just_control, paste0("monocle3_subset_fibs_subset_control_using_origional_clustering_", date_and_time))
+run_monocle3(just_fibs, paste0("monocle3_subset_fibs_using_original_clustering_", date_and_time))
+run_monocle3(just_SSC, paste0("monocle3_subset_fibs_subset_SSC_using_original_clustering_", date_and_time))
+run_monocle3(just_control, paste0("monocle3_subset_fibs_subset_control_using_original_clustering_", date_and_time))
 
 just_fibs <- FindNeighbors(just_fibs, reduction = "integrated.cca", dims = 1:30)
 just_fibs <- FindClusters(just_fibs, cluster.name = "cca_clusters")
