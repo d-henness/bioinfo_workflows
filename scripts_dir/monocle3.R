@@ -67,7 +67,7 @@ run_monocle3 <- function(seurat_object, outdir){
     ggsave(filenm, plot, width = 16, height = 8)
 
     make_multiplots(cds, "singleR.labels_fine", outdir, "celltype_highlights.pdf")
-    make_multiplots(cds, "CytoTRACE2_Potency", outdir, "CytoTRACE2_Potency_highlights.pdf", c("Multipotent", "Oligopotent", "Unipotent", "Differentiated")
+    make_multiplots(cds, "CytoTRACE2_Potency", outdir, "CytoTRACE2_Potency_highlights.pdf", c("Multipotent", "Oligopotent", "Unipotent", "Differentiated"))
     make_multiplots(cds, "diagnosis", outdir, "diagnosis_highlights.pdf")
 
     cds <- learn_graph(cds)
