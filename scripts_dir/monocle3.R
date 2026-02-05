@@ -138,7 +138,7 @@ just_SSC <- subset(just_fibs, diagnosis == 'SSC')
 
 run_monocle3(just_fibs, paste0("monocle3_subset_fibs_and_reclustered_", date_and_time))
 run_monocle3(just_SSC, paste0("monocle3_subset_fibs_and_reclustered_subset_SSC_", date_and_time))
-run_monocle3(just_control, paste0("monocle3_subset_fibs_and_reclustered_subset_control", date_and_time))
+run_monocle3(just_control, paste0("monocle3_subset_fibs_and_reclustered_subset_control_", date_and_time))
 
 just_control <- FindNeighbors(just_control, reduction = "integrated.cca", dims = 1:30)
 just_control <- FindClusters(just_control, cluster.name = "cca_clusters")
