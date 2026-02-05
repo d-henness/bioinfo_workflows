@@ -138,6 +138,7 @@ for (batch in batches) {
     
     potency_batch <- data.frame(
         CytoTRACE2_Potency = cytotrace2_result$CytoTRACE2_Potency,
+        CytoTRACE2_Score = cytotrace2_result$CytoTRACE2_Score,
         row.names = rownames(cytotrace2_result)
     )
     print("binding")
@@ -164,9 +165,9 @@ head(rownames(all_potency))
 print(sum(rownames(data@meta.data) %in% rownames(all_potency)))
 
 
-data$CytoTRACE2_Potency <- all_potency$CytoTRACE2_Potency[match(rownames(data@meta.data), rownames(all_potency))]
+data <- AddMetaData(data, all_potency)
 
-saveRDS(fibroblast_cells, "cytotrace_seurat.rds")
+saveRDS(data, "cytotrace_seurat.rds")
 
 #fibroblast_cells <- readRDS("cytotrace_seurat.rds")
 #
@@ -185,9 +186,7 @@ saveRDS(fibroblast_cells, "cytotrace_seurat.rds")
 #    )
 #    ggsave(paste0("umap_CytoTRACE2_Potency_", celltype, ".pdf"), plot, width = 16, height = 8, dpi = 300)
 #
-#    plot <- DimPlot(
-#      cells,
-#      reduction = "tsne.cca",
+#    plot <- Dimdata#      reduction = "tsne.cca",
 #      group.by = "CytoTRACE2_Potency",
 #      label.size = 2
 #    )
