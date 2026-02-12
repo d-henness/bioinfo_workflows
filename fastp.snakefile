@@ -49,14 +49,7 @@ rule fastp_paired:
         -O {output.fq2_out} \
         -w 1 \
         -j {log.json} \
-        -h {log.html} \
-        -D \
-        --dup_calc_accuracy 5 \
-        --trim_poly_g \
-        --length_required 30 \
-        --qualified_quality_phred 20 \
-        --cut_right --cut_right_mean_quality 20 \
-        --detect_adapter_for_pe &> {log.overall}
+        -h {log.html} &> {log.overall}
       echo "finished" > {output.signal}
 
       fastqc {output.fq1_out} {output.fq2_out} -o fastp_dna/{wildcards.library}/fastp/
