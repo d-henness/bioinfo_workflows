@@ -287,6 +287,7 @@ rule Filter:
 	--ob-priors {input.art_tab} \
 	-f-score-beta {wildcards.f_score_thresh} \
       	--tumor-segmentation {input.maf_seg} &> {log} \
+
     """
 
 #rule FilterByOrientationBias:

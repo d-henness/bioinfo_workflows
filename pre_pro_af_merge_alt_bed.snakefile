@@ -159,7 +159,8 @@ rule ApplyBQSR:
   output:
     bam_out = "GATK_runs/{merge}/ApplyBQSR/{merge}_recal.bam",
     bai_out = "GATK_runs/{merge}/ApplyBQSR/{merge}_recal.bam.bai",
-    stats = "GATK_runs/{merge}/ApplyBQSR/{merge}_recal.stats",
+    stats = "GATK_runs/{merge}/ApplyBQSR/{merge}_recal_stats.txt",
+    stats_wo_bed = "GATK_runs/{merge}/ApplyBQSR/{merge}_recal_stats_wo_bed.txt",
   conda:
     "envs_dir/pre_proc.yaml"
   log:
@@ -199,4 +200,5 @@ rule ApplyBQSR:
         mv GATK_runs/{wildcards.merge}/ApplyBQSR/{wildcards.merge}_recal.bai GATK_runs/{wildcards.merge}/ApplyBQSR/{wildcards.merge}_recal.bam.bai
       fi
       samtools stats {params.interval} {output.bam_out} > {output.stats}
+      samtools stats {output.bam_out} > {output.stats_wo_bed}
     """
