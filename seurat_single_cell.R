@@ -73,16 +73,18 @@ if (file.exists(saved_objects_filename)) {
     # Read and process each dataset
     mapping_df <- read.csv(args$mapping_file)
 
-    seurat_objects <- pmap(mapping_df, function(sample_id, path, diagnosis) {
+    seurat_objects <- pmap(mapping_df, function(sample_id, path, diagnosis, dataset) {
         print(sample_id)
         print(path)
         print(diagnosis)
+        print(dataset)
 
         data <- Read10X(data.dir = path)
 
         seurat_object <- CreateSeuratObject(counts = data)
         seurat_object <- AddMetaData(seurat_object, metadata = sample_id, col.name = "sample_id")
         seurat_object <- AddMetaData(seurat_object, metadata = diagnosis, col.name = "diagnosis")
+        seurat_object <- AddMetaData(seurat_object, metadata = dataset, col.name = "dataset")
         print(head(seurat_object@meta.data))
 
         print(paste0("Number of barcodes before filtering ", length(seurat_object$orig.ident)))

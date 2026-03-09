@@ -328,6 +328,7 @@ rule VEP:
   input:
     vcf = rules.Filter.output.filt_vcf,
   output:
+    normed_mutect2 = "GATK_runs/{tumor}_{f_score_thresh}/VEP/{tumor}_{f_score_thresh}_normed.vcf",
     vcf_out = "GATK_runs/{tumor}_{f_score_thresh}/VEP/{tumor}_{f_score_thresh}.vcf",
     vcf_out_zip = "vep/{tumor}_{f_score_thresh}/VEP/{tumor}_{f_score_thresh}_VEP.vcf.gz",
     summary = "GATK_runs/{tumor}_{f_score_thresh}/VEP/{tumor}_{f_score_thresh}.vcf_summary.html",
@@ -349,8 +350,13 @@ rule VEP:
     mem_mb = lambda wildcards, attempt: attempt * 3000,
   shell:
     """
+      echo "-------------------------------------------------------" > {log}
+      bcftools norm -f {params.ref_fasta} -Oz -o {output.normed_mutect2} {input.vcf} >> {log} 2>&1
+      echo "-------------------------------------------------------" >> {log}
+      bcftools index {output.normed_mutect2} >> {log} 2>&1
+
       vep \
-        --input_file {input.vcf} \
+        --input_file {output.normed_mutect2} \
         --output_file {output.vcf_out} \
         --format vcf \
         --vcf \
