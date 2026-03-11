@@ -197,8 +197,7 @@ if (file.exists(saved_integrated_data)){
 print("here")
 
 
-# nibi had issues with getting this so this is a temporary work around until I work things out with support 
-ref <- celldex::HumanPrimaryCellAtlasData(cache=path.expand("~/.cache/R/BiocFileCache"))
+ref <- celldex::HumanPrimaryCellAtlasData()
 
 print(integrated_data[["RNA"]])
 
