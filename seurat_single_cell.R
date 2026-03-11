@@ -58,6 +58,38 @@ sanitize_label_for_AggregateExpression <- function(label) {
     gsub("[/\\:*?\"<>|_]", "-", label)
 }
 
+make_multiplots <- function(integrated_data, cell_metadata, outdir, filenm, order = NULL){
+    umap_coords <- as.data.frame(reducedDims(integrated_data)[["UMAP"]])
+    colnames(umap_coords) <- c("UMAP1", "UMAP2")
+    umap_coords$cell_metadata <- colData(integrated_data)[[cell_metadata]]
+    umap_coords$cluster <- integrated_data@clusters$UMAP$clusters
+
+    if (is.null(order)){
+        cell_metadata_uniq <- unique(umap_coords$cell_metadata)
+    }else{
+        cell_metadata_uniq <- order
+    }
+    highlight_plots <- lapply(cell_metadata_uniq, function(cm) {
+      umap_coords$highlight <- ifelse(umap_coords$cell_metadata == cm, "Selected", "Other")
+      # Plot "Other" first so highlighted cells are drawn on top
+      umap_coords <- umap_coords[order(umap_coords$highlight, decreasing = FALSE), ]
+      ggplot(umap_coords, aes(UMAP1, UMAP2, color = highlight)) +
+        geom_point(size = 0.3) +
+        scale_color_manual(values = c("Other" = "lightgrey", "Selected" = "red")) +
+        ggtitle(cm) +
+        theme_minimal() +
+        theme(legend.position = "none")
+    })
+
+    highlight_plot <- wrap_plots(highlight_plots, ncol = min(c(length(cell_metadata_uniq), 4)))
+
+    ggsave(file.path(outdir, filenm), 
+        highlight_plot,
+        width = 5 * min(c(length(cell_metadata_uniq), 4)),
+        height = 5 * ceiling(length(cell_metadata_uniq) / 4)
+    )
+}
+
 # Create an ArgumentParser object
 parser <- ArgumentParser(description = 'Integrate multiple scRNA-seq datasets into one Seurat object')
 parser$add_argument("--mapping_file", help="File paths to mapping file with sample_id,path,diagnosis as header")
@@ -152,15 +184,21 @@ if (file.exists(saved_integrated_data)){
       group.by = c("sample_id", "diagnosis", "cca_clusters"),
       combine = FALSE, label.size = 2
     )
-
-    ggsave("tsne_cca.pdf", plot, width = 16, height = 8, dpi = 300)
-
     saveRDS(integrated_data, file = saved_integrated_data)
+
+    outdir = "umaps"
+    ggsave("tsne_cca.pdf", plot, width = 16, height = 8, dpi = 300)
+#    make_multiplots(integrated_data, "sample_id", outdir, "sample_id_ump.pdf")
+#    make_multiplots(integrated_data, "diagnosis", outdir, "diagnosis_umap.pdf")
+#    make_multiplots(integrated_data, "cca_clusters", outdir, "seurat_cca_clusters_umap.pdf")
+#    make_multiplots(integrated_data, "cca_clusters", outdir, "seurat_cca_clusters_umap.pdf")
+
 }
 print("here")
 
 
-ref <- celldex::HumanPrimaryCellAtlasData()
+# nibi had issues with getting this so this is a temporary work around until I work things out with support 
+ref <- celldex::HumanPrimaryCellAtlasData(cache=path.expand("~/.cache/R/BiocFileCache"))
 
 print(integrated_data[["RNA"]])
 
