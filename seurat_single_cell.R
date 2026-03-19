@@ -7,6 +7,7 @@ library(tidyverse)
 library(pheatmap)
 library(purrr)
 library(EnhancedVolcano)
+library(patchwork)
 
 
 fibroblast_celltypes <- c(
@@ -23,32 +24,6 @@ fibroblast_celltypes <- c(
     "Tissue_stem_cells:BM_MSC"
 )
 
-# hard code for now, do properly later
-# the future is now old man
-#diagnosis = c(
-#    "SC1_cellranger" = "control",
-#    "SC4_cellranger" = "control",
-#    "SC18_cellranger" = "control",
-#    "SC32_cellranger" = "control",
-#    "SC33_cellranger" = "control",
-#    "SC34_cellranger" = "control",
-#    "SC50_cellranger" = "control",
-#    "SC68_cellranger" = "control",
-#    "SC124_cellranger" = "control",
-#    "SC125_cellranger" = "control",
-#    "SC2_cellranger" = "SSC",
-#    "SC5_cellranger" = "SSC",
-#    "SC19_cellranger" = "SSC",
-#    "SC49_cellranger" = "SSC",
-#    "SC60_cellranger" = "SSC",
-#    "SC69_cellranger" = "SSC",
-#    "SC70_cellranger" = "SSC",
-#    "SC86_cellranger" = "SSC",
-#    "SC119_cellranger" = "SSC",
-#    "SC185_cellranger" = "SSC",
-#    "SC188_cellranger" = "SSC",
-#    "SC189_cellranger" = "SSC"
-#)
 
 sanitize_label_for_filename <- function(label) {
     gsub("[/\\:*?\"<>|]", "_", label)
@@ -58,35 +33,70 @@ sanitize_label_for_AggregateExpression <- function(label) {
     gsub("[/\\:*?\"<>|_]", "-", label)
 }
 
-make_multiplots <- function(integrated_data, cell_metadata, outdir, filenm, order = NULL){
-    umap_coords <- as.data.frame(reducedDims(integrated_data)[["UMAP"]])
-    colnames(umap_coords) <- c("UMAP1", "UMAP2")
-    umap_coords$cell_metadata <- colData(integrated_data)[[cell_metadata]]
-    umap_coords$cluster <- integrated_data@clusters$UMAP$clusters
+#make_multiplots <- function(integrated_data, cell_metadata, outdir, filenm, order = NULL){
+#    umap_coords <- Embeddings(integrated_data, "umap.cca")
+#    colnames(umap_coords) <- c("UMAP1", "UMAP2")
+#    umap_coords$cell_metadata <- colData(integrated_data)[[cell_metadata]]
+#    umap_coords$cluster <- integrated_data@clusters$UMAP$clusters
+#
+#    if (is.null(order)){
+#        cell_metadata_uniq <- unique(umap_coords$cell_metadata)
+#    }else{
+#        cell_metadata_uniq <- order
+#    }
+#    highlight_plots <- lapply(cell_metadata_uniq, function(cm) {
+#      umap_coords$highlight <- ifelse(umap_coords$cell_metadata == cm, "Selected", "Other")
+#      # Plot "Other" first so highlighted cells are drawn on top
+#      umap_coords <- umap_coords[order(umap_coords$highlight, decreasing = FALSE), ]
+#      ggplot(umap_coords, aes(UMAP1, UMAP2, color = highlight)) +
+#        geom_point(size = 0.3) +
+#        scale_color_manual(values = c("Other" = "lightgrey", "Selected" = "red")) +
+#        ggtitle(cm) +
+#        theme_minimal() +
+#        theme(legend.position = "none")
+#    })
+#
+#    highlight_plot <- wrap_plots(highlight_plots, ncol = min(c(length(cell_metadata_uniq), 4)))
+#
+#    ggsave(file.path(outdir, filenm), 
+#        highlight_plot,
+#        width = 5 * min(c(length(cell_metadata_uniq), 4)),
+#        height = 5 * ceiling(length(cell_metadata_uniq) / 4)
+#    )
+#}
 
-    if (is.null(order)){
+
+make_multiplots <- function(integrated_data, cell_metadata, outdir, filenm, plot_order = NULL){
+    dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
+
+    umap_coords <- as.data.frame(Embeddings(integrated_data, "umap.cca"))
+    colnames(umap_coords) <- c("UMAP1", "UMAP2")
+    umap_coords$cell_metadata <- integrated_data@meta.data[[cell_metadata]]
+
+    if (is.null(plot_order)){
         cell_metadata_uniq <- unique(umap_coords$cell_metadata)
     }else{
-        cell_metadata_uniq <- order
+        cell_metadata_uniq <- plot_order
     }
+
     highlight_plots <- lapply(cell_metadata_uniq, function(cm) {
-      umap_coords$highlight <- ifelse(umap_coords$cell_metadata == cm, "Selected", "Other")
-      # Plot "Other" first so highlighted cells are drawn on top
-      umap_coords <- umap_coords[order(umap_coords$highlight, decreasing = FALSE), ]
-      ggplot(umap_coords, aes(UMAP1, UMAP2, color = highlight)) +
-        geom_point(size = 0.3) +
-        scale_color_manual(values = c("Other" = "lightgrey", "Selected" = "red")) +
-        ggtitle(cm) +
-        theme_minimal() +
-        theme(legend.position = "none")
+        umap_coords$highlight <- ifelse(umap_coords$cell_metadata == cm, "Selected", "Other")
+        umap_coords <- umap_coords[order(umap_coords$highlight, decreasing = FALSE), ]
+        ggplot(umap_coords, aes(UMAP1, UMAP2, color = highlight)) +
+            geom_point(size = 0.3) +
+            scale_color_manual(values = c("Other" = "lightgrey", "Selected" = "red")) +
+            ggtitle(cm) +
+            theme_minimal() +
+            theme(legend.position = "none")
     })
 
     highlight_plot <- wrap_plots(highlight_plots, ncol = min(c(length(cell_metadata_uniq), 4)))
 
-    ggsave(file.path(outdir, filenm), 
+    ggsave(file.path(outdir, filenm),
         highlight_plot,
         width = 5 * min(c(length(cell_metadata_uniq), 4)),
-        height = 5 * ceiling(length(cell_metadata_uniq) / 4)
+        height = 5 * ceiling(length(cell_metadata_uniq) / 4),
+        limitsize = FALSE
     )
 }
 
@@ -136,9 +146,17 @@ if (file.exists(saved_objects_filename)) {
 # Find integration anchors
 saved_integrated_data <- "integrated_seurat_object.rds"
 if (file.exists(saved_integrated_data)){
+    # get rid of big objects
+    rm(seurat_objects)
+    gc()
     integrated_data <- readRDS(saved_integrated_data)
 }else{
     object <- merge(seurat_objects[[1]], seurat_objects[-1])
+
+    # get rid of big objects
+    rm(seurat_objects)
+    gc()
+
     print(object)
     object <- JoinLayers(object, assay = "RNA")
     object[["RNA"]] <- split(object[["RNA"]], f = object$sample_id)
@@ -164,6 +182,11 @@ if (file.exists(saved_integrated_data)){
       verbose = FALSE
     )
 
+
+    # get rid of big objects
+    rm(object)
+    gc()
+
     integrated_data <- FindNeighbors(integrated_data, reduction = "integrated.cca", dims = 1:30)
     integrated_data <- FindClusters(integrated_data, cluster.name = "cca_clusters")
 
@@ -188,16 +211,15 @@ if (file.exists(saved_integrated_data)){
 
     outdir = "umaps"
     ggsave("tsne_cca.pdf", plot, width = 16, height = 8, dpi = 300)
-#    make_multiplots(integrated_data, "sample_id", outdir, "sample_id_ump.pdf")
-#    make_multiplots(integrated_data, "diagnosis", outdir, "diagnosis_umap.pdf")
-#    make_multiplots(integrated_data, "cca_clusters", outdir, "seurat_cca_clusters_umap.pdf")
-#    make_multiplots(integrated_data, "cca_clusters", outdir, "seurat_cca_clusters_umap.pdf")
+    make_multiplots(integrated_data, "sample_id", outdir, "sample_id_ump.pdf")
+    make_multiplots(integrated_data, "diagnosis", outdir, "diagnosis_umap.pdf")
+    make_multiplots(integrated_data, "cca_clusters", outdir, "seurat_cca_clusters_umap.pdf")
+    make_multiplots(integrated_data, "dataset", outdir, "dataset_umap.pdf")
 
 }
 print("here")
 
-
-ref <- celldex::HumanPrimaryCellAtlasData()
+ref <- readRDS("hpca_ref.rds")
 
 print(integrated_data[["RNA"]])
 
@@ -222,6 +244,15 @@ if (file.exists(singleR_rds)){
     )
 
     joined_integrated_data$singleR.labels_fine <- pred$labels[match(rownames(joined_integrated_data@meta.data), rownames(pred))]
+
+    pred <- SingleR(
+    test = counts,
+    ref = ref,
+    labels = ref$label.main,
+    )
+
+    joined_integrated_data$singleR.labels_main <- pred$labels[match(rownames(joined_integrated_data@meta.data), rownames(pred))]
+
     print(paste0("Number of fine labels:  ", length(unique(joined_integrated_data$singleR.labels_fine))))
     write.csv(table(joined_integrated_data$singleR.labels_fine), "cell_type_counts_fine.csv")
     saveRDS(joined_integrated_data, file = singleR_rds)
@@ -296,87 +327,10 @@ tsne_plot_dir <- "tsne_fibroblast_only_plots"
 dir.create(umap_plot_dir, showWarnings = FALSE)
 dir.create(tsne_plot_dir, showWarnings = FALSE)
 
-# Subset to only fibroblast cells
-#fibroblast_cells <- subset(
-#    joined_integrated_data,
-#    singleR.labels_fine %in% fibroblast_celltypes
-#)
-
-#umap_plot <- DimPlot(
-#    fibroblast_cells,
-#    reduction = 'umap.cca',
-#    group.by = 'singleR.labels_fine'
-#)
-#
-#tsne_plot <- DimPlot(
-#    fibroblast_cells,
-#    reduction = 'tsne.cca',
-#    group.by = 'singleR.labels_fine'
-#)
-#
-#umap_plot_path <- file.path(umap_plot_dir, "all_fibroblast_celltypes_umap.pdf")
-#tsne_plot_path <- file.path(tsne_plot_dir, "all_fibroblast_celltypes_tsne.pdf")
-#ggsave(umap_plot_path, umap_plot, width = 16, height = 8, dpi = 300)
-#ggsave(tsne_plot_path, tsne_plot, width = 16, height = 8, dpi = 300)
-
-
-#for (cell_type in fibroblast_celltypes) {
-#    print(paste0("plotting fibro only ", cell_type))
-#    
-#    cell_type_label <- sanitize_label_for_filename(cell_type)
-#    
-#    for (diag in unique(fibroblast_cells$diagnosis)) {
-#        # Create a new column that highlights only this cell type
-#        fibroblast_cells$highlight <- ifelse(
-#            fibroblast_cells$singleR.labels_fine == cell_type & 
-#            fibroblast_cells$diagnosis == diag,
-#            cell_type,
-#            "Other"
-#        )
-#        
-#        # Reorder so "Other" cells are plotted first (behind highlighted cells)
-#        fibroblast_cells$highlight <- factor(
-#            fibroblast_cells$highlight,
-#            levels = c("Other", cell_type)
-#        )
-#        
-#        # Set color based on diagnosis
-#        diag_color <- ifelse(diag == "control", "#377EB8", "#E41A1C")  # blue for control, red for SSc
-#        
-#        highlight_colors <- c("Other" = "lightgrey")
-#        highlight_colors[cell_type] <- diag_color
-#        
-#        umap_plot <- DimPlot(
-#            fibroblast_cells,
-#            reduction = 'umap.cca',
-#            group.by = 'highlight',
-#            cols = highlight_colors,
-#            order = cell_type
-#        ) + ggtitle(paste0(cell_type, " - ", diag))
-#        
-#        tsne_plot <- DimPlot(
-#            fibroblast_cells,
-#            reduction = 'tsne.cca',
-#            group.by = 'highlight',
-#            cols = highlight_colors,
-#            order = cell_type
-#        ) + ggtitle(paste0(cell_type, " - ", diag))
-#        
-#        diag_label <- sanitize_label_for_filename(diag)
-#        umap_plot_path <- file.path(umap_plot_dir, paste0(cell_type_label, "_", diag_label, "_umap.pdf"))
-#        tsne_plot_path <- file.path(tsne_plot_dir, paste0(cell_type_label, "_", diag_label, "_tsne.pdf"))
-#        ggsave(umap_plot_path, umap_plot, width = 10, height = 8, dpi = 300)
-#        ggsave(tsne_plot_path, tsne_plot, width = 10, height = 8, dpi = 300)
-#    }
-#}
-
 
 print("umap plots done")
 
-
-
 saveRDS(joined_integrated_data, file = "joined_integrated_seurat_object.rds")
-
 
 outdir <- "diffexpress_one_vs_all"
 dir.create(outdir, showWarnings = FALSE, recursive = TRUE)

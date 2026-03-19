@@ -218,13 +218,15 @@ gene_set4 <- c(
     "S100B",
     "NRXN1",
     "KIF1A",
-    "S100B",
     "TRAC",
     "CD3D",
     "CD3E",
     "CD68",
     "CXCL8",
     "LYZ",
+    "CD1A",
+    "CD207",
+    "LAMP3",
     "SLC2A3",
     "IFRD1",
     "RASGEF1B",
@@ -236,21 +238,23 @@ gene_set4 <- c(
     "IGLC2"
 )
 
+
+
 cell_order <- c(
-    "keratinocytes",
-    "melanocytes",
-     melanocyes
-    "eccrine gland",
-    "endothelial",
-    "fibroblasts",
-    "pericyte",
-    "smooth muscle",
-    "neurons",
-    "T-cells",
-    "macrophage",
-    "neutrophils",
+    "B-cells",
     "mast cells",
-    "B-cells"
+    "neutrophils",
+    "dendritic cells",
+    "macrophage",
+    "T-cells",
+    "neurons",
+    "smooth muscle",
+    "pericyte",
+    "fibroblasts",
+    "endothelial",
+    "eccrine gland",
+    "melanocytes",
+    "keratinocytes"
 )
 
 
@@ -291,7 +295,7 @@ make_plot <- function(seurat_object, gene_set, separator_genes, identity, filenm
     #    geom_vline(xintercept = line_positions, color = "black", linewidth = 0.3)
 
     print(5 * (nrow(unique(seurat_object[[identity]])) / 10))
-    ggsave(filenm, plot, width = 10, height = 3 * (nrow(unique(seurat_object[[identity]])) / 10), limitsize = FALSE)
+    ggsave(filenm, plot, width = 10, height = 2 * (nrow(unique(seurat_object[[identity]])) / 10), limitsize = FALSE)
 }
 
 # Create an ArgumentParser object
@@ -308,125 +312,12 @@ args <- parser$parse_args()
 print(args)
 
 seurat_object <- readRDS(args$joined_integrated_seurat_object_with_cytotrace_labels)
+seurat_object$cell_group[seurat_object$cell_group == "melanocyes"] <- "melanocytes"
 seurat_object$diagnosis <- trimws(seurat_object$diagnosis)
+print(head(seurat_object))
 
-#seurat_object_just_SSC <- subset(seurat_object, diagnosis == 'SSC')
-#seurat_object_just_control <- subset(seurat_object, diagnosis == 'control')
-#
-#print(Assays(seurat_object_just_SSC))
-#
-#
 dir.create(args$outdir, showWarnings = FALSE, recursive = TRUE)
 date_and_time <- format(now(), "%Y%m%d_%H%M%S")
-#
-## Define genes after which to add separator lines
-#separator_genes_plottype_1 <- c("SFRP2", "LGR5", "GDF10", "HLA-DRB1",
-#"COL11A1", "MYL4", "TNMD", "PTCH1", "PEAR1", "SFRP1")
-#
-#line_positions_plottype_1 <- which(gene_set1 %in% separator_genes_plottype_1) + 0.5
-#filenm <- file.path(
-#    args$outdir,
-#    paste0("just_SSC_singleR_labels_gene_set1_", args$file_suff, "_", date_and_time, ".pdf")
-#)
-#make_plot(seurat_object_just_SSC, gene_set1, separator_genes_plottype_1, "singleR.labels_fine", filenm)
-#
-#filenm <- file.path(
-#    args$outdir,
-#    paste0("just_control_singleR_labels_gene_set1_", args$file_suff, "_", date_and_time, ".pdf")
-#)
-#make_plot(seurat_object_just_control, gene_set1, separator_genes_plottype_1, "singleR.labels_fine", filenm)
-#
-#filenm <- file.path(
-#    args$outdir,
-#    paste0("just_SSC_CytoTRACE2_Potency_gene_set1_", args$file_suff, "_", date_and_time, ".pdf")
-#)
-#make_plot(seurat_object_just_SSC, gene_set1, separator_genes_plottype_1, "CytoTRACE2_Potency", filenm)
-#
-#filenm <- file.path(
-#    args$outdir,
-#    paste0("just_control_CytoTRACE2_Potency_gene_set1_", args$file_suff, "_", date_and_time, ".pdf")
-#)
-#make_plot(seurat_object_just_control, gene_set1, separator_genes_plottype_1, "CytoTRACE2_Potency", filenm)
-#
-#separator_genes_plottype_2 <- c(
-#    "CXCL9",
-#    "CXCL1",
-#    "COL7A1",
-#    "HIF1A",
-#    "LAMP5",
-#    "OGN",
-#    "CDH2",
-#    "KCNMA1",
-#    "CRTAC1"
-#)
-#
-#line_positions_plottype_1 <- which(gene_set2 %in% separator_genes_plottype_2) + 0.5
-#filenm <- file.path(
-#    args$outdir,
-#    paste0("just_SSC_singleR_labels_gene_set2_", args$file_suff, "_", date_and_time, ".pdf")
-#)
-#make_plot(seurat_object_just_SSC, gene_set2, separator_genes_plottype_2, "singleR.labels_fine", filenm)
-#
-#filenm <- file.path(
-#    args$outdir,
-#    paste0("just_control_singleR_labels_gene_set2_", args$file_suff, "_", date_and_time, ".pdf")
-#)
-#make_plot(seurat_object_just_control, gene_set2, separator_genes_plottype_2, "singleR.labels_fine", filenm)
-#
-#filenm <- file.path(
-#    args$outdir,
-#    paste0("just_SSC_CytoTRACE2_Potency_gene_set2_", args$file_suff, "_", date_and_time, ".pdf")
-#)
-#make_plot(seurat_object_just_SSC, gene_set2, separator_genes_plottype_2, "CytoTRACE2_Potency", filenm)
-#
-#filenm <- file.path(
-#    args$outdir,
-#    paste0("just_control_CytoTRACE2_Potency_gene_set2_", args$file_suff, "_", date_and_time, ".pdf")
-#)
-#make_plot(seurat_object_just_control, gene_set2, separator_genes_plottype_2, "CytoTRACE2_Potency", filenm)
-
-#filenm <- file.path(
-#    args$outdir,
-#    paste0("all_datasets_singleR.labels_main_", args$file_suff, "_", date_and_time, ".pdf")
-#)
-#make_plot(seurat_object, gene_set3, NULL, "singleR.labels_main", filenm)
-#filenm <- file.path(
-#    args$outdir,
-#    paste0("all_datasets_singleR.labels_main_cellcounts.csv")
-#)
-#write.csv(table(seurat_object$singleR.labels_main), filenm)
-#
-#filenm <- file.path(
-#    args$outdir,
-#    paste0("all_datasets_singleR.labels_fine_", args$file_suff, "_", date_and_time, ".pdf")
-#)
-#make_plot(seurat_object, gene_set3, NULL, "singleR.labels_fine", filenm)
-#filenm <- file.path(
-#    args$outdir,
-#    paste0("all_datasets_singleR.labels_fine_cellcounts.csv")
-#)
-#write.csv(table(seurat_object$singleR.labels_fine), filenm)
-
-#group_data <- read.csv(args$group_file, sep = '\t')
-#
-#lookup <- setNames(group_data$new_name_dotplot, group_data$singleR.label_fine)
-#
-#seurat_object$cell_group <- ifelse(
-#    seurat_object$singleR.labels_fine %in% names(lookup),
-#    lookup[as.character(seurat_object$singleR.labels_fine)],
-#    "n/a"
-#)
-#
-#
-#seurat_object <- subset(seurat_object, cell_group != 'n/a')
-#write.csv(table(seurat_object$singleR.labels_fine), "cell_counts_after_filtering.csv")
-#
-#
-#filenm <- file.path(
-#    args$outdir,
-#    paste0("all_datasets_cell_group_", args$file_suff, "_", date_and_time, ".pdf")
-#)
-#make_plot(seurat_object, gene_set3, NULL, "cell_group", filenm)
 
 just_subset <- subset(seurat_object, cell_group != 'n/a')
 print(grep("PECAM", rownames(just_subset), value = TRUE))

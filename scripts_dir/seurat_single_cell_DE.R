@@ -64,7 +64,7 @@ run_DE <- function(seurat_object, cell_type, identity_of_interest, outdir, file_
         return.seurat = TRUE,
         slot = "counts",
         assays = "RNA",
-        group.by = c("singleR.labels_fine", "sample_id", "diagnosis", "is_fib")
+        group.by = c("cell_group", "sample_id")
     )
 
     Idents(bulk) <- identity_of_interest
@@ -72,7 +72,6 @@ run_DE <- function(seurat_object, cell_type, identity_of_interest, outdir, file_
 
     file_name <- file.path(outdir, paste0("aggregate_cell_counts_", file_suff, ".csv"))
     write.csv(table(bulk[[identity_of_interest]]), file_name)
-
 
     # add a pseudocount of 1 to every gene as per https://www.biostars.org/p/440379/
     counts_matrix <- GetAssayData(bulk, layer = "counts")
@@ -116,7 +115,7 @@ parser$add_argument("--cell_type", help="cell type to use", required = TRUE)
 parser$add_argument("--cell_type_identity", help="identity to use", required = TRUE)
 parser$add_argument("--outdir", help="directory to write to", required = TRUE)
 parser$add_argument("--file_suff", help="file suffix", required = TRUE)
-parser$add_argument("--min_cells", type="integer", help="Min cells per celltype for diff express", default = 8)
+parser$add_argument("--min_cells", type="integer", help="Min cells per celltype for diff express", default = 5)
 parser$add_argument("--subset", help="cell type to use, leaving this null subsets to all fibroblast cell types", default = NULL)
 parser$add_argument("--subset_identity", help="identity to use", default = NULL)
 
@@ -126,15 +125,17 @@ args <- parser$parse_args()
 print(args)
 
 joined_integrated_data <- readRDS(args$joined_integrated_seurat_object)
+joined_integrated_data <- subset(joined_integrated_data, cell_group != "n/a")
+
 joined_integrated_data$diagnosis <- trimws(joined_integrated_data$diagnosis)
 joined_integrated_data$singleR.labels_fine <- sanitize_label_for_AggregateExpression(joined_integrated_data$singleR.labels_fine)
 
-sanitized_fib_labels <- sanitize_label_for_AggregateExpression(fibroblast_celltypes)
-joined_integrated_data$is_fib <- ifelse(
-    joined_integrated_data$singleR.labels_fine %in% sanitized_fib_labels,
-    "fibroblast",
-    "other"
-)
+#sanitized_fib_labels <- sanitize_label_for_AggregateExpression(fibroblast_celltypes)
+#joined_integrated_data$is_fib <- ifelse(
+#    joined_integrated_data$singleR.labels_fine %in% sanitized_fib_labels,
+#    "fibroblast",
+#    "other"
+#)
 
 cells <- joined_integrated_data
 #if (is.null(args$subset_identity)){
