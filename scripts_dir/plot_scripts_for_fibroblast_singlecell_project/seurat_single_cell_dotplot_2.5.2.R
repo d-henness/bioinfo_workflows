@@ -5,7 +5,7 @@ library(tidyverse)
 library(pheatmap)
 
 
-gene_set <- c(
+gene_set <- c( 
     "APCDD1",
     "COL23A1",
     "NKD2",
@@ -19,43 +19,65 @@ gene_set <- c(
     "FABP4",
     "LPL",
     "CIDEA",
+    "PLIN1",
+    "THRSP",
+    "AWAT2",
     "CCL19",
     "CD74",
     "HLA-DRA",
     "VCAM1",
-    "ASPN",
-    "COL11A1",
-    "CILP2",
-    "TNMD",
-    "COCH",
-    "SCN7A",
-    "FMO2",
-    "NGFR",
-    "RAMP1",
-    "CALCA",
-    "ACTA2",
-    "LRRC15",
-    "CTHRC1",
-    "LOX",
-    "FAP",
-    "ADAM12",
     "IL11",
     "CXCL8",
     "CXCL13",
     "IL7R",
     "PTX3",
     "CCL20",
+    "CXCL1",
+    "SELE",
+    "SERPINB2",
+    "MMP1",
+    "ASPN",
+    "COL11A1",
+    "CILP2",
+    "TNMD",
+    "COCH",
+    "HAPLN1",
+    "HAS1",
+    "ADAMTS18",
+    "SENCR",
+    "SCN7A",
+    "FMO2",
+    "NGFR",
+    "RAMP1",
+    "CALCA",
+    "SOX10",
+    "RELN",
+    "PLP1",
+    "GJA4",
     "MKI67",
     "TOP2A",
     "CDK1",
     "AURKB",
     "PLK1",
+    "MELK",
+    "TROAP",
+    "TERT",
     "HIF1A",
     "DDIT4",
     "NDRG2",
     "HSPA6",
     "FBXO32",
-    "ISG20"
+    "ISG20",
+    "TM7SF3",
+    "TK2",
+    "PLVAP",
+    "SOX17",
+    "ACTA2",
+    "LRRC15",
+    "CTHRC1",
+    "LOX",
+    "FAP",
+    "ADAM12"
 )
 
 #cell_order <- c(
@@ -85,7 +107,7 @@ sanitize_label_for_AggregateExpression <- function(label) {
 }
 
 make_plot <- function(seurat_object, gene_set, separator_genes, identity, filenm){
-    #line_positions <- which(gene_set %in% separator_genes) + 0.5
+#    line_positions <- which(gene_set %in% separator_genes) + 0.5
 
 
     plot <- DotPlot(seurat_object, gene_set, group.by = identity, dot.scale = 2, scale = FALSE, scale.min = 0, scale.max = 60) +
@@ -93,7 +115,7 @@ make_plot <- function(seurat_object, gene_set, separator_genes, identity, filenm
         theme(axis.text.y = element_text(hjust = 1, vjust = 0.5, size = 6)) +
         scale_color_gradient(low = "black", high = "red") #+
     #   uncomment if you want the lines back
-    #    geom_vline(xintercept = line_positions, color = "black", linewidth = 0.3)
+#        geom_vline(xintercept = line_positions, color = "black", linewidth = 0.3)
 
     print(5 * (nrow(unique(seurat_object[[identity]])) / 10))
     ggsave(filenm, plot, width = 2 * length(gene_set) / 10, height = 2 * (nrow(unique(seurat_object[[identity]])) / 10), limitsize = FALSE)
@@ -128,25 +150,31 @@ print(missing)
 print("here")
 
 cell_types <- c(
-  "Fibroblasts:breast",
-  "Fibroblasts:foreskin",
-  "Tissue_stem_cells:BM_MSC",
-  "MSC",
-  "Tissue_stem_cells:iliac_MSC",
-  "Chondrocytes:MSC-derived",
-  "Tissue_stem_cells:BM_MSC:BMP2",
-  "Tissue_stem_cells:BM_MSC:TGFb3",
-  "Osteoblasts",
-  "Osteoblasts:BMP2",
-  "Smooth_muscle_cells:bronchial",
-  "Smooth_muscle_cells:bronchial:vit_D",
-  "Smooth_muscle_cells:vascular:IL-17",
-  "iPS_cells:adipose_stem_cells",
-  "iPS_cells:CRL2097_foreskin",
-  "iPS_cells:fibroblasts",
-  "iPS_cells:PDB_fibroblasts",
-  "iPS_cells:skin_fibroblast",
-  "Tissue_stem_cells:adipose-derived_MSC_AM3"
+    "Fibroblasts:breast",
+    "iPS_cells:fibroblasts",
+    "iPS_cells:PDB_fibroblasts",
+    "iPS_cells:skin_fibroblast",
+    #
+    "Chondrocytes:MSC-derived",
+    "Smooth_muscle_cells:bronchial",
+    "Smooth_muscle_cells:bronchial:vit_D",
+    #
+    "Tissue_stem_cells:iliac_MSC",
+    #
+    "Fibroblasts:foreskin",
+    "Smooth_muscle_cells:vascular:IL-17",
+    #
+    "Osteoblasts",
+    "Osteoblasts:BMP2",
+    "iPS_cells:CRL2097_foreskin",
+    #
+    "MSC",
+    "Tissue_stem_cells:adipose-derived_MSC_AM3",
+    #
+    "Tissue_stem_cells:BM_MSC:BMP2",
+    "Tissue_stem_cells:BM_MSC",
+    "Tissue_stem_cells:BM_MSC:TGFb3",
+    "iPS_cells:adipose_stem_cells"
 )
 
 diagnoses <- c("normal_skin", "scar", "keloid", "ssc")
@@ -164,8 +192,31 @@ just_subset$singleR.labels_fine_plus_diagnosis <- factor(
   levels = ordered_levels
 )
 
+separator_genes <- c(
+    # F2 — Universal "PI16",
+    "CD34",
+    # AdipoMSC — Lipogenic "PPARG",
+    "FABP4",
+    # F3 — Immunomodulatory "CCL19",
+    "CD74",
+    # D1 — Inflammatory "IL11",
+    "CXCL8",
+    # F4 — Niche / Dermal Papilla "ASPN",
+    "COL11A1",
+    # F5 — Schwann / Neural Crest "SCN7A",
+    "FMO2",
+    # D3 — Proliferating "MKI67",
+    "TOP2A",
+    # Stress / UPR "HIF1A",
+    "DDIT4",
+    # MEndoT — Mesenchymal-to-Endothelial "PLVAP",
+    "SOX17",
+    # D2 — Contractile / Myofibroblast "ACTA2",
+    "LRRC15"
+)
+
 filenm <- file.path(
     args$outdir,
     paste0("all_datasets_cell_group_", args$file_suff, "_", date_and_time, ".pdf")
 )
-make_plot(just_subset, gene_set, NULL, "singleR.labels_fine_plus_diagnosis", filenm)
+make_plot(just_subset, gene_set, separator_genes, "singleR.labels_fine_plus_diagnosis", filenm)

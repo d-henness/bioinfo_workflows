@@ -225,7 +225,7 @@ make_plot <- function(seurat_object, gene_set, separator_genes, identity, filenm
     #line_positions <- which(gene_set %in% separator_genes) + 0.5
 
 
-    plot <- DotPlot(seurat_object, gene_set, group.by = identity, dot.scale = 2) +
+    plot <- DotPlot(seurat_object, gene_set, group.by = identity, dot.scale = 2, scale = FALSE, scale.min = 0, scale.max = 60) +
         theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 6)) +
         theme(axis.text.y = element_text(hjust = 1, vjust = 0.5, size = 6)) +
         scale_color_gradient(low = "black", high = "red") #+
@@ -234,6 +234,7 @@ make_plot <- function(seurat_object, gene_set, separator_genes, identity, filenm
 
     print(5 * (nrow(unique(seurat_object[[identity]])) / 10))
     ggsave(filenm, plot, width = 2 * length(gene_set) / 10, height = 2 * (nrow(unique(seurat_object[[identity]])) / 10), limitsize = FALSE)
+    write.csv(plot$data, paste0(tools::file_path_sans_ext(filenm), ".csv"))
 }
 
 # Create an ArgumentParser object
