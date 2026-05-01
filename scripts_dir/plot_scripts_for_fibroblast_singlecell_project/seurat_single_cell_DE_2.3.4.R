@@ -21,6 +21,19 @@ run_DE <- function(seurat_object, cell_type, identity_of_interest, outdir, file_
     dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
     print(file_suff)
 
+    cells_per_sample <- table(seurat_object$sample_id, seurat_object[[identity_of_interest, drop = TRUE]])
+    file_name <- file.path(outdir, paste0("cell_counts_", cell_type, "_", file_suff, ".csv"))
+    write.csv(cells_per_sample, file_name)
+
+    #filter out bad samples
+    good_samples <- rownames(cells_per_sample)[rowSums(cells_per_sample) >= 10]
+    seurat_object <- subset(seurat_object, sample_id %in% good_samples)
+
+    if (length(unique(seurat_object$sample_id)) < 3) {
+        print(paste0("Skipping ", cell_type, ": only ", length(unique(seurat_object$sample_id)), " sample(s) after filtering — need >= 2 for pseudobulk DE"))
+        return(NULL)
+    }
+
     bulk <- AggregateExpression(
         seurat_object,
         return.seurat = TRUE,
@@ -36,13 +49,14 @@ run_DE <- function(seurat_object, cell_type, identity_of_interest, outdir, file_
     write.csv(table(bulk[[identity_of_interest]]), file_name)
 
     # add a pseudocount of 1 to every gene as per https://www.biostars.org/p/440379/
-    counts_matrix <- GetAssayData(bulk, layer = "counts")
-    bulk <- SetAssayData(bulk, layer = "counts", new.data = counts_matrix + 1)
+    #counts_matrix <- GetAssayData(bulk, layer = "counts")
+    #bulk <- SetAssayData(bulk, layer = "counts", new.data = counts_matrix + 1)
 
     n_cells <- sum(bulk[[identity_of_interest, drop = TRUE]] == cell_type)
+    n_control_cells <- sum(bulk[[identity_of_interest, drop = TRUE]] == "normal-skin")
     print(n_cells)
-    if (n_cells < min_cells){
-        print(paste0(cell_type, " had less than ", min_cells," cells"))
+    if (n_cells < min_cells || n_control_cells < 3){
+        print(paste0(cell_type, " had less than ", min_cells," cells, or normal-skin had fewer than 3 pseudobulk samples (", n_control_cells, ")"))
         print(table(bulk[[identity_of_interest]]))
     }else{
         print(cell_type)

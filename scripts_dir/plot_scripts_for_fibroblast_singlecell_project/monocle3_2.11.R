@@ -82,16 +82,14 @@ run_monocle3 <- function(seurat_object, outdir){
     plot1 <- plot_cells(cds, color_cells_by = "m_labels", show_trajectory_graph = FALSE, label_cell_groups = FALSE)
     plot2 <- plot_cells(cds, color_cells_by = "new_cat_labels", show_trajectory_graph = FALSE, label_cell_groups = FALSE)
     plot3 <- plot_cells(cds, color_cells_by = "CytoTRACE2_Potency", show_trajectory_graph = FALSE, label_cell_groups = FALSE)
-    plot4 <- plot_cells(cds, color_cells_by = "diagnosis", show_trajectory_graph = FALSE, label_cell_groups = FALSE)
-    plot <- wrap_plots(plot1, plot2, plot3, plot4)
+    plot <- wrap_plots(plot1, plot2, plot3, ncol = 3)
 
     filenm <- file.path(outdir, "labels_and_potency.pdf")
-    ggsave(filenm, plot, width = 32, height = 8)
+    ggsave(filenm, plot, width = 24, height = 8)
 
     make_multiplots(cds, "m_labels", outdir, "celltype_highlights.pdf")
     make_multiplots(cds, "new_cat_labels", outdir, "new_cat_labels_highlights.pdf")
     make_multiplots(cds, "CytoTRACE2_Potency", outdir, "CytoTRACE2_Potency_highlights.pdf", c("Multipotent", "Oligopotent", "Unipotent", "Differentiated"))
-    make_multiplots(cds, "diagnosis", outdir, "diagnosis_highlights.pdf")
 
     cds <- learn_graph(cds)
     plot1 <- plot_cells(
@@ -121,18 +119,9 @@ run_monocle3 <- function(seurat_object, outdir){
         label_cell_groups = FALSE
     )
 
-    plot4 <- plot_cells(
-        cds,
-        color_cells_by = "diagnosis",
-        label_groups_by_cluster = FALSE,
-        label_leaves = FALSE,
-        label_branch_points = FALSE,
-        label_cell_groups = FALSE
-    )
-
-    plot <- wrap_plots(plot1, plot2, plot3, plot4)
+    plot <- wrap_plots(plot1, plot2, plot3, ncol = 3)
     filenm <- file.path(outdir, "principal_graphs.pdf")
-    ggsave(filenm, plot, width = 20, height = 5)
+    ggsave(filenm, plot, width = 15, height = 5)
 
     max_ct2 <- which.max(unlist(FetchData(seurat_object, "CytoTRACE2_Score")))
     max_ct2 <- colnames(seurat_object)[max_ct2]
@@ -157,7 +146,6 @@ wanted_groups = c("fibroblasts", "pericyte")
 just_subset <- subset(just_subset, cell_group %in% wanted_groups)
 just_subset <- subset(just_subset, !is.na(CytoTRACE2_Potency))
 
-outdir <- file.path(args$outdir)
 just_subset$m_labels <- mapping$m_labels[match(just_subset$singleR.labels_fine, mapping$singleR.labels_fine)]
 just_subset$new_cat_labels <- mapping$new_cat_labels[match(just_subset$singleR.labels_fine, mapping$singleR.labels_fine)]
 
