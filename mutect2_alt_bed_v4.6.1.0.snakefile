@@ -328,7 +328,8 @@ rule VEP:
   input:
     vcf = rules.Filter.output.filt_vcf,
   output:
-    normed_mutect2 = "GATK_runs/{tumor}_{f_score_thresh}/VEP/{tumor}_{f_score_thresh}_normed.vcf",
+    input_vcf_compressed = "GATK_runs/{tumor}_{f_score_thresh}/VEP/{tumor}_{f_score_thresh}_compessed.vcf.gz",
+    normed_mutect2 = "GATK_runs/{tumor}_{f_score_thresh}/VEP/{tumor}_{f_score_thresh}_normed.vcf.gz",
     vcf_out = "GATK_runs/{tumor}_{f_score_thresh}/VEP/{tumor}_{f_score_thresh}.vcf",
     vcf_out_zip = "vep/{tumor}_{f_score_thresh}/VEP/{tumor}_{f_score_thresh}_VEP.vcf.gz",
     summary = "GATK_runs/{tumor}_{f_score_thresh}/VEP/{tumor}_{f_score_thresh}.vcf_summary.html",
@@ -350,8 +351,10 @@ rule VEP:
     mem_mb = lambda wildcards, attempt: attempt * 3000,
   shell:
     """
+      bgzip -c {input.vcf} > {output.input_vcf_compressed}
+      bcftools index {output.input_vcf_compressed} > {log} 2>&1
       echo "-------------------------------------------------------" > {log}
-      bcftools norm -f {params.ref_fasta} -Oz -o {output.normed_mutect2} {input.vcf} >> {log} 2>&1
+      bcftools norm -f {params.ref_fasta} -Oz -o {output.normed_mutect2} {output.input_vcf_compressed} >> {log} 2>&1
       echo "-------------------------------------------------------" >> {log}
       bcftools index {output.normed_mutect2} >> {log} 2>&1
 
@@ -364,7 +367,6 @@ rule VEP:
         --terms SO \
         --tsl \
         --hgvs \
-        --hgvsg \
         --fasta {params.ref_fasta} \
         --offline --cache --dir_cache {params.vep_cache} \
         --dir_plugins {params.vep_plugins} \
