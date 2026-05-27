@@ -50,10 +50,10 @@ mv overlap/{wildcards.tumor}/0002.vcf {output.final_out_vcf} >> {log} 2>&1
 echo "-------------------------------------------------------" >> {log}
 TUMOR=$(bcftools view -h {output.final_out_vcf} | grep '^##tumor_sample=' | sed 's/.*=//')
 printf 'chr\tpos\tref\talt\tvaf\tgnomAD_AF_joint\tgnomAD_AF_grpmax_joint\tSYMBOL\tGene\tConsequence\tSIFT\tPolyPhen\tCondel\tLoFtool\tBLOSUM62\tProtein_position\tAmino_acids\tCodons\n' > {output.final_out_parsed}
-bcftools +split-vep -s "$TUMOR" \
+bcftools view -s "$TUMOR" {output.final_out_vcf} 2>> {log} \
+  | bcftools +split-vep \
     -f '%CHROM\t%POS\t%REF\t%ALT\t[%AF]\t%INFO/gnomADj_AF_joint\t%INFO/gnomADj_AF_grpmax_joint\t%SYMBOL\t%Gene\t%Consequence\t%SIFT\t%PolyPhen\t%Condel\t%LoFtool\t%BLOSUM62\t%Protein_position\t%Amino_acids\t%Codons\n' \
-    -A tab \
-    {output.final_out_vcf} >> {output.final_out_parsed} 2>> {log}
+    -A tab >> {output.final_out_parsed} 2>> {log}
 
 """
 

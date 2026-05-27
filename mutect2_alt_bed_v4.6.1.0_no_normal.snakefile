@@ -347,12 +347,20 @@ rule VEP:
     mem_mb = lambda wildcards, attempt: attempt * 3000,
   shell:
     r"""
-      bgzip -c {input.vcf} > {output.input_vcf_compressed}
-      bcftools index -f {output.input_vcf_compressed}
-      bcftools view -f PASS {output.input_vcf_compressed} \
-        | bcftools norm -f {params.ref_fasta} -Oz -o {output.normed_mutect2}
-      bcftools index -f {output.normed_mutect2}
+      echo "=== [$(date)] bgzip input ===" > {log}
+      bgzip -c {input.vcf} > {output.input_vcf_compressed} 2>> {log}
 
+      echo "=== [$(date)] bcftools index input_vcf_compressed ===" >> {log}
+      bcftools index -f {output.input_vcf_compressed} >> {log} 2>&1
+
+      echo "=== [$(date)] bcftools view PASS | bcftools norm ===" >> {log}
+      bcftools view -f PASS {output.input_vcf_compressed} 2>> {log} \
+        | bcftools norm -f {params.ref_fasta} -Oz -o {output.normed_mutect2} >> {log} 2>&1
+
+      echo "=== [$(date)] bcftools index normed_mutect2 ===" >> {log}
+      bcftools index -f {output.normed_mutect2} >> {log} 2>&1
+
+      echo "=== [$(date)] VEP ===" >> {log}
       vep \
         --input_file {output.normed_mutect2} \
         --output_file {output.vcf_out} \
@@ -374,27 +382,40 @@ rule VEP:
         --pick \
         --sift b \
         --polyphen b \
-        --transcript_version &> {log}
+        --transcript_version >> {log} 2>&1
 
-      bgzip -c {output.vcf_out} > {output.vcf_out_zip}
-      bcftools index -f {output.vcf_out_zip}
+      echo "=== [$(date)] bgzip vcf_out ===" >> {log}
+      bgzip -c {output.vcf_out} > {output.vcf_out_zip} 2>> {log}
+
+      echo "=== [$(date)] bcftools index vcf_out_zip ===" >> {log}
+      bcftools index -f {output.vcf_out_zip} >> {log} 2>&1
 
       # Filtered VCF: PASS + exclude GIAB difficult regions + gnomAD grpmax AF filter
       # This is the input to the two-caller overlap step
-      bcftools view -f PASS -T ^{params.difficult_bed} {output.vcf_out_zip} \
-        | bcftools filter -e 'INFO/gnomADj_AF_grpmax_joint > {params.af_threshold}' \
-        -Oz -o {output.filtered_vcf}
-      bcftools index -f {output.filtered_vcf}
+      echo "=== [$(date)] bcftools view PASS + GIAB exclude + gnomAD AF filter ===" >> {log}
+      bcftools view -f PASS -T ^{params.difficult_bed} {output.vcf_out_zip} 2>> {log} \
+        | sed 's/\(##INFO=<ID=gnomADj_AF[^>]*\)Type=String/\1Type=Float/g' \
+        | bcftools view -e 'INFO/gnomADj_AF_grpmax_joint > {params.af_threshold}' \
+        -Oz -o {output.filtered_vcf} >> {log} 2>&1
 
+      echo "=== [$(date)] bcftools index filtered_vcf ===" >> {log}
+      bcftools index -f {output.filtered_vcf} >> {log} 2>&1
+
+      PRE_GNOMAD=$(bcftools view -H -f PASS -T ^{params.difficult_bed} {output.vcf_out_zip} | wc -l)
+      POST_GNOMAD=$(bcftools view -H {output.filtered_vcf} | wc -l)
+      echo "=== gnomAD AF filter (AF_grpmax_joint > {params.af_threshold}): removed $((PRE_GNOMAD - POST_GNOMAD)) of $PRE_GNOMAD variants, $POST_GNOMAD remaining ===" >> {log}
+
+      echo "=== [$(date)] bcftools +split-vep ===" >> {log}
       TUMOR=$(bcftools view -h {output.filtered_vcf} | grep '^##tumor_sample=' | sed 's/.*=//')
 
       printf 'chr\tpos\tref\talt\tvaf\tgnomAD_AF_joint\tgnomAD_AF_grpmax_joint\tSYMBOL\tGene\tConsequence\tSIFT\tPolyPhen\tCondel\tLoFtool\tBLOSUM62\tProtein_position\tAmino_acids\tCodons\n' > {output.parsed_output}
 
-      bcftools +split-vep -s "$TUMOR" \
+      bcftools view -s "$TUMOR" {output.filtered_vcf} 2>> {log} \
+        | bcftools +split-vep \
           -f '%CHROM\t%POS\t%REF\t%ALT\t[%AF]\t%INFO/gnomADj_AF_joint\t%INFO/gnomADj_AF_grpmax_joint\t%SYMBOL\t%Gene\t%Consequence\t%SIFT\t%PolyPhen\t%Condel\t%LoFtool\t%BLOSUM62\t%Protein_position\t%Amino_acids\t%Codons\n' \
-          -A tab \
-          {output.filtered_vcf} >> {output.parsed_output}
+          -A tab >> {output.parsed_output} 2>> {log}
 
+      echo "=== [$(date)] done ===" >> {log}
       if [[ !(-d easy_transfer_no_normal) ]]; then
         mkdir easy_transfer_no_normal
       fi
