@@ -11,7 +11,7 @@ rule overlap_all:
 
 rule compute_overlap:
     input:
-        mutect2_vcf = rules.VEP.output.vcf_out,
+        mutect2_vcf = rules.VEP.output.filtered_vcf,
         strelka_vcf = rules.Strelka_execute.output.vcf,
     output:
         normed_mutect2 = "overlap_no_normal/normed/{tumor}/mutect2_normed_{f_score_thresh}.vcf.gz",
@@ -40,10 +40,10 @@ bcftools index {output.normed_strelka} >> {log} 2>&1
 
 
 echo "-------------------------------------------------------" >> {log}
-bcftools isec -p overlap/{wildcards.tumor}/ -f 'PASS' {output.normed_mutect2} {output.normed_strelka} >> {log} 2>&1
+bcftools isec -p overlap_no_normal/{wildcards.tumor}/ -f 'PASS' {output.normed_mutect2} {output.normed_strelka} >> {log} 2>&1
 
 echo "-------------------------------------------------------" >> {log}
-mv overlap/{wildcards.tumor}/0002.vcf {output.final_out_vcf} >> {log} 2>&1
+mv overlap_no_normal/{wildcards.tumor}/0002.vcf {output.final_out_vcf} >> {log} 2>&1
 echo "-------------------------------------------------------" >> {log}
 python3 {params.bioinfo_workflows_path}/scripts_dir/vep_vcf_parser.py \
     -f SYMBOL Gene Consequence SIFT PolyPhen Condel LoFtool BLOSUM62 Protein_position Amino_acids Codons \

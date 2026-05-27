@@ -325,6 +325,7 @@ rule VEP:
     vcf_out = "GATK_runs/{tumor}_{f_score_thresh}/VEP_no_normal/{tumor}_{f_score_thresh}.vcf",
     vcf_out_zip = "vep/{tumor}_{f_score_thresh}/VEP_no_normal/{tumor}_{f_score_thresh}_VEP.vcf.gz",
     summary = "GATK_runs/{tumor}_{f_score_thresh}/VEP_no_normal/{tumor}_{f_score_thresh}.vcf_summary.html",
+    filtered_vcf = "GATK_runs/{tumor}_{f_score_thresh}/VEP_no_normal/{tumor}_{f_score_thresh}_filtered.vcf.gz",
     parsed_output = "GATK_runs/{tumor}_{f_score_thresh}/VEP_no_normal/{tumor}_{f_score_thresh}_VEP_parsed.tsv",
     easy_transfer = "easy_transfer_no_normal/{tumor}_{f_score_thresh}_VEP_parsed.tsv",
   conda: "envs_dir/vep.yaml"
@@ -338,17 +339,19 @@ rule VEP:
     condel_config = config["condel_config"],
     loftool_config = config["loftool_config"],
     bioinfo_workflows_path = config["bioinfo_workflows_path"],
+    gnomad_v4 = config["gnomad_v4_template"],
+    difficult_bed = config["difficult_regions_bed"],
+    af_threshold = 0.001,
   threads: 1
   resources:
     mem_mb = lambda wildcards, attempt: attempt * 3000,
   shell:
-    """
+    r"""
       bgzip -c {input.vcf} > {output.input_vcf_compressed}
-      bcftools index {output.input_vcf_compressed} > {log} 2>&1
-      echo "-------------------------------------------------------" > {log}
-      bcftools norm -f {params.ref_fasta} -Oz -o {output.normed_mutect2} {output.input_vcf_compressed} >> {log} 2>&1
-      echo "-------------------------------------------------------" >> {log}
-      bcftools index {output.normed_mutect2} >> {log} 2>&1
+      bcftools index -f {output.input_vcf_compressed}
+      bcftools view -f PASS {output.input_vcf_compressed} \
+        | bcftools norm -f {params.ref_fasta} -Oz -o {output.normed_mutect2}
+      bcftools index -f {output.normed_mutect2}
 
       vep \
         --input_file {output.normed_mutect2} \
@@ -367,21 +370,34 @@ rule VEP:
         --plugin Condel,{params.condel_config},b,2 \
         --plugin LoFtool,{params.loftool_config} \
         --plugin Blosum62 \
+        --custom file={params.gnomad_v4},short_name=gnomADj,format=vcf,type=exact,fields=AF_joint%AF_grpmax_joint \
         --pick \
         --sift b \
         --polyphen b \
         --transcript_version &> {log}
+
       bgzip -c {output.vcf_out} > {output.vcf_out_zip}
       bcftools index -f {output.vcf_out_zip}
 
-      python3 {params.bioinfo_workflows_path}/scripts_dir/vep_vcf_parser.py \
-        -f SYMBOL Gene Consequence SIFT PolyPhen Condel LoFtool BLOSUM62 Protein_position Amino_acids Codons \
-        -v {output.vcf_out} -p > {output.parsed_output}
+      # Filtered VCF: PASS + exclude GIAB difficult regions + gnomAD grpmax AF filter
+      # This is the input to the two-caller overlap step
+      bcftools view -f PASS -T ^{params.difficult_bed} {output.vcf_out_zip} \
+        | bcftools filter -e 'INFO/gnomADj_AF_grpmax_joint > {params.af_threshold}' \
+        -Oz -o {output.filtered_vcf}
+      bcftools index -f {output.filtered_vcf}
+
+      TUMOR=$(bcftools view -h {output.filtered_vcf} | grep '^##tumor_sample=' | sed 's/.*=//')
+
+      printf 'chr\tpos\tref\talt\tvaf\tgnomAD_AF_joint\tgnomAD_AF_grpmax_joint\tSYMBOL\tGene\tConsequence\tSIFT\tPolyPhen\tCondel\tLoFtool\tBLOSUM62\tProtein_position\tAmino_acids\tCodons\n' > {output.parsed_output}
+
+      bcftools +split-vep -s "$TUMOR" \
+          -f '%CHROM\t%POS\t%REF\t%ALT\t[%AF]\t%INFO/gnomADj_AF_joint\t%INFO/gnomADj_AF_grpmax_joint\t%SYMBOL\t%Gene\t%Consequence\t%SIFT\t%PolyPhen\t%Condel\t%LoFtool\t%BLOSUM62\t%Protein_position\t%Amino_acids\t%Codons\n' \
+          -A tab \
+          {output.filtered_vcf} >> {output.parsed_output}
 
       if [[ !(-d easy_transfer_no_normal) ]]; then
         mkdir easy_transfer_no_normal
       fi
-
       cp {output.vcf_out} {output.parsed_output} easy_transfer_no_normal
     """
 # removed final_artifact_modes

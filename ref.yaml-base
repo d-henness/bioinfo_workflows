@@ -81,7 +81,7 @@
 "rsem_index": "/path/to/refs/rsem_homo_sapien_ref/rsem_homo_sapien_ref"
 
 # gnomAD v4.1 joint sites VCFs (per-chromosome, ###CHR### substituted by VEP at runtime)
-"gnomad_v4_template": "/path/to/refs/gnomAD_v4.1.1/gnomad.joint.v4.1.sites.chr###CHR###.vcf.bgz"
+"gnomad_v4_template": "/path/to/refs/gnomAD_v4.1.1/gnomad.joint.v4.1.sites.###CHR###.vcf.bgz"
 
 # GIAB difficult regions BED (the actual file, not the directory)
 "difficult_regions_bed": "/path/to/refs/giab_difficult_regions/GRCh38_alldifficultregions.bed.gz"
